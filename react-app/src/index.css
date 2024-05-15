@@ -1,0 +1,31 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  background-color: #e2e1e0;
+}
+
+.react-datepicker-wrapper input {
+  background: white;
+  color: #333;
+  border: 1px solid lightgray;
+  border-radius: 8px;
+  padding: 0.55em 1em;
+  font-size: 14px;
+}
+
+body,
+p,
+div,
+span {
+  font-size: 14px;
+}
