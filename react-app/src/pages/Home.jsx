@@ -46,7 +46,6 @@ function Home() {
   const isLoading = dataStatus === statusMap.LOADING;
   const isError = dataStatus === statusMap.ERROR;
 
-  console.log(userDataList);
   return (
     <>
       <UserPicker onSubmit={onSubmit} />
