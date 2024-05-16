@@ -111,25 +111,34 @@ function UserProfile() {
   ];
 
   tableColumns.forEach((t) => {
-    // t.width = "fit-content";
     t.wrap = true;
   });
 
   return (
     <>
-      <div>
-        <h4 style={{ float: "left" }}>
+      <div
+        style={{
+          marginBottom: "20px",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <h4>
           {userData?.name} ({username})
         </h4>
-        <div style={{ float: "right" }}>
+        <div>
           {localStorageStartDate &&
             localStorageEndDate &&
-            `${localStorageStartDate}-${localStorageEndDate}`}
+            `${new Date(localStorageStartDate).toDateString()} to ${new Date(
+              localStorageEndDate
+            ).toDateString()}`}
         </div>
       </div>
 
-      <hr />
-      <GitHubCalendar username={username} colorScheme="light" />
+      <div>
+        <GitHubCalendar username={username} colorScheme="light" />
+      </div>
+
       <hr />
       {loadingStatus && loadingStatus === "loading" && <h5>Loading...</h5>}
       {error && <h5>Error: {error.message}</h5>}
@@ -137,46 +146,6 @@ function UserProfile() {
         <>
           <h5>PR List</h5>
           <DataTable columns={tableColumns} data={prList} fixedHeader />
-          {/* <Table hover bordered>
-            <thead>
-              <tr>
-                <td>URL</td>
-                <td>Created</td>
-                <td>Closed</td>
-                <td>Cycle Time (Days)</td>
-                <td>Commits</td>
-                <td>Comments</td>
-                <td>Additions</td>
-                <td>Deletions</td>
-                <td>Changed Files</td>
-              </tr>
-            </thead>
-            <tbody>
-              {prList.map((pr, index) => {
-                return (
-                  <tr key={index}>
-                    <td>
-                      <a href={pr.html_url} target="_blank">
-                        {pr.html_url}
-                      </a>
-                    </td>
-                    <td>{new Date(pr.created_at).toDateString()}</td>
-                    <td>{new Date(pr.closed_at).toDateString()}</td>
-                    <td>
-                      {pr.closed_at
-                        ? daysDifference(pr.created_at, pr.closed_at)
-                        : "N/A"}
-                    </td>
-                    <td>{pr.commits}</td>
-                    <td>{pr.comments}</td>
-                    <td>{pr.additions}</td>
-                    <td>{pr.deletions}</td>
-                    <td>{pr.changed_files}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table> */}
         </>
       ) : (
         <></>
