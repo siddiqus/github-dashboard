@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { UserCard } from "../components/UserCard/UserCard";
+import { HomeUserTable } from "../components/HomeUserTable/HomeUserTable";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
 import { getUserData } from "../services/call-api";
+import DataTable from "react-data-table-component";
 
 const statusMap = {
   LOADING: "loading",
@@ -45,6 +46,7 @@ function Home() {
   const isLoading = dataStatus === statusMap.LOADING;
   const isError = dataStatus === statusMap.ERROR;
 
+  console.log(userDataList);
   return (
     <>
       <UserPicker onSubmit={onSubmit} />
@@ -60,9 +62,7 @@ function Home() {
       )}
 
       {isLoaded ? (
-        userDataList.map((d, index) => {
-          return <UserCard key={`data-${index}`} userData={d}></UserCard>;
-        })
+        <HomeUserTable userDataList={userDataList}></HomeUserTable>
       ) : (
         <></>
       )}

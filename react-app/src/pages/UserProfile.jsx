@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { Tab, Table, Tabs } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import { getPr } from "../services/call-api";
+import { getMonthsStringFromIssueList } from "../services/utils";
 
 function UserProfile() {
   const { username } = useParams();
@@ -51,68 +53,163 @@ function UserProfile() {
     getData();
   }, []);
 
-  const tableColumns = [
-    {
-      name: "URL",
-      selector: (row) => (
-        <a href={row.html_url} target="_blank">
-          {row.html_url}
-        </a>
-      ),
-      width: "400px",
-    },
-    {
-      name: "Created",
-      selector: (row) => new Date(row.created_at),
-      format: (row) => new Date(row.created_at).toDateString(),
-      sortable: true,
-      width: "150px",
-    },
-    {
-      name: "Merged / Closed",
-      selector: (row) => {
-        if (row.closed_at) {
-          return `${new Date(row.closed_at).toDateString()} (merged)`;
-        }
-
-        if (row.closed_at) {
-          return `${new Date(row.closed_at).toDateString()} (closed)`;
-        }
-
-        return "N/A";
+  function PrList({ prList }) {
+    const tableColumns = [
+      {
+        name: "URL",
+        selector: (row) => (
+          <a href={row.html_url} target="_blank">
+            {row.html_url}
+          </a>
+        ),
+        width: "400px",
       },
-      width: "150px",
-    },
-    {
-      name: "Commits",
-      selector: (row) => row.commits,
-      sortable: true,
-    },
-    {
-      name: "Comments",
-      selector: (row) => row.comments,
-      sortable: true,
-    },
-    {
-      name: "Additions",
-      selector: (row) => row.additions,
-      sortable: true,
-    },
-    {
-      name: "Deletions",
-      selector: (row) => row.deletions,
-      sortable: true,
-    },
-    {
-      name: "Changed Files",
-      selector: (row) => row.changed_files,
-      sortable: true,
-    },
-  ];
+      {
+        name: "Created",
+        selector: (row) => new Date(row.created_at),
+        format: (row) => new Date(row.created_at).toDateString(),
+        sortable: true,
+        width: "150px",
+      },
+      {
+        name: "Merged / Closed",
+        selector: (row) => {
+          if (row.closed_at) {
+            return `${new Date(row.closed_at).toDateString()} (merged)`;
+          }
 
-  tableColumns.forEach((t) => {
-    t.wrap = true;
-  });
+          if (row.closed_at) {
+            return `${new Date(row.closed_at).toDateString()} (closed)`;
+          }
+
+          return "N/A";
+        },
+        width: "150px",
+      },
+      {
+        name: "Commits",
+        selector: (row) => row.commits,
+        sortable: true,
+      },
+      {
+        name: "Comments",
+        selector: (row) => row.comments,
+        sortable: true,
+      },
+      {
+        name: "Additions",
+        selector: (row) => row.additions,
+        sortable: true,
+      },
+      {
+        name: "Deletions",
+        selector: (row) => row.deletions,
+        sortable: true,
+      },
+      {
+        name: "Changed Files",
+        selector: (row) => row.changed_files,
+        sortable: true,
+      },
+    ];
+
+    tableColumns.forEach((t) => {
+      t.wrap = true;
+    });
+
+    return prList.length ? (
+      <DataTable
+        highlightOnHover
+        columns={tableColumns}
+        data={prList}
+        fixedHeader
+      />
+    ) : (
+      <>N/A</>
+    );
+  }
+
+  function PrStats() {
+    if (!userData) {
+      return null;
+    }
+
+    const allRepos = userData.allRepos.sort(); // default asc
+
+    const months = getMonthsStringFromIssueList(userData.prList);
+
+    return (
+      <Table bordered hover>
+        <thead>
+          <tr>
+            <th></th>
+            {months.map((month, index) => (
+              <th key={index} index={`month-${index}`}>
+                {month}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Total PR Count ({userData.totalPrCounts})</td>
+            {months.map((month, index) => {
+              const monthData = userData.statList.find(
+                (s) => s.month === month
+              );
+
+              return <td key={index}>{monthData?.prCount || 0}</td>;
+            })}
+          </tr>
+
+          {allRepos.map((repo, index) => {
+            const countForRepo = Object.keys(
+              userData.prCountsPerRepoPerMonth
+            ).reduce((sum, month) => {
+              const counts = userData.prCountsPerRepoPerMonth[month][repo] || 0;
+              return sum + counts;
+            }, 0);
+            return (
+              <tr key={index}>
+                <td>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{repo} (
+                  {countForRepo})
+                </td>
+                {months.map((month, index) => {
+                  const countPerRepo = userData.prCountsPerRepoPerMonth[month]
+                    ? userData.prCountsPerRepoPerMonth[month][repo] || 0
+                    : 0;
+                  return <td key={index}>{countPerRepo}</td>;
+                })}
+              </tr>
+            );
+          })}
+
+          <tr>
+            <td>PR Reviews</td>
+            {Object.keys(userData.reviewCountsPerMonth).map((month, index) => {
+              return (
+                <td key={index}>{userData.reviewCountsPerMonth[month]}</td>
+              );
+            })}
+          </tr>
+
+          <tr>
+            <td>Avg. PR Cycle Time (days)</td>
+            {Object.keys(userData.averagePrCycleTimePerMonth).map(
+              (month, index) => {
+                return (
+                  <td key={index}>
+                    {userData.averagePrCycleTimePerMonth[month]}
+                  </td>
+                );
+              }
+            )}
+          </tr>
+        </tbody>
+      </Table>
+    );
+  }
 
   return (
     <>
@@ -142,14 +239,19 @@ function UserProfile() {
       <hr />
       {loadingStatus && loadingStatus === "loading" && <h5>Loading...</h5>}
       {error && <h5>Error: {error.message}</h5>}
-      {prList.length ? (
-        <>
-          <h5>PR List</h5>
-          <DataTable columns={tableColumns} data={prList} fixedHeader />
-        </>
-      ) : (
-        <></>
-      )}
+
+      <Tabs
+        defaultActiveKey="prStats"
+        id="uncontrolled-tab-example"
+        className="mb-3"
+      >
+        <Tab eventKey="prStats" title="PR Stats">
+          <PrStats />
+        </Tab>
+        <Tab eventKey="prList" title="PR List">
+          <PrList prList={prList} />
+        </Tab>
+      </Tabs>
       <br />
     </>
   );
