@@ -1,16 +1,16 @@
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LineElement,
   LinearScale,
   PointElement,
-  LineElement,
   Title,
   Tooltip,
-  Legend,
 } from "chart.js";
-import { Card, Col, Container, Row } from "react-bootstrap";
-import { Line } from "react-chartjs-2";
 import _ from "lodash";
+import { Card, Col, Row } from "react-bootstrap";
+import { Line } from "react-chartjs-2";
 import {
   daysDifference,
   getMonthsStringFromIssueList,
@@ -112,9 +112,10 @@ function getPrCycleTimeChartOptions({ userDataList }) {
             avg =
               prsForDate.reduce(
                 (sum, pr) =>
-                  sum + pr.closed_at
+                  sum +
+                  (pr.closed_at
                     ? daysDifference(pr.created_at, pr.closed_at)
-                    : 0,
+                    : 0),
                 0
               ) / prsForDate.length;
           }
