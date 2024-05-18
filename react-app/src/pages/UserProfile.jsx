@@ -62,6 +62,7 @@ function UserProfile() {
   }, []);
 
   function PrList({ prList }) {
+    prList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     const tableColumns = [
       {
         name: "URL",
