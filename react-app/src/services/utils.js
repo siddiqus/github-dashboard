@@ -34,9 +34,9 @@ export function daysDifference(dateFrom, dateTo) {
   const difference_ms = Math.abs(date2_ms - date1_ms);
 
   // Convert the difference from milliseconds to days
-  const difference_days = Math.ceil(difference_ms / (1000 * 60 * 60 * 24));
+  const difference_days = difference_ms / (1000 * 60 * 60 * 24);
 
-  return difference_days;
+  return +difference_days.toFixed(2);
 }
 
 export function getMonthsStringFromIssueList(prList) {

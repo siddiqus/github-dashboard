@@ -17,15 +17,20 @@ const router = createBrowserRouter([
 
 function App() {
   function goToHomePage() {
-    router.navigate('/');
+    router.navigate("/");
   }
 
   return (
     <Container>
-      <br />
-      <h1 style={{ cursor: "pointer" }} onClick={() => goToHomePage()}>
+      <h2
+        style={{
+          paddingTop: "20px",
+          cursor: "pointer",
+        }}
+        onClick={() => goToHomePage()}
+      >
         Github Stats
-      </h1>
+      </h2>
       <hr />
       <RouterProvider router={router} />
     </Container>

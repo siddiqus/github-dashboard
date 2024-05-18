@@ -4,7 +4,10 @@ import DataTable from "react-data-table-component";
 import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import { getPr } from "../services/call-api";
-import { getMonthsStringFromIssueList } from "../services/utils";
+import {
+  daysDifference,
+  getMonthsStringFromIssueList,
+} from "../services/utils";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 
 function UserProfile() {
@@ -19,6 +22,10 @@ function UserProfile() {
 
   const localStorageStartDate = localStorage.getItem("opti-gh-startDate");
   const localStorageEndDate = localStorage.getItem("opti-gh-endDate");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     async function getData() {
@@ -63,7 +70,7 @@ function UserProfile() {
             {row.html_url}
           </a>
         ),
-        width: "400px",
+        width: "350px",
       },
       {
         name: "Created",
@@ -86,6 +93,13 @@ function UserProfile() {
           return "N/A";
         },
         width: "150px",
+      },
+      {
+        name: `Cycle (in Days)`,
+        selector: (row) =>
+          daysDifference(row.created_at, row.closed_at || new Date()),
+        width: "100px",
+        sortable: true,
       },
       {
         name: "Commits",
@@ -120,6 +134,7 @@ function UserProfile() {
 
     return prList.length ? (
       <DataTable
+        fixedHeaderScrollHeight="500px"
         highlightOnHover
         columns={tableColumns}
         data={prList}

@@ -1,9 +1,11 @@
 import { Form, Row, Button, Alert, Col } from "react-bootstrap";
-import "./UserPicker.css";
 import { useState } from "react";
 import ReactDatePicker from "react-datepicker";
 import { formatDate } from "../../services/utils";
 import userList from "../../../../cmp-users.json";
+import { TEAMS, TEAM_MEMBERS } from "../../constants";
+
+import "./UserPicker.css";
 
 function getDefaultDates() {
   const localStorageStartDate = localStorage.getItem("opti-gh-startDate");
@@ -50,8 +52,17 @@ function UserPicker({ onSubmit }) {
 
     if (!value.trim()) return;
 
-    const valueSplit = value.split(",").map((v) => v.trim());
-    const names = Array.from(new Set([...usernames, ...valueSplit]));
+    let newNames;
+
+    const selectedTeam = Object.values(TEAMS).find(v => v === value);
+
+    if (selectedTeam) {
+      newNames = TEAM_MEMBERS[selectedTeam] || [];
+    } else {
+      newNames = value.split(",").map((v) => v.trim());
+    }
+
+    const names = Array.from(new Set([...usernames, ...newNames]));
     localStorage.setItem("opti-gh-userlist", JSON.stringify(names));
     setUsernames(names);
     e.target.value = "";
