@@ -3,7 +3,6 @@ import { HomeUserTable } from "../components/HomeUserTable/HomeUserTable";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
 import { getUserData } from "../services/call-api";
-import DataTable from "react-data-table-component";
 
 const statusMap = {
   LOADING: "loading",

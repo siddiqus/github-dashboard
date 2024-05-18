@@ -5,6 +5,7 @@ import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import { getPr } from "../services/call-api";
 import { getMonthsStringFromIssueList } from "../services/utils";
+import UserPrChart from "../components/UserPRChart/UserPrChart";
 
 function UserProfile() {
   const { username } = useParams();
@@ -242,10 +243,11 @@ function UserProfile() {
 
       <Tabs
         defaultActiveKey="prStats"
-        id="uncontrolled-tab-example"
+        id="user-profile-stats-tabs"
         className="mb-3"
       >
         <Tab eventKey="prStats" title="PR Stats">
+          <UserPrChart userDataList={userData ? [userData] : []}></UserPrChart>
           <PrStats />
         </Tab>
         <Tab eventKey="prList" title="PR List">
