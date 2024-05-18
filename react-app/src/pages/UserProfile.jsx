@@ -84,14 +84,14 @@ function UserProfile() {
         name: "Merged / Closed",
         selector: (row) => {
           if (row.closed_at) {
-            return `${new Date(row.closed_at).toDateString()} (merged)`;
+            return `${new Date(row.closed_at).toDateString()} (Merged)`;
           }
 
           if (row.closed_at) {
-            return `${new Date(row.closed_at).toDateString()} (closed)`;
+            return `${new Date(row.closed_at).toDateString()} (Closed)`;
           }
 
-          return "N/A";
+          return "Open";
         },
         width: "150px",
       },
