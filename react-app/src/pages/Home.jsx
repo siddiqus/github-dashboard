@@ -45,9 +45,14 @@ function Home() {
   const isLoading = dataStatus === statusMap.LOADING;
   const isError = dataStatus === statusMap.ERROR;
 
+  function onReset() {
+    setUserDataList([]);
+    setDataStatus(statusMap.NO_DATA);
+  }
+
   return (
     <>
-      <UserPicker onSubmit={onSubmit} />
+      <UserPicker onSubmit={onSubmit} onReset={onReset} />
       <hr />
 
       {isLoading ? <h4>Loading...</h4> : <></>}

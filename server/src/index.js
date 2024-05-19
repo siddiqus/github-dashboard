@@ -3,8 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-const { getUserData } = require("./utils");
-const { getPrData } = require("./github-api.service");
+const { getUserData, getPrData, removeCache } = require("./utils");
 
 const app = express();
 
@@ -50,6 +49,8 @@ app.post("/get-prs", async (req, res) => {
   try {
     const prs = req.body.prs; // Array<{ repo: string; pullNumber: number; owner: string }>
 
+    console.log(new Date(), "/get-prs", JSON.stringify({ prs: prs.length }));
+
     if (!prs || !prs.length) {
       return [];
     }
@@ -66,6 +67,35 @@ app.post("/get-prs", async (req, res) => {
 
     res.json({
       data: results,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      data: null,
+      error: error.message,
+    });
+  }
+});
+
+app.post("/reset-cache", async (req, res) => {
+  try {
+    const data = req.body;
+    console.log(new Date(), "/reset-cache", JSON.stringify(data));
+
+    for (const d of data) {
+      const { author, startDate, endDate } = d;
+      removeCache({
+        author,
+        startDate,
+        endDate,
+        organization: "newscred",
+      });
+    }
+
+    res.json({
+      data: {
+        success: "ok",
+      },
     });
   } catch (error) {
     console.log(error);

@@ -6,6 +6,7 @@ import userList from "../../../../cmp-users.json";
 import { TEAMS, TEAM_MEMBERS } from "../../constants";
 
 import "./UserPicker.css";
+import { resetCache } from "../../services/call-api";
 
 function getDefaultDates() {
   const localStorageStartDate = localStorage.getItem("opti-gh-startDate");
@@ -33,7 +34,7 @@ function getDefaultDates() {
   };
 }
 
-function UserPicker({ onSubmit }) {
+function UserPicker({ onSubmit, onReset }) {
   const [usernames, setUsernames] = useState(
     JSON.parse(localStorage.getItem("opti-gh-userlist") || "[]")
   );
@@ -54,7 +55,7 @@ function UserPicker({ onSubmit }) {
 
     let newNames;
 
-    const selectedTeam = Object.values(TEAMS).find(v => v === value);
+    const selectedTeam = Object.values(TEAMS).find((v) => v === value);
 
     if (selectedTeam) {
       newNames = TEAM_MEMBERS[selectedTeam] || [];
@@ -109,11 +110,30 @@ function UserPicker({ onSubmit }) {
     setIsLoading(false);
   }
 
-  function resetAll() {
+  function resetForm() {
     setUsernames([]);
     localStorage.setItem("opti-gh-userlist", JSON.stringify([]));
     setStartDate(null);
     setEndDate(null);
+    onReset();
+  }
+
+  function resetDataCache() {
+    resetForm();
+    if (!usernames.length) {
+      return;
+    }
+    // author, startDate, endDate
+    const resetCacheDataList = usernames.map((u) => {
+      return {
+        author: u,
+        startDate,
+        endDate,
+      };
+    });
+    resetCache(resetCacheDataList)
+      .then((d) => console.log(d))
+      .catch((e) => console.log(e));
   }
 
   return (
@@ -150,7 +170,12 @@ function UserPicker({ onSubmit }) {
         </datalist>
 
         {usernames.length ? (
-          <Button size="sm" variant="light" onClick={clearUsernames}>
+          <Button
+            disabled={isLoading}
+            size="sm"
+            variant="light"
+            onClick={clearUsernames}
+          >
             {" "}
             Clear All{" "}
           </Button>
@@ -186,7 +211,7 @@ function UserPicker({ onSubmit }) {
               disabled={isLoading}
             />
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 3 }}>
             <Button disabled={isLoading} onClick={handleSubmit}>
               Submit
             </Button>
@@ -194,9 +219,17 @@ function UserPicker({ onSubmit }) {
               style={{ marginLeft: "20px" }}
               className="btn btn-light"
               disabled={isLoading}
-              onClick={resetAll}
+              onClick={resetForm}
             >
-              Reset
+              Reset Form
+            </Button>
+            <Button
+              style={{ marginLeft: "20px" }}
+              className="btn btn-light"
+              disabled={isLoading}
+              onClick={resetDataCache}
+            >
+              Clear Cache
             </Button>
           </div>
         </Row>

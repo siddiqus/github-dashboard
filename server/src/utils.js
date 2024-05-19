@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const _ = require("lodash");
 const { getAllIssues } = require("./github-api.service");
 
@@ -130,16 +132,105 @@ function getMonthlyReviewStats(reviewedData) {
   };
 }
 
+function getDataCacheKey({ organization, author, startDate, endDate, mode }) {
+  return `${organization}-${author}-${startDate}-${endDate}-${mode}`;
+}
+
+function getDataCacheFilePath({
+  organization,
+  author,
+  startDate,
+  endDate,
+  mode,
+}) {
+  const cacheKey = getDataCacheKey({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode,
+  });
+
+  const tmpFolder = path.join(__dirname, "..", "tmp", "search");
+  if (!fs.existsSync(tmpFolder)) {
+    fs.mkdirSync(tmpFolder);
+  }
+
+  const theFile = path.join(tmpFolder, `${cacheKey}.json`);
+
+  return theFile;
+}
+
+async function getAllIssuesCached({
+  organization,
+  author,
+  startDate,
+  endDate,
+  mode,
+}) {
+  const theFile = getDataCacheFilePath({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode,
+  });
+
+  if (fs.existsSync(theFile)) {
+    const content = require(theFile);
+    return content;
+  }
+
+  const data = await getAllIssues({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode,
+  });
+
+  fs.writeFileSync(theFile, JSON.stringify(data));
+
+  return data;
+}
+
+function getPrCacheFilePath({ owner, repo, pullNumber }) {
+  const cacheKey = `${owner}-${repo}-${pullNumber}`;
+
+  const tmpFolder = path.join(__dirname, "..", "./tmp", "pr");
+  if (!fs.existsSync(tmpFolder)) {
+    fs.mkdirSync(tmpFolder);
+  }
+
+  const theFile = path.join(tmpFolder, `${cacheKey}.json`);
+
+  return theFile;
+}
+
+async function getPrDataCached({ owner, repo, pullNumber }) {
+  const theFile = getPrCacheFilePath({ owner, repo, pullNumber });
+
+  if (fs.existsSync(theFile)) {
+    const content = require(theFile);
+    return content;
+  }
+
+  const result = await getPrData({ owner, repo, pullNumber });
+
+  fs.writeFileSync(theFile, JSON.stringify(result));
+  return result;
+}
+
 async function getUserData({ organization, author, startDate, endDate }) {
   const [prCreatedData, reviewedData] = await Promise.all([
-    getAllIssues({
+    getAllIssuesCached({
       organization,
       author,
       startDate,
       endDate,
       mode: "author",
     }),
-    getAllIssues({
+    getAllIssuesCached({
       organization,
       author,
       startDate,
@@ -167,6 +258,31 @@ async function getUserData({ organization, author, startDate, endDate }) {
   };
 }
 
+function removeCache({ organization, author, startDate, endDate }) {
+  const authorCachePath = getDataCacheFilePath({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode: "author",
+  });
+  const reviewerCachePath = getDataCacheFilePath({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode: "reviewer",
+  });
+
+  [authorCachePath, reviewerCachePath].forEach((p) => {
+    if (fs.existsSync(p)) {
+      fs.unlinkSync(p);
+    }
+  });
+}
+
 module.exports = {
   getUserData,
+  removeCache,
+  getPrData: getPrDataCached,
 };
