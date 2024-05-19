@@ -3,7 +3,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-const { getUserData, getPrData, removeCache } = require("./utils");
+const {
+  getUserData,
+  getPrData,
+  removeUserDataCache,
+  removePrCache,
+} = require("./utils");
 
 const app = express();
 
@@ -77,18 +82,46 @@ app.post("/get-prs", async (req, res) => {
   }
 });
 
-app.post("/reset-cache", async (req, res) => {
+app.post("/reset-user-data-cache", async (req, res) => {
   try {
     const data = req.body;
-    console.log(new Date(), "/reset-cache", JSON.stringify(data));
+    console.log(new Date(), "/reset-user-data-cache", JSON.stringify(data));
 
     for (const d of data) {
       const { author, startDate, endDate } = d;
-      removeCache({
+      removeUserDataCache({
         author,
         startDate,
         endDate,
         organization: "newscred",
+      });
+    }
+
+    res.json({
+      data: {
+        success: "ok",
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      data: null,
+      error: error.message,
+    });
+  }
+});
+
+app.post("/reset-pr-cache", async (req, res) => {
+  try {
+    const data = req.body;
+    console.log(new Date(), "/reset-pr-cach", JSON.stringify(data));
+
+    for (const d of data) {
+      const { owner, repo, pullNumber } = d;
+      removePrCache({
+        owner,
+        pullNumber,
+        repo,
       });
     }
 
