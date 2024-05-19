@@ -40,6 +40,9 @@ export function daysDifference(dateFrom, dateTo) {
 }
 
 export function getMonthsStringFromIssueList(prList) {
+  if (!prList || !prList.length) {
+    return [];
+  }
   const sorted = [...prList].sort(
     (a, b) => new Date(a.created_at) - new Date(b.created_at)
   );

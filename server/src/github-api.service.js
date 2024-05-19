@@ -72,40 +72,6 @@ async function getAllIssues({
   return results;
 }
 
-async function getAllIssuesCached({
-  organization,
-  author,
-  startDate,
-  endDate,
-  mode,
-}) {
-  const cacheKey = `${organization}-${author}-${startDate}-${endDate}-${mode}`;
-
-  const tmpFolder = path.join(__dirname, "..", "tmp", "search");
-  if (!fs.existsSync(tmpFolder)) {
-    fs.mkdirSync(tmpFolder);
-  }
-
-  const theFile = path.join(tmpFolder, `${cacheKey}.json`);
-
-  if (fs.existsSync(theFile)) {
-    const content = require(theFile);
-    return content;
-  }
-
-  const data = await getAllIssues({
-    organization,
-    author,
-    startDate,
-    endDate,
-    mode,
-  });
-
-  fs.writeFileSync(theFile, JSON.stringify(data));
-
-  return data;
-}
-
 // async function getCommentsForIssues(owner, repo, pullNumber) {
 //   const res = await client.request(
 //     `GET /repos/${owner}/${repo}/pulls/${pullNumber}/comments`
@@ -127,28 +93,7 @@ async function getPrData({ owner, repo, pullNumber }) {
   return result.data;
 }
 
-async function getPrDataCached({ owner, repo, pullNumber }) {
-  const cacheKey = `${owner}-${repo}-${pullNumber}`;
-
-  const tmpFolder = path.join(__dirname, "..", "./tmp", "pr");
-  if (!fs.existsSync(tmpFolder)) {
-    fs.mkdirSync(tmpFolder);
-  }
-
-  const theFile = path.join(tmpFolder, `${cacheKey}.json`);
-
-  if (fs.existsSync(theFile)) {
-    const content = require(theFile);
-    return content;
-  }
-
-  const result = await getPrData({ owner, repo, pullNumber });
-
-  fs.writeFileSync(theFile, JSON.stringify(result));
-  return result;
-}
-
 module.exports = {
-  getAllIssues: getAllIssuesCached,
-  getPrData: getPrDataCached,
+  getAllIssues,
+  getPrData,
 };

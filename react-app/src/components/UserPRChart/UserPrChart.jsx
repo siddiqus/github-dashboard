@@ -207,6 +207,10 @@ function UserPrChart({ userDataList }) {
     )
   );
 
+  if (!months.length) {
+    return <h5>NO DATA FOUND</h5>;
+  }
+
   const prChartData = getPrCreatedChartData({
     months,
     userDataList,
