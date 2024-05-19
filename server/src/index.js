@@ -10,7 +10,8 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-const port = 9987;
+
+const port = process.env.PORT || 9987;
 
 // Define a route for a GET request
 app.get("/", (req, res) => {
