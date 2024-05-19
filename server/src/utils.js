@@ -258,7 +258,7 @@ async function getUserData({ organization, author, startDate, endDate }) {
   };
 }
 
-function removeCache({ organization, author, startDate, endDate }) {
+function removeUserDataCache({ organization, author, startDate, endDate }) {
   const authorCachePath = getDataCacheFilePath({
     organization,
     author,
@@ -281,8 +281,17 @@ function removeCache({ organization, author, startDate, endDate }) {
   });
 }
 
+function removePrCache({ owner, repo, pullNumber }) {
+  const cachePath = getPrCacheFilePath({ owner, repo, pullNumber });
+
+  if (fs.existsSync(cachePath)) {
+    fs.unlinkSync(cachePath);
+  }
+}
+
 module.exports = {
   getUserData,
-  removeCache,
+  removeUserDataCache,
   getPrData: getPrDataCached,
+  removePrCache,
 };
