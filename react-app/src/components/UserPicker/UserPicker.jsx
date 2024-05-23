@@ -4,9 +4,9 @@ import ReactDatePicker from "react-datepicker";
 import { formatDate } from "../../services/utils";
 import userList from "../../../../cmp-users.json";
 import { TEAMS, TEAM_MEMBERS } from "../../constants";
+import { resetUserDataCache } from "../../services/call-api";
 
 import "./UserPicker.css";
-import { resetCache } from "../../services/call-api";
 
 function getDefaultDates() {
   const localStorageStartDate = localStorage.getItem("opti-gh-startDate");
@@ -119,21 +119,25 @@ function UserPicker({ onSubmit, onReset }) {
   }
 
   function resetDataCache() {
-    resetForm();
     if (!usernames.length) {
       return;
     }
     // author, startDate, endDate
+    const startDateFormatted = formatDate(startDate);
+    const endDateFormatted = formatDate(endDate);
+
     const resetCacheDataList = usernames.map((u) => {
       return {
         author: u,
-        startDate,
-        endDate,
+        startDate: startDateFormatted,
+        endDate: endDateFormatted,
       };
     });
-    resetCache(resetCacheDataList)
-      .then((d) => console.log(d))
-      .catch((e) => console.log(e));
+    resetUserDataCache(resetCacheDataList)
+      .then(() => handleSubmit())
+      .catch((e) => {
+        setErrorMessage(e.message);
+      });
   }
 
   return (
@@ -229,7 +233,7 @@ function UserPicker({ onSubmit, onReset }) {
               disabled={isLoading}
               onClick={resetDataCache}
             >
-              Clear Cache
+              Refresh Cache
             </Button>
           </div>
         </Row>

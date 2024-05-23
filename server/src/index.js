@@ -113,8 +113,8 @@ app.post("/reset-user-data-cache", async (req, res) => {
 
 app.post("/reset-pr-cache", async (req, res) => {
   try {
-    const data = req.body;
-    console.log(new Date(), "/reset-pr-cach", JSON.stringify(data));
+    const data = req.body.prs;
+    console.log(new Date(), "/reset-pr-cache", JSON.stringify(data));
 
     for (const d of data) {
       const { owner, repo, pullNumber } = d;
