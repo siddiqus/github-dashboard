@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
-const { getAllIssues } = require("./github-api.service");
+const { getAllIssues, getPrData } = require("./github-api.service");
 
 const userList = require("../../cmp-users.json");
 

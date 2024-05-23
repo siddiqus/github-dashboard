@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Dropdown, InputGroup } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { getPr } from "../../services/call-api";
+import { getPr, clearPrCache } from "../../services/call-api";
 import {
   daysDifference,
   getMonthsStringFromIssueList,
@@ -104,6 +104,21 @@ function PrList({ prList }) {
   );
 }
 
+function getPrApiBody(prList) {
+  const data = prList.map((p) => {
+    const url = p.html_url;
+    const [_, ownerRepoPullNumber] = url.split("github.com/");
+    const [owner, repo] = ownerRepoPullNumber.split("/");
+    return {
+      pullNumber: p.number,
+      owner,
+      repo,
+    };
+  });
+
+  return data;
+}
+
 function UserProfilePrList({ userData }) {
   if (!userData || !userData.prList || !userData.prList.length) {
     return null;
@@ -116,31 +131,22 @@ function UserProfilePrList({ userData }) {
 
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function getData() {
-      try {
-        const prList = userData.prList.map((p) => {
-          const url = p.html_url;
-          const [_, ownerRepoPullNumber] = url.split("github.com/");
-          const [owner, repo] = ownerRepoPullNumber.split("/");
-          return {
-            pullNumber: p.number,
-            owner,
-            repo,
-          };
-        });
-        prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        const userPrs = await getPr(prList);
-        setPrList(userPrs);
-        setFilteredPrList(userPrs);
-        setLoadingStatus("loaded");
-      } catch (error) {
-        setError(error);
-        setLoadingStatus("loaded");
-      }
+  async function getPrData() {
+    try {
+      const prList = getPrApiBody(userData.prList);
+      prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      const userPrs = await getPr(prList);
+      setPrList(userPrs);
+      setFilteredPrList(userPrs);
+      setLoadingStatus("loaded");
+    } catch (error) {
+      setError(error);
+      setLoadingStatus("loaded");
     }
+  }
 
-    getData();
+  useEffect(() => {
+    getPrData();
   }, []);
 
   function setPrListFilterValue(filter) {
@@ -168,9 +174,12 @@ function UserProfilePrList({ userData }) {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              {months.map((month) => {
+              {months.map((month, index) => {
                 return (
-                  <Dropdown.Item onClick={() => setPrListFilterValue(month)}>
+                  <Dropdown.Item
+                    key={index}
+                    onClick={() => setPrListFilterValue(month)}
+                  >
                     {month}
                   </Dropdown.Item>
                 );
@@ -190,6 +199,15 @@ function UserProfilePrList({ userData }) {
     }, [prList]);
   }
 
+  async function resetPrCacheData() {
+    try {
+      await clearPrCache(getPrApiBody(userData.prList));
+      await getPrData();
+    } catch (error) {
+      setError(error);
+    }
+  }
+
   return (
     <>
       {error && <h5>Error: {error.message}</h5>}
@@ -201,8 +219,19 @@ function UserProfilePrList({ userData }) {
             <div style={{ padding: "15px", fontWeight: "600" }}>
               Items: {filteredPrList.length}
             </div>
-            <div>
-              <SearchFilter></SearchFilter>
+            <div style={{ display: "flex" }}>
+              <div style={{ flex: 1 }}>
+                <SearchFilter></SearchFilter>
+              </div>
+              <div style={{ flex: 1 }}>
+                <Button
+                  style={{ marginLeft: "20px" }}
+                  variant="light"
+                  onClick={resetPrCacheData}
+                >
+                  Refresh Cache
+                </Button>
+              </div>
             </div>
           </div>
 
