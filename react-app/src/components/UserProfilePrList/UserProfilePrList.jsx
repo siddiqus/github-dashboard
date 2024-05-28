@@ -119,6 +119,11 @@ function getPrApiBody(prList) {
   return data;
 }
 
+const LOADING_STATUS = {
+  loaded: "loaded",
+  loading: "loading",
+};
+
 function UserProfilePrList({ userData }) {
   if (!userData || !userData.prList || !userData.prList.length) {
     return null;
@@ -133,15 +138,16 @@ function UserProfilePrList({ userData }) {
 
   async function getPrData() {
     try {
+      setLoadingStatus(LOADING_STATUS.loading);
       const prList = getPrApiBody(userData.prList);
       prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       const userPrs = await getPr(prList);
       setPrList(userPrs);
       setFilteredPrList(userPrs);
-      setLoadingStatus("loaded");
+      setLoadingStatus(LOADING_STATUS.loaded);
     } catch (error) {
       setError(error);
-      setLoadingStatus("loaded");
+      setLoadingStatus(LOADING_STATUS.loaded);
     }
   }
 
@@ -167,9 +173,9 @@ function UserProfilePrList({ userData }) {
     return useMemo(() => {
       const months = getMonthsStringFromIssueList(prList);
       return (
-        <InputGroup className="mb-3">
-          <Dropdown onChange={(e) => () => console.log(e)}>
-            <Dropdown.Toggle variant="light" style={{ width: "200px" }}>
+        <InputGroup>
+          <Dropdown>
+            <Dropdown.Toggle variant="light" style={{ width: "150px" }}>
               {prListFilter || "Select Month"}
             </Dropdown.Toggle>
 
@@ -192,7 +198,7 @@ function UserProfilePrList({ userData }) {
             variant="light"
             onClick={() => setPrListFilterValue("")}
           >
-            {prListFilter && "x"}
+            {prListFilter ? "x" : " "}
           </Button>
         </InputGroup>
       );
@@ -211,19 +217,21 @@ function UserProfilePrList({ userData }) {
   return (
     <>
       {error && <h5>Error: {error.message}</h5>}
-      {loadingStatus && loadingStatus === "loading" && <h5>Loading...</h5>}
+      {loadingStatus && loadingStatus === LOADING_STATUS.loading && (
+        <h5>Loading...</h5>
+      )}
 
-      {prList && prList.length ? (
+      {loadingStatus === LOADING_STATUS.loaded && prList && prList.length ? (
         <>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div style={{ padding: "15px", fontWeight: "600" }}>
               Items: {filteredPrList.length}
             </div>
-            <div style={{ display: "flex" }}>
-              <div style={{ flex: 1 }}>
+            <div style={{ display: "inline-flex" }}>
+              <div>
                 <SearchFilter></SearchFilter>
               </div>
-              <div style={{ flex: 1 }}>
+              <div>
                 <Button
                   style={{ marginLeft: "20px" }}
                   variant="light"
