@@ -1,6 +1,4 @@
 const { Octokit } = require("octokit");
-const fs = require("fs");
-const path = require("path");
 
 const client = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -72,14 +70,6 @@ async function getAllIssues({
   return results;
 }
 
-// async function getCommentsForIssues(owner, repo, pullNumber) {
-//   const res = await client.request(
-//     `GET /repos/${owner}/${repo}/pulls/${pullNumber}/comments`
-//   );
-
-//   return res.data;
-// }
-
 async function getPrData({ owner, repo, pullNumber }) {
   const result = await client.request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}",
@@ -93,7 +83,26 @@ async function getPrData({ owner, repo, pullNumber }) {
   return result.data;
 }
 
+async function getMembers(org) {
+  return client
+    .request("GET /orgs/{org}/members", {
+      org,
+    })
+    .then((d) => d.data);
+}
+
+async function getMemberDetails(org, username) {
+  return client
+    .request("GET /orgs/{org}/members/{username}", {
+      username,
+      org,
+    })
+    .then((d) => d.data);
+}
+
 module.exports = {
   getAllIssues,
   getPrData,
+  getMembers,
+  getMemberDetails,
 };
