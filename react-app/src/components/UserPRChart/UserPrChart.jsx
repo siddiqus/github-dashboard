@@ -36,6 +36,13 @@ export const baseChartOptions = {
       display: true,
     },
   },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  },
 };
 
 const colorNames = [
