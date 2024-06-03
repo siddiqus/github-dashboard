@@ -1,7 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
-const { getAllIssues, getPrData } = require("./github-api.service");
+const {
+  getAllIssues,
+  getPrData,
+  getMembers,
+  getMemberDetails,
+} = require("./github-api.service");
 
 const userList = require("../../cmp-users.json");
 
@@ -207,10 +212,26 @@ function getPrCacheFilePath({ owner, repo, pullNumber }) {
   return theFile;
 }
 
+function isFileOlderThanOneDaySync(filePath) {
+  try {
+    const now = new Date();
+    const stats = fs.statSync(filePath);
+    const mtime = new Date(stats.mtime);
+    const diff = now - mtime;
+    const diffInDays = diff / (1000 * 60 * 60 * 24);
+
+    // Check if the difference is more than 1 day
+    return diffInDays > 1;
+  } catch (err) {
+    console.error(`Error getting stats for file: ${err.message}`);
+    return false;
+  }
+}
+
 async function getPrDataCached({ owner, repo, pullNumber }) {
   const theFile = getPrCacheFilePath({ owner, repo, pullNumber });
 
-  if (fs.existsSync(theFile)) {
+  if (fs.existsSync(theFile) && !isFileOlderThanOneDaySync(theFile)) {
     const content = require(theFile);
     return content;
   }
