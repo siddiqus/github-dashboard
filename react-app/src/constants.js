@@ -28,5 +28,6 @@ export const TEAM_MEMBERS = {
     "rhs99",
     "zahinahmed12",
     "sgtlaugh",
+    "ahmed-dinar",
   ],
 };
