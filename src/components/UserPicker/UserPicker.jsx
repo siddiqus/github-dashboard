@@ -2,9 +2,9 @@ import { Form, Row, Button, Alert, Col } from "react-bootstrap";
 import { useState } from "react";
 import ReactDatePicker from "react-datepicker";
 import { formatDate } from "../../services/utils";
-import userList from "../../../../cmp-users.json";
+import userList from "../../../cmp-users.json";
 import { TEAMS, TEAM_MEMBERS } from "../../constants";
-import { resetUserDataCache } from "../../services/call-api";
+import { resetUserDataCache } from "../../services/index";
 
 import "./UserPicker.css";
 

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Dropdown, InputGroup } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { getPr, clearPrCache } from "../../services/call-api";
+import { getPr, clearPrCache } from "../../services/index";
 import {
   daysDifference,
   getMonthsStringFromIssueList,
 } from "../../services/utils";
+import Loading from "../Loading";
 
 function PrList({ prList }) {
   prList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -218,7 +219,8 @@ function UserProfilePrList({ userData }) {
     <>
       {error && <h5>Error: {error.message}</h5>}
       {loadingStatus && loadingStatus === LOADING_STATUS.loading && (
-        <h5>Loading...</h5>
+        // <h5>Loading...</h5>
+        <Loading></Loading>
       )}
 
       {loadingStatus === LOADING_STATUS.loaded && prList && prList.length ? (

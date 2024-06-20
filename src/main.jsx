@@ -8,7 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import App from "./App";
 
-import userList from "../../cmp-users.json";
+import userList from "../cmp-users.json";
 import { TEAMS } from "./constants";
 
 for (const key of Object.keys(TEAMS)) {

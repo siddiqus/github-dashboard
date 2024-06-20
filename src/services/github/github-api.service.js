@@ -1,7 +1,7 @@
-const { Octokit } = require("octokit");
+import { Octokit } from "octokit";
 
 const client = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
+  auth: import.meta.env.VITE_GITHUB_TOKEN,
 });
 
 async function delay(ms) {
@@ -26,7 +26,7 @@ function getQueryQValueForIssuesSearch({
   return str;
 }
 
-async function getAllIssues({
+export async function getAllIssues({
   organization,
   author,
   startDate,
@@ -70,7 +70,7 @@ async function getAllIssues({
   return results;
 }
 
-async function getPrData({ owner, repo, pullNumber }) {
+export async function getPrData({ owner, repo, pullNumber }) {
   const result = await client.request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}",
     {
@@ -83,7 +83,7 @@ async function getPrData({ owner, repo, pullNumber }) {
   return result.data;
 }
 
-async function getMembers(org) {
+export async function getMembers(org) {
   return client
     .request("GET /orgs/{org}/members", {
       org,
@@ -91,7 +91,7 @@ async function getMembers(org) {
     .then((d) => d.data);
 }
 
-async function getMemberDetails(org, username) {
+export async function getMemberDetails(org, username) {
   return client
     .request("GET /orgs/{org}/members/{username}", {
       username,
@@ -99,10 +99,3 @@ async function getMemberDetails(org, username) {
     })
     .then((d) => d.data);
 }
-
-module.exports = {
-  getAllIssues,
-  getPrData,
-  getMembers,
-  getMemberDetails,
-};
