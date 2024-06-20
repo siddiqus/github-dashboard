@@ -1,14 +1,8 @@
-const fs = require("fs");
-const path = require("path");
-const _ = require("lodash");
-const {
-  getAllIssues,
-  getPrData,
-  getMembers,
-  getMemberDetails,
-} = require("./github-api.service");
+import _ from "lodash";
+import { getAllIssues, getPrData } from "./github-api.service";
 
-const userList = require("../../cmp-users.json");
+import userList from "../../../cmp-users.json";
+import db from "../idb";
 
 const userListByUsername = _.keyBy(userList, "username");
 
@@ -141,7 +135,7 @@ function getDataCacheKey({ organization, author, startDate, endDate, mode }) {
   return `${organization}-${author}-${startDate}-${endDate}-${mode}`;
 }
 
-function getDataCacheFilePath({
+async function getAllIssuesCached({
   organization,
   author,
   startDate,
@@ -156,34 +150,9 @@ function getDataCacheFilePath({
     mode,
   });
 
-  const tmpFolder = path.join(__dirname, "..", "tmp", "search");
-  if (!fs.existsSync(tmpFolder)) {
-    fs.mkdirSync(tmpFolder);
-  }
-
-  const theFile = path.join(tmpFolder, `${cacheKey}.json`);
-
-  return theFile;
-}
-
-async function getAllIssuesCached({
-  organization,
-  author,
-  startDate,
-  endDate,
-  mode,
-}) {
-  const theFile = getDataCacheFilePath({
-    organization,
-    author,
-    startDate,
-    endDate,
-    mode,
-  });
-
-  if (fs.existsSync(theFile)) {
-    const content = require(theFile);
-    return content;
+  const cachedData = await db.getData(cacheKey);
+  if (cachedData) {
+    return cachedData;
   }
 
   const data = await getAllIssues({
@@ -194,55 +163,36 @@ async function getAllIssuesCached({
     mode,
   });
 
-  fs.writeFileSync(theFile, JSON.stringify(data));
+  await db.setData(cacheKey, data);
 
   return data;
 }
 
-function getPrCacheFilePath({ owner, repo, pullNumber }) {
-  const cacheKey = `${owner}-${repo}-${pullNumber}`;
-
-  const tmpFolder = path.join(__dirname, "..", "./tmp", "pr");
-  if (!fs.existsSync(tmpFolder)) {
-    fs.mkdirSync(tmpFolder);
-  }
-
-  const theFile = path.join(tmpFolder, `${cacheKey}.json`);
-
-  return theFile;
+function getPrCacheKey({ owner, repo, pullNumber }) {
+  return `${owner}-${repo}-${pullNumber}`;
 }
 
-function isFileOlderThanOneDaySync(filePath) {
-  try {
-    const now = new Date();
-    const stats = fs.statSync(filePath);
-    const mtime = new Date(stats.mtime);
-    const diff = now - mtime;
-    const diffInDays = diff / (1000 * 60 * 60 * 24);
+export async function getPrDataCached({ owner, repo, pullNumber }) {
+  const cacheKey = getPrCacheKey({ owner, repo, pullNumber });
 
-    // Check if the difference is more than 1 day
-    return diffInDays > 1;
-  } catch (err) {
-    console.error(`Error getting stats for file: ${err.message}`);
-    return false;
-  }
-}
+  const cachedData = await db.getData(cacheKey);
 
-async function getPrDataCached({ owner, repo, pullNumber }) {
-  const theFile = getPrCacheFilePath({ owner, repo, pullNumber });
-
-  if (fs.existsSync(theFile) && !isFileOlderThanOneDaySync(theFile)) {
-    const content = require(theFile);
-    return content;
+  if (cachedData) {
+    return cachedData;
   }
 
   const result = await getPrData({ owner, repo, pullNumber });
 
-  fs.writeFileSync(theFile, JSON.stringify(result));
+  await db.setData(cacheKey, result);
   return result;
 }
 
-async function getUserData({ organization, author, startDate, endDate }) {
+export async function getUserData({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
   const [prCreatedData, reviewedData] = await Promise.all([
     getAllIssuesCached({
       organization,
@@ -279,15 +229,20 @@ async function getUserData({ organization, author, startDate, endDate }) {
   };
 }
 
-function removeUserDataCache({ organization, author, startDate, endDate }) {
-  const authorCachePath = getDataCacheFilePath({
+export async function removeUserDataCache({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
+  const authorCachePath = getDataCacheKey({
     organization,
     author,
     startDate,
     endDate,
     mode: "author",
   });
-  const reviewerCachePath = getDataCacheFilePath({
+  const reviewerCachePath = getDataCacheKey({
     organization,
     author,
     startDate,
@@ -295,24 +250,12 @@ function removeUserDataCache({ organization, author, startDate, endDate }) {
     mode: "reviewer",
   });
 
-  [authorCachePath, reviewerCachePath].forEach((p) => {
-    if (fs.existsSync(p)) {
-      fs.unlinkSync(p);
-    }
-  });
+  await db.unsetData(authorCachePath);
+  await db.unsetData(reviewerCachePath);
 }
 
-function removePrCache({ owner, repo, pullNumber }) {
-  const cachePath = getPrCacheFilePath({ owner, repo, pullNumber });
+export async function removePrCache({ owner, repo, pullNumber }) {
+  const cachePath = getPrCacheKey({ owner, repo, pullNumber });
 
-  if (fs.existsSync(cachePath)) {
-    fs.unlinkSync(cachePath);
-  }
+  await db.unsetData(cachePath);
 }
-
-module.exports = {
-  getUserData,
-  removeUserDataCache,
-  getPrData: getPrDataCached,
-  removePrCache,
-};

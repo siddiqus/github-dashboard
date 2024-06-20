@@ -1,5 +1,4 @@
 # Github Stats Dashboard
 
-1. Create a `.env` file in `server`, and set your github personal access token as `GITHUB_TOKEN`
-2. Go into `react-app` and run `yarn dev`
-3. Go into `server` and run `yarn dev`
+1. Inside `react-app` folder create a `.env` file with VITE_GITHUB_TOKEN. This token has to have repository and organization read permissions.
+2. Navigate to `react-app` folder and run `yarn dev`

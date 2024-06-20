@@ -1,0 +1,48 @@
+import * as githubUtils from "./github/utils";
+
+export async function getUserData({
+  author,
+  startDate,
+  endDate,
+  organization = "newscred",
+}) {
+  return githubUtils.getUserData({ organization, author, startDate, endDate });
+}
+
+// data: Array<{ author, startDate, endDate }>
+export async function resetUserDataCache(data, organization = "newscred") {
+  for (const d of data) {
+    const { author, startDate, endDate } = d;
+    await githubUtils.removeUserDataCache({
+      organization,
+      author,
+      startDate,
+      endDate,
+    });
+  }
+}
+
+export async function getPr(prList) {
+  const results = await Promise.all(
+    prList.map((p) =>
+      githubUtils.getPrDataCached({
+        owner: p.owner,
+        pullNumber: p.pullNumber,
+        repo: p.repo,
+      })
+    )
+  );
+
+  return results;
+}
+
+export async function clearPrCache(prList) {
+  for (const d of prList) {
+    const { owner, repo, pullNumber } = d;
+    removePrCache({
+      owner,
+      pullNumber,
+      repo,
+    });
+  }
+}

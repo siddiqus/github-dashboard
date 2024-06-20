@@ -2,7 +2,8 @@ import { useState } from "react";
 import { HomeUserTable } from "../components/HomeUserTable/HomeUserTable";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
-import { getUserData } from "../services/call-api";
+import { getUserData } from "../services/index";
+import Loading from "../components/Loading";
 
 const statusMap = {
   LOADING: "loading",
@@ -55,7 +56,7 @@ function Home() {
       <UserPicker onSubmit={onSubmit} onReset={onReset} />
       <hr />
 
-      {isLoading ? <h4>Loading...</h4> : <></>}
+      {isLoading ? <Loading></Loading> : <></>}
       {isError ? <h4 style={{ color: "red" }}> {errorMessage}</h4> : <></>}
 
       {isLoaded ? (
