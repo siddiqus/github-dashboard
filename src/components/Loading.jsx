@@ -1,12 +1,19 @@
-import logoAnimation from "../assets/opti logo animation loading.gif";
+import logoAnimation from "../assets/optimizely_logo_animation.gif";
 
 export default function Loading() {
   return (
-    <img
-      width={"60px"}
-      height={"60px"}
-      src={logoAnimation}
-      alt="loading..."
-    />
+    <div
+      style={{
+        width: "100%",
+        textAlign: "center",
+      }}
+    >
+      <img
+        width={"auto"}
+        height={"60px"}
+        src={logoAnimation}
+        alt="loading..."
+      />
+    </div>
   );
 }

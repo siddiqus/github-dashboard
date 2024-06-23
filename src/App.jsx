@@ -21,7 +21,7 @@ function App() {
   }
 
   return (
-    <Container style={{ height: "100vh" }}>
+    <Container style={{ minHeight: "100vh" }}>
       <h2
         style={{
           paddingTop: "20px",
