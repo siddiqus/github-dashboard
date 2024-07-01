@@ -9,10 +9,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import App from "./App";
 
 import userList from "../cmp-users.json";
-import { TEAMS } from "./constants";
+import { TEAM_MEMBERS } from "./constants";
 
-for (const key of Object.keys(TEAMS)) {
-  userList.push({ username: TEAMS[key], name: TEAMS[key] });
+for (const key of Object.keys(TEAM_MEMBERS)) {
+  userList.push({ username: key, name: key });
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(
