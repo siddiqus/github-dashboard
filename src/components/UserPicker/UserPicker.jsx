@@ -1,10 +1,10 @@
-import { Form, Row, Button, Alert, Col } from "react-bootstrap";
 import { useState } from "react";
+import { Alert, Button, Col, Form, Row } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
-import { formatDate } from "../../services/utils";
 import userList from "../../../cmp-users.json";
-import { TEAMS, TEAM_MEMBERS } from "../../constants";
+import { TEAM_MEMBERS } from "../../constants";
 import { resetUserDataCache } from "../../services/index";
+import { formatDate } from "../../services/utils";
 
 import "./UserPicker.css";
 
@@ -55,7 +55,7 @@ function UserPicker({ onSubmit, onReset }) {
 
     let newNames;
 
-    const selectedTeam = Object.values(TEAMS).find((v) => v === value);
+    const selectedTeam = Object.keys(TEAM_MEMBERS).find((v) => v === value);
 
     if (selectedTeam) {
       newNames = TEAM_MEMBERS[selectedTeam] || [];

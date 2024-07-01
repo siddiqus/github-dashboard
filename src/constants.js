@@ -1,19 +1,14 @@
-export const TEAMS = {
-  TEAM_7: "Team 7",
-  API_TEAM: "API Team",
-  TEAM_4: "Team 4",
-};
-
 export const TEAM_MEMBERS = {
-  [TEAMS.TEAM_7]: [
+  "Team 7": [
     "shohidulbari",
     "MusavvirK",
     "refkarim",
     "yasinarefin",
     "Mehedi-Hassan",
     "JushrafRahman",
+    "Aryan3212",
   ],
-  [TEAMS.API_TEAM]: [
+  "API Team": [
     "dustyRAIN",
     "shunjid",
     "AhsanShihab",
@@ -21,7 +16,7 @@ export const TEAM_MEMBERS = {
     "atiq1589",
     "frrahat",
   ],
-  [TEAMS.TEAM_4]: [
+  "Team 4": [
     "debasisroy144",
     "AbrarNad",
     "ahmedsadman",
@@ -29,5 +24,7 @@ export const TEAM_MEMBERS = {
     "zahinahmed12",
     "sgtlaugh",
     "ahmed-dinar",
+    "farhanfuad35",
   ],
+  "Team 8": ["jjmalina", "sajedul-karim", "mumin91", "imran2140"],
 };
