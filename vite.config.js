@@ -5,7 +5,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), EnvironmentPlugin(["GITHUB_TOKEN", "GITHUB_ORG"])],
+  plugins: [react(), EnvironmentPlugin("all", { prefix: "APP_" })],
   resolve: {
     alias: {
       "~bootstrap": path.resolve(__dirname, "node_modules/bootstrap"),
