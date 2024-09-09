@@ -1,7 +1,7 @@
 import { Octokit } from "octokit";
 
 const client = new Octokit({
-  auth: process.env.VITE_GITHUB_TOKEN,
+  auth: process.env.APP_GITHUB_TOKEN,
 });
 
 async function delay(ms) {

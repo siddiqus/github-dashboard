@@ -5,7 +5,6 @@ export const TEAM_MEMBERS = {
     "refkarim",
     "yasinarefin",
     "Mehedi-Hassan",
-    "JushrafRahman",
     "Aryan3212",
   ],
   "API Team": [
