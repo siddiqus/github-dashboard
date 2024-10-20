@@ -11,7 +11,7 @@ export function getMonthsBetween(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-  const months = [];
+  const months: string[] = [];
 
   let current = start;
 
@@ -44,7 +44,8 @@ export function getMonthsStringFromIssueList(prList) {
     return [];
   }
   const sorted = [...prList].sort(
-    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+    (a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   );
 
   const first = sorted[0].created_at;

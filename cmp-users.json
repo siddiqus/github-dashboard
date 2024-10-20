@@ -1,614 +1,322 @@
 [
     {
-        "username": "AbrarNad",
-        "name": "Khandaker Abrar Nadib"
-    },
-    {
-        "username": "afiyyaah",
-        "name": "Afia Fahmida Rahman"
+        "username": "ahmed-dinar",
+        "name": "Ahmed Dinar",
+        "email": "maid.dinar@optimizely.com"
     },
     {
         "username": "ahmedrafayat",
-        "name": "Ahmed Rafayat"
+        "name": "Ahmed Rafayat",
+        "email": "ahmed.rafayat@optimizely.com"
     },
     {
         "username": "ahmedsadman",
-        "name": "Sadman Muhib (Samyo)"
+        "name": "Sadman Muhib (Samyo)",
+        "email": "ahmed.muhib@optimizely.com"
     },
     {
         "username": "ahmedshuhel",
-        "name": "Shuhel Ahmed"
+        "name": "Shuhel Ahmed",
+        "email": "ahmed.shuhel@optimizely.com"
     },
     {
         "username": "AhsanShihab",
-        "name": "Nazmul Ahsan"
-    },
-    {
-        "username": "AlexMcComb",
-        "name": "AlexMcComb"
+        "name": "Nazmul Ahsan",
+        "email": "nazmul.ahsan@optimizely.com"
     },
     {
         "username": "amandachen13",
-        "name": "Amanda Chen"
+        "name": "Amanda Chen",
+        "email": "amanda.chen@optimizely.com"
     },
     {
         "username": "amardebnath",
-        "name": "Amar Debnath"
+        "name": "Amar Debnath",
+        "email": "amar.debnath@optimizely.com"
     },
     {
         "username": "amitmojumder",
-        "name": "Amit Mojumder"
+        "name": "Amit Mojumder",
+        "email": "amit.mojumder@optimizely.com"
     },
     {
         "username": "anayaian",
-        "name": "Saiful Islam"
-    },
-    {
-        "username": "And1Split",
-        "name": "Nils"
-    },
-    {
-        "username": "anielsud",
-        "name": "Aniel Sud"
-    },
-    {
-        "username": "AnisNC",
-        "name": "AnisNC"
+        "name": "Saiful Islam",
+        "email": "saiful.islam@optimizely.com"
     },
     {
         "username": "Anjum219",
-        "name": "Hasnat Anjum Haz"
-    },
-    {
-        "username": "Armaansc",
-        "name": "Armaansc"
-    },
-    {
-        "username": "ashiqursuperfly",
-        "name": "Ashiqur Rahman"
-    },
-    {
-        "username": "atiq1589",
-        "name": "Md. Atiqul Islam"
-    },
-    {
-        "username": "austinmbrown",
-        "name": "Austin"
-    },
-    {
-        "username": "azizulhakim-f",
-        "name": "Azizul Hakim"
-    },
-    {
-        "username": "azmainadel",
-        "name": "Azmain Adel"
-    },
-    {
-        "username": "Battleaxe19",
-        "name": "Tyler Allen"
-    },
-    {
-        "username": "benjskoog",
-        "name": "benjskoog"
-    },
-    {
-        "username": "bigmonkiki",
-        "name": "Pei"
-    },
-    {
-        "username": "bivor-adrito",
-        "name": "Bivor Faruque Adrito"
-    },
-    {
-        "username": "bjuris",
-        "name": "Per Bjurström"
-    },
-    {
-        "username": "boborchard",
-        "name": "Bob Orchard"
-    },
-    {
-        "username": "Brymith",
-        "name": "Brymith"
-    },
-    {
-        "username": "chrisshaddad",
-        "name": "Chriss Haddad"
-    },
-    {
-        "username": "danielnuggets",
-        "name": "Dan Nguyen"
-    },
-    {
-        "username": "dataxerik",
-        "name": "dataxerik"
-    },
-    {
-        "username": "davidknipe",
-        "name": "David Knipe"
-    },
-    {
-        "username": "debasisroy144",
-        "name": "Debasis Roy"
-    },
-    {
-        "username": "denweinert",
-        "name": "Denny Weinert"
-    },
-    {
-        "username": "Dhruba10414",
-        "name": "Dhruba Mitra"
-    },
-    {
-        "username": "DiptoBarua918",
-        "name": "Dipto Barua"
-    },
-    {
-        "username": "dosterhof",
-        "name": "Daniel Österhof"
-    },
-    {
-        "username": "dustyRAIN",
-        "name": "Guru Ananda"
-    },
-    {
-        "username": "elidickinson",
-        "name": "Eli Dickinson"
-    },
-    {
-        "username": "epishilpa",
-        "name": "Shilpa Joshi"
-    },
-    {
-        "username": "Eric-Stout",
-        "name": "Eric-Stout"
-    },
-    {
-        "username": "Eshpelin",
-        "name": "Eshpelin Mishtak"
-    },
-    {
-        "username": "faisalhmohd",
-        "name": "Mohammad Faisal"
-    },
-    {
-        "username": "farzeen-naz",
-        "name": "Farzeen Naz Promi"
-    },
-    {
-        "username": "FloydCorbin",
-        "name": "Floyd Corbin"
-    },
-    {
-        "username": "frrahat",
-        "name": "Fazle Rahat"
-    },
-    {
-        "username": "fzamd",
-        "name": "Faiyaz Ahmed"
-    },
-    {
-        "username": "gaspardip",
-        "name": "Gaspar Dip"
-    },
-    {
-        "username": "habui-epi",
-        "name": "Ha Bui"
-    },
-    {
-        "username": "hannahrobbins22",
-        "name": "hannahrobbins22"
-    },
-    {
-        "username": "hennys",
-        "name": "Henrik Nystrom"
-    },
-    {
-        "username": "hsiam261",
-        "name": "Siam Habib"
-    },
-    {
-        "username": "htan13",
-        "name": "Hui Sian Richardson"
-    },
-    {
-        "username": "hungpv1988",
-        "name": "Hung PhanVan"
-    },
-    {
-        "username": "ImperishableMe",
-        "name": "Bishwajit Bhattacharjee"
-    },
-    {
-        "username": "imran2140",
-        "name": "Imran Alam"
-    },
-    {
-        "username": "imyousuf",
-        "name": "Imran M Yousuf"
-    },
-    {
-        "username": "isaltwell",
-        "name": "isaltwell"
-    },
-    {
-        "username": "JafarSaifullah",
-        "name": "Abu Jafar Saifullah"
-    },
-    {
-        "username": "jameslholcombe",
-        "name": "James Holcombe"
-    },
-    {
-        "username": "jbearfoot",
-        "name": "Johan Björnfot"
-    },
-    {
-        "username": "jjmalina",
-        "name": "Jeremiah Malina"
-    },
-    {
-        "username": "JohanPetersson",
-        "name": "Johan Petersson"
-    },
-    {
-        "username": "johnholdun",
-        "name": "John Holdun"
-    },
-    {
-        "username": "jtraverso-opti",
-        "name": "Joe Traverso"
-    },
-    {
-        "username": "JZoshak22",
-        "name": "JZoshak22"
-    },
-    {
-        "username": "kamrul1157024",
-        "name": "Md kamrul hassan"
-    },
-    {
-        "username": "KetanSawant1",
-        "name": "Ketan Sawant"
-    },
-    {
-        "username": "kfoozminus",
-        "name": "Jannatul Ferdows Jenny"
-    },
-    {
-        "username": "kmtusher97",
-        "name": "Kamrul Hasan Tusher"
-    },
-    {
-        "username": "ksg24",
-        "name": "Katy Grosjean"
-    },
-    {
-        "username": "longbien",
-        "name": "Bien Nguyen"
-    },
-    {
-        "username": "longle91",
-        "name": "Long Le"
-    },
-    {
-        "username": "lonvepi",
-        "name": "Long Nguyen Van"
-    },
-    {
-        "username": "lseemann",
-        "name": "Luke Seemann"
-    },
-    {
-        "username": "m-s-abeer",
-        "name": "Mahmud Sajjad Abeer"
-    },
-    {
-        "username": "Madiha4Khan",
-        "name": "Madiha4Khan"
-    },
-    {
-        "username": "mainul-islam-exp",
-        "name": "Mainul Islam"
-    },
-    {
-        "username": "manaj",
-        "name": "Manaj Chakrobarti"
-    },
-    {
-        "username": "MarkMetcalfe-Epi",
-        "name": "Mark Metcalfe"
-    },
-    {
-        "username": "mauricecruz",
-        "name": "Maurice Cruz"
-    },
-    {
-        "username": "Mehedi-Hassan",
-        "name": "Md. Mehedi Hassan"
-    },
-    {
-        "username": "mehreen-r6234",
-        "name": "Mehreen Rahman"
-    },
-    {
-        "username": "melnie23",
-        "name": "melnie23"
-    },
-    {
-        "username": "mii9000",
-        "name": "ibrahim"
-    },
-    {
-        "username": "MiriamSexton",
-        "name": "Miriam Sexton"
-    },
-    {
-        "username": "mnemeth-opti",
-        "name": "Matt Nemeth"
-    },
-    {
-        "username": "mostafa-K-raihan",
-        "name": "Raihan"
-    },
-    {
-        "username": "MostofaMohiuddin",
-        "name": "Mostofa Mohiuddin"
-    },
-    {
-        "username": "Mr-M-Andersson",
-        "name": "Martin Andersson"
-    },
-    {
-        "username": "mrahl",
-        "name": "Magnus Rahl"
-    },
-    {
-        "username": "mredulorfiaz",
-        "name": "Gazi Orfiaj Karim"
-    },
-    {
-        "username": "mullarks",
-        "name": "mullarks"
-    },
-    {
-        "username": "mumin91",
-        "name": "Muminur Rahman"
-    },
-    {
-        "username": "MunifTanjim",
-        "name": "Munif Tanjim"
-    },
-    {
-        "username": "MusavvirK",
-        "name": "Abde Musavvir Khan"
-    },
-    {
-        "username": "mutasim-toha",
-        "name": "mutasim-toha"
-    },
-    {
-        "username": "nadim-saker",
-        "name": "nadim-saker"
-    },
-    {
-        "username": "newscred-container-git-bot",
-        "name": "newscred-container-git-bot"
-    },
-    {
-        "username": "newscred-git-bot",
-        "name": "NewsCred Git Bot"
-    },
-    {
-        "username": "Nure",
-        "name": "Md. Nure Alam Siddiq"
-    },
-    {
-        "username": "oneshadab",
-        "name": "Shadman Shadab"
-    },
-    {
-        "username": "optimizely-githubsa",
-        "name": "Optimizely Service Account"
-    },
-    {
-        "username": "optisiddiqus",
-        "name": "Sabbir Siddiqui"
-    },
-    {
-        "username": "pergunsarfs",
-        "name": "Per Gunsarfs"
-    },
-    {
-        "username": "pratikjoy7",
-        "name": "Pratik Saha"
-    },
-    {
-        "username": "quanmaiepi",
-        "name": "Quan Mai"
-    },
-    {
-        "username": "quantranepiserver",
-        "name": "Quan Tran"
-    },
-    {
-        "username": "radnan",
-        "name": "Rafi Adnan"
-    },
-    {
-        "username": "raihan-abu",
-        "name": "Raihan"
-    },
-    {
-        "username": "raykibul",
-        "name": "Rakibul Islam"
-    },
-    {
-        "username": "razib2055",
-        "name": "Razib Khan"
-    },
-    {
-        "username": "RedwanPlague",
-        "name": "Redwanul Haque"
-    },
-    {
-        "username": "refkarim",
-        "name": "Refaya Karim"
-    },
-    {
-        "username": "reshadmrrr",
-        "name": "Monayam Reshad"
-    },
-    {
-        "username": "rfolan",
-        "name": "Robert Folan"
-    },
-    {
-        "username": "rhs99",
-        "name": "Md. Rakibul Hasan Sarker"
-    },
-    {
-        "username": "rizwan192",
-        "name": "Rizwanul Hoque Ratul"
-    },
-    {
-        "username": "rjspiker",
-        "name": "RJ Spiker"
-    },
-    {
-        "username": "rubaimahbub",
-        "name": "RubaiM"
-    },
-    {
-        "username": "RuiRayWang",
-        "name": "OctoPanda"
-    },
-    {
-        "username": "sajedul-karim",
-        "name": "Sajedul karim"
-    },
-    {
-        "username": "SakibAbrar",
-        "name": "Sakib Abrar"
-    },
-    {
-        "username": "SaminRK",
-        "name": "Samin Rahman Khan"
-    },
-    {
-        "username": "sergiovega-opti",
-        "name": "Sergio Vega Gutierrez"
-    },
-    {
-        "username": "sgtlaugh",
-        "name": "Sabit Zahin"
-    },
-    {
-        "username": "ShafinKhadem",
-        "name": "Nafiur Rahman Khadem"
-    },
-    {
-        "username": "shahramshahram",
-        "name": "Shahram Shahinzadeh"
-    },
-    {
-        "username": "shohidulbari",
-        "name": "Shohidul Bari"
-    },
-    {
-        "username": "shunjid",
-        "name": "Shunjid Rahman Showrov"
-    },
-    {
-        "username": "SlowDecay",
-        "name": "Zawad Abdullah"
-    },
-    {
-        "username": "sonbua",
-        "name": "Son Nguyen"
-    },
-    {
-        "username": "SuriyaTasmimDisha",
-        "name": "Suriya Tasmim Disha"
-    },
-    {
-        "username": "sw3dish",
-        "name": "Colin Burr"
-    },
-    {
-        "username": "syednabilashraf",
-        "name": "syednabilashraf"
-    },
-    {
-        "username": "tajrian",
-        "name": "Tajrian Jahid"
-    },
-    {
-        "username": "tanvirstreame",
-        "name": "Tanvir Islam Streame"
-    },
-    {
-        "username": "thachnd",
-        "name": "Nguyen Dac Thach"
-    },
-    {
-        "username": "thudaoepi",
-        "name": "Thu Dao"
-    },
-    {
-        "username": "tidyui",
-        "name": "Håkan Edling"
-    },
-    {
-        "username": "trishahanlon",
-        "name": "Trisha Hanlon"
-    },
-    {
-        "username": "tyler-hoodoo",
-        "name": "tyler-hoodoo"
-    },
-    {
-        "username": "VictoriaGoldenNewscred",
-        "name": "Victoria"
-    },
-    {
-        "username": "WajeehZantout",
-        "name": "Wajeeh Zantout"
-    },
-    {
-        "username": "waliurjs",
-        "name": "Waliur Rahman"
-    },
-    {
-        "username": "webteckie",
-        "name": "Carlos Colon"
-    },
-    {
-        "username": "yasinarefin",
-        "name": "yasinarefin"
-    },
-    {
-        "username": "Zahid-Sarker-7",
-        "name": "Zahid Sarker"
-    },
-    {
-        "username": "zahinahmed12",
-        "name": "Zahin Ahmed"
-    },
-    {
-        "username": "zhdzmn",
-        "name": "A K M Zahiduzzaman"
+        "name": "Hasnat Anjum Haz",
+        "email": "anjum.haz@optimizely.com"
     },
     {
         "username": "Aryan3212",
-        "name": "Aryan Rahman"
+        "name": "Aryan Rahman",
+        "email": "aryan.rahman@optimizely.com"
     },
     {
-        "username": "ahmed-dinar",
-        "name": "Ahmed Dinar"
+        "username": "ashiqursuperfly",
+        "name": "Ashiqur Rahman",
+        "email": "khondoker.rahman@optimizely.com"
+    },
+    {
+        "username": "atiq1589",
+        "name": "Md. Atiqul Islam",
+        "email": "atiqul.islam@optimizely.com"
+    },
+    {
+        "username": "danielnuggets",
+        "name": "Dan Nguyen",
+        "email": "dan.nguyen@optimizely.com"
+    },
+    {
+        "username": "debasisroy144",
+        "name": "Debasis Roy",
+        "email": "debasis.roy@optimizely.com"
+    },
+    {
+        "username": "Dhruba10414",
+        "name": "Dhruba Mitra",
+        "email": "dhruba.mitra@optimizely.com"
+    },
+    {
+        "username": "DiptoBarua918",
+        "name": "Dipto Barua",
+        "email": "dipto.barua@optimizely.com"
+    },
+    {
+        "username": "dustyRAIN",
+        "name": "Guru Ananda",
+        "email": "guru.gayen@optimizely.com"
+    },
+    {
+        "username": "faisalhmohd",
+        "name": "Mohammad Faisal",
+        "email": "mohammad.faisal@optimizely.com"
     },
     {
         "username": "farhanfuad35",
-        "name": "Farhan Fuad Haque"
+        "name": "Farhan Fuad Haque",
+        "email": "farhanfuad.haque@optimizely.com"
+    },
+    {
+        "username": "farzeen-naz",
+        "name": "Farzeen Naz Promi",
+        "email": "farzeen.promi@optimizely.com"
+    },
+    {
+        "username": "frrahat",
+        "name": "Fazle Rahat",
+        "email": "fazle.rahat@optimizely.com"
+    },
+    {
+        "username": "fzamd",
+        "name": "Faiyaz Ahmed",
+        "email": "faiyaz.ahmed@optimizely.com"
+    },
+    {
+        "username": "hsiam261",
+        "name": "Siam Habib",
+        "email": "siam.habib@optimizely.com"
+    },
+    {
+        "username": "imran2140",
+        "name": "Imran Alam",
+        "email": "imran.alam@optimizely.com"
+    },
+    {
+        "username": "JafarSaifullah",
+        "name": "Abu Jafar Saifullah",
+        "email": "abujafar.saifullah@optimizely.com"
+    },
+    {
+        "username": "jjmalina",
+        "name": "Jeremiah Malina",
+        "email": "jeremiah.malina-pierscionek@optimizely.com"
+    },
+    {
+        "username": "kamrul1157024",
+        "name": "Md kamrul hassan",
+        "email": "md.kamrul.hassan@optimizely.com"
+    },
+    {
+        "username": "kfoozminus",
+        "name": "Jannatul Ferdows Jenny",
+        "email": "jannatul.ferdows@optimizely.com"
+    },
+    {
+        "username": "kmtusher97",
+        "name": "Kamrul Hasan Tusher",
+        "email": "kamrul.hasan@optimizely.com"
+    },
+    {
+        "username": "manaj",
+        "name": "Manaj Chakrobarti",
+        "email": "manaj.chakrobarti@optimizely.com"
+    },
+    {
+        "username": "mauricecruz",
+        "name": "Maurice Cruz",
+        "email": "maurice.cruz@optimizely.com"
+    },
+    {
+        "username": "Mehedi-Hassan",
+        "name": "Md. Mehedi Hassan",
+        "email": "mehedi.hassan@optimizely.com"
+    },
+    {
+        "username": "mehreen-r6234",
+        "name": "Mehreen Rahman",
+        "email": "mehreen.rahman@optimizely.com"
+    },
+    {
+        "username": "mostafa-K-raihan",
+        "name": "Raihan",
+        "email": "mostafa.raihan@optimizely.com"
+    },
+    {
+        "username": "mredulorfiaz",
+        "name": "Gazi Orfiaj Karim",
+        "email": "gazi.karim@optimizely.com"
+    },
+    {
+        "username": "mumin91",
+        "name": "Muminur Rahman",
+        "email": "muminur.rahman@optimizely.com"
+    },
+    {
+        "username": "MunifTanjim",
+        "name": "Munif Tanjim",
+        "email": "munif.tanjim@optimizely.com"
+    },
+    {
+        "username": "MusavvirK",
+        "name": "Abde Musavvir Khan",
+        "email": "abde.khan@optimizely.com"
+    },
+    {
+        "username": "toha993",
+        "name": "Mutasim Toha",
+        "email": "mutasim.toha@optimizely.com"
+    },
+    {
+        "username": "nadim-saker",
+        "name": "nadim-saker",
+        "email": "nadim.saker@optimizely.com"
+    },
+    {
+        "username": "oneshadab",
+        "name": "Shadman Shadab",
+        "email": "shadman.shadab@optimizely.com"
+    },
+    {
+        "username": "optisiddiqus",
+        "name": "Sabbir Siddiqui",
+        "email": "sabbir.siddiqui@optimizely.com"
+    },
+    {
+        "username": "pratikjoy7",
+        "name": "Pratik Saha",
+        "email": "pratik.saha@optimizely.com"
+    },
+    {
+        "username": "radnan",
+        "name": "Rafi Adnan",
+        "email": "rafi.adnan@optimizely.com"
+    },
+    {
+        "username": "raykibul",
+        "name": "Rakibul Islam",
+        "email": "rakibul.islam@optimizely.com"
+    },
+    {
+        "username": "refkarim",
+        "name": "Refaya Karim",
+        "email": "refaya.karim@optimizely.com"
+    },
+    {
+        "username": "reshadmrrr",
+        "name": "Monayam Reshad",
+        "email": "monayam.reshad@optimizely.com"
+    },
+    {
+        "username": "rhs99",
+        "name": "Md. Rakibul Hasan Sarker",
+        "email": "rakibul.sarker@optimizely.com"
+    },
+    {
+        "username": "rizwan192",
+        "name": "Rizwanul Hoque Ratul",
+        "email": "rizwanul.ratul@optimizely.com"
+    },
+    {
+        "username": "sajedul-karim",
+        "name": "Sajedul karim",
+        "email": "sajedul.karim@optimizely.com"
+    },
+    {
+        "username": "SakibAbrar",
+        "name": "Sakib Abrar",
+        "email": "sakib.abrar@optimizely.com"
+    },
+    {
+        "username": "sgtlaugh",
+        "name": "Sabit Zahin",
+        "email": "sabit.zahin@optimizely.com"
+    },
+    {
+        "username": "ShafinKhadem",
+        "name": "Nafiur Rahman Khadem",
+        "email": "nafiur.khadem@optimizely.com"
+    },
+    {
+        "username": "shohidulbari",
+        "name": "Shohidul Bari",
+        "email": "shohidul.bari@optimizely.com"
+    },
+    {
+        "username": "shunjid",
+        "name": "Shunjid Rahman Showrov",
+        "email": "shunjid.showrov@optimizely.com"
+    },
+    {
+        "username": "SlowDecay",
+        "name": "Zawad Abdullah",
+        "email": "zawad.abdullah@optimizely.com"
+    },
+    {
+        "username": "SuriyaTasmimDisha",
+        "name": "Suriya Tasmim Disha",
+        "email": "suriya.disha@optimizely.com"
+    },
+    {
+        "username": "syednabilashraf",
+        "name": "syednabilashraf",
+        "email": "nabil.ashraf@optimizely.com"
+    },
+    {
+        "username": "tajrian",
+        "name": "Tajrian Jahid",
+        "email": "tajrian.jahid@optimizely.com"
+    },
+    {
+        "username": "tanvirstreame",
+        "name": "Tanvir Islam Streame",
+        "email": "tanvir.islam@optimizely.com"
+    },
+    {
+        "username": "yasinarefin",
+        "name": "yasinarefin",
+        "email": "mohammad.arefin@optimizely.com"
+    },
+    {
+        "username": "zhdzmn",
+        "name": "A K M Zahiduzzaman",
+        "email": "zahid@optimizely.com"
+    },
+    {
+        "username": "gaspardip",
+        "name": "Gaspar Dip",
+        "email": "gaspar.dip@optimizely.com"
     }
 ]
