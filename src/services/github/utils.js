@@ -4,7 +4,7 @@ import { getAllIssues, getPrData } from "./github-api.service";
 import userList from "../../../cmp-users.json";
 import db from "../idb";
 
-const userListByUsername = _.keyBy(userList, "username");
+export const userListByUsername = _.keyBy(userList, "username");
 
 function sortMonthsAscending(monthsArray) {
   return monthsArray.sort((a, b) => {

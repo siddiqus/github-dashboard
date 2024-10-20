@@ -218,6 +218,8 @@ function UserPrChart({ userDataList }) {
     return <h5>NO DATA FOUND</h5>;
   }
 
+  months.sort((a, b) => a.localeCompare(b));
+
   const prChartData = getPrCreatedChartData({
     months,
     userDataList,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Button, Col, Form, Row } from "react-bootstrap";
+import { Alert, Button, Col, Form, Row, Dropdown } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
 import userList from "../../../cmp-users.json";
 import { TEAM_MEMBERS } from "../../constants";
@@ -32,6 +32,35 @@ function getDefaultDates() {
     defaultStartDate,
     defaultEndDate,
   };
+}
+
+function TeamModeSelectionDropdown({ chooseUsers }) {
+  const [selected, setSelected] = useState();
+  const teams = Object.keys(TEAM_MEMBERS);
+  return (
+    <Dropdown
+      onSelect={(e) => {
+        if (e === "manual") {
+          setSelected("Choose manually");
+          chooseUsers([]);
+        } else {
+          chooseUsers(TEAM_MEMBERS[e]);
+          setSelected(e);
+        }
+      }}
+    >
+      <Dropdown.Toggle>{selected || "Select team"} </Dropdown.Toggle>
+
+      <Dropdown.Menu>
+        {teams.sort().map((t, index) => (
+          <Dropdown.Item eventKey={t} key={index}>
+            {t}
+          </Dropdown.Item>
+        ))}
+        <Dropdown.Item eventKey={"manual"}>Choose manually</Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown>
+  );
 }
 
 function UserPicker({ onSubmit, onReset }) {
@@ -142,50 +171,56 @@ function UserPicker({ onSubmit, onReset }) {
 
   return (
     <div style={{ opacity: `${isLoading ? 60 : 100}%` }}>
-      <div className="tags-input-container">
-        {usernames.map((tag, index) => (
-          <div className="tag-item" key={index}>
-            <span className="text">{tag}</span>
-            <span className="close" onClick={() => removeTag(index)}>
-              &times;
-            </span>
-          </div>
-        ))}
-        <input
-          onKeyDown={handleKeyDown}
-          onKeyDownCapture={handleUserPicketInputChange}
-          type="text"
-          className="tags-input"
-          placeholder="Type in Github usernames"
-          disabled={isLoading}
-          onBlur={setNewValueInUsernamesInputList}
-          // autocomplete="on"
-          list="userSuggestions"
+      <div>
+        <TeamModeSelectionDropdown
+          chooseUsers={(users) => setUsernames(users)}
         />
-        <datalist id="userSuggestions">
-          {userList.map((user, index) => {
-            return (
-              <option
-                value={user.username}
-                key={index}
-              >{`${user.name} (${user.username})`}</option>
-            );
-          })}
-        </datalist>
+        <div className="tags-input-container">
+          {usernames.map((tag, index) => (
+            <div className="tag-item" key={index}>
+              <span className="text">{tag}</span>
+              <span className="close" onClick={() => removeTag(index)}>
+                &times;
+              </span>
+            </div>
+          ))}
 
-        {usernames.length ? (
-          <Button
+          <input
+            onKeyDown={handleKeyDown}
+            onKeyDownCapture={handleUserPicketInputChange}
+            type="text"
+            className="tags-input"
+            placeholder="Type in Github usernames"
             disabled={isLoading}
-            size="sm"
-            variant="light"
-            onClick={clearUsernames}
-          >
-            {" "}
-            Clear All{" "}
-          </Button>
-        ) : (
-          <></>
-        )}
+            onBlur={setNewValueInUsernamesInputList}
+            list="userSuggestions"
+          />
+
+          <datalist id="userSuggestions">
+            {userList.map((user, index) => {
+              return (
+                <option
+                  value={user.username}
+                  key={index}
+                >{`${user.name} (${user.username})`}</option>
+              );
+            })}
+          </datalist>
+
+          {usernames.length ? (
+            <Button
+              disabled={isLoading}
+              size="sm"
+              variant="light"
+              onClick={clearUsernames}
+            >
+              {" "}
+              Clear All{" "}
+            </Button>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
 
       <Form style={{ paddingTop: "10px" }}>

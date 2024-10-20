@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { HomeUserTable } from "../components/HomeUserTable/HomeUserTable";
+import Loading from "../components/Loading";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
+import { userListByUsername } from "../services/github/utils";
 import { getUserData } from "../services/index";
-import Loading from "../components/Loading";
+import { searchJiraIssues } from "../services/jira";
 
 const statusMap = {
   LOADING: "loading",
@@ -23,7 +25,14 @@ function Home() {
       setErrorMessage("");
       setDataStatus(statusMap.LOADING);
 
-      const data = await Promise.all(
+      // const jiraData = await searchJiraIssues({
+      //   userEmails: usernames.map((u) => userListByUsername[u].email),
+      //   startDate: startDate,
+      //   endDate: endDate,
+      // });
+      // console.log(jiraData);
+
+      const githubData = await Promise.all(
         usernames.map((u) =>
           getUserData({
             author: u,
@@ -32,10 +41,11 @@ function Home() {
           })
         )
       );
-      setUserDataList(data);
+
+      setUserDataList(githubData);
       setDataStatus(statusMap.LOADED);
 
-      localStorage.setItem("opti-gh-data", JSON.stringify(data));
+      localStorage.setItem("opti-gh-data", JSON.stringify(githubData));
     } catch (error) {
       setErrorMessage(error.message);
       setDataStatus(statusMap.ERROR);
