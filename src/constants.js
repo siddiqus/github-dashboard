@@ -35,7 +35,7 @@ export const TEAM_MEMBERS = {
     "rizwan192",
     "hsiam261",
   ],
-  "Team Axiom": ["radnan", "MunifTanjim", "JafarSaifullah", "toha993"],
+  "Team Axiom": ["radnan", "MunifTanjim", "jaf107", "toha993"],
   "Platform Team": [
     "DiptoBarua918",
     "radnan",
