@@ -5,7 +5,9 @@ import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
 import { userListByUsername } from "../services/github/utils";
 import { getUserData } from "../services/index";
-import { searchJiraIssues } from "../services/jira";
+import {
+  getJiraMonthWiseIssueDataByUsername
+} from "../services/jira";
 
 const statusMap = {
   LOADING: "loading",
@@ -18,6 +20,7 @@ function Home() {
   const [dataStatus, setDataStatus] = useState(statusMap.NO_DATA);
 
   const [userDataList, setUserDataList] = useState([]);
+  const [jiraChartData, setJiraChartData] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
   async function onSubmit({ startDate, endDate, usernames }) {
@@ -25,12 +28,17 @@ function Home() {
       setErrorMessage("");
       setDataStatus(statusMap.LOADING);
 
-      // const jiraData = await searchJiraIssues({
-      //   userEmails: usernames.map((u) => userListByUsername[u].email),
-      //   startDate: startDate,
-      //   endDate: endDate,
-      // });
-      // console.log(jiraData);
+      getJiraMonthWiseIssueDataByUsername({
+        userEmails: usernames.map((u) => userListByUsername[u].email),
+        startDate: startDate,
+        endDate: endDate,
+      })
+        .then((jiraData) => {
+          setJiraChartData(jiraData);
+        })
+        .catch((er) => {
+          console.error(er);
+        });
 
       const githubData = await Promise.all(
         usernames.map((u) =>
@@ -70,13 +78,19 @@ function Home() {
       {isError ? <h4 style={{ color: "red" }}> {errorMessage}</h4> : <></>}
 
       {isLoaded ? (
-        <UserPrChart userDataList={userDataList}></UserPrChart>
+        <UserPrChart
+          userDataList={userDataList}
+          jiraChartData={jiraChartData}
+        ></UserPrChart>
       ) : (
         <></>
       )}
 
       {isLoaded ? (
-        <HomeUserTable userDataList={userDataList}></HomeUserTable>
+        <HomeUserTable
+          userDataList={userDataList}
+          jiraChartData={jiraChartData}
+        ></HomeUserTable>
       ) : (
         <></>
       )}

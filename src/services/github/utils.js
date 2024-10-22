@@ -229,6 +229,10 @@ export async function getUserData({
   };
 }
 
+// type AsyncReturnType<T extends (...args: any) => Promise<any>> =
+//     T extends (...args: any) => Promise<infer R> ? R : any
+// export type UserDataListType = AsyncReturnType<typeof getUserData>;
+
 export async function removeUserDataCache({
   organization,
   author,
