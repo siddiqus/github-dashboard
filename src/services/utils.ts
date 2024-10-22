@@ -1,3 +1,5 @@
+import { JiraIssue } from "./jira";
+
 export function formatDate(theDate) {
   const date = new Date(theDate);
   const year = date.getFullYear();

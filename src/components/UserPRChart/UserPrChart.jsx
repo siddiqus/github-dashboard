@@ -207,7 +207,25 @@ function getPrClosedChartData({ months, userDataList }) {
   return { chartOptions, data };
 }
 
-function UserPrChart({ userDataList }) {
+function getJiraClosedTicketData({ months, chartData }) {
+  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
+  chartOptions.plugins.title.text = "JIRA Issues Closed";
+
+  const data = {
+    labels: months,
+    datasets: chartData.map((data, index) => {
+      return {
+        label: data.username,
+        data: data.monthDataList,
+        borderColor: colorNames[index] || "red",
+      };
+    }),
+  };
+
+  return { chartOptions, data };
+}
+
+function UserPrChart({ userDataList, jiraChartData }) {
   const months = Array.from(
     new Set(
       userDataList.map((u) => getMonthsStringFromIssueList(u.prList)).flat()
@@ -219,11 +237,6 @@ function UserPrChart({ userDataList }) {
   }
 
   months.sort((a, b) => a.localeCompare(b));
-
-  const prChartData = getPrCreatedChartData({
-    months,
-    userDataList,
-  });
 
   const prReviewChartOptions = getPrReviewChartOptions({
     months,
@@ -239,6 +252,11 @@ function UserPrChart({ userDataList }) {
     userDataList,
   });
 
+  const jiraClosedTicketOptions = getJiraClosedTicketData({
+    months: jiraChartData?.months || [],
+    chartData: jiraChartData?.chartData || [],
+  });
+
   return (
     <div>
       <Row>
@@ -246,7 +264,10 @@ function UserPrChart({ userDataList }) {
           <Card
             style={{ height: "400px", padding: "1em", marginBottom: "1em" }}
           >
-            <Line options={prChartData.chartOptions} data={prChartData.data} />
+            <Line
+              options={prClosedChartOptions.chartOptions}
+              data={prClosedChartOptions.data}
+            />
           </Card>
         </Col>
         <Col>
@@ -254,8 +275,8 @@ function UserPrChart({ userDataList }) {
             style={{ height: "400px", padding: "1em", marginBottom: "1em" }}
           >
             <Line
-              options={prClosedChartOptions.chartOptions}
-              data={prClosedChartOptions.data}
+              options={jiraClosedTicketOptions.chartOptions}
+              data={jiraClosedTicketOptions.data}
             />
           </Card>
         </Col>
