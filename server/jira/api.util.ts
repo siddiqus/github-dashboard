@@ -20,7 +20,7 @@ export async function getPaginatedApiData<ApiResponse, MapperResponse>({
   const pageLimit = limit || 10;
   const data = await callApi(page);
 
-  let objects = getObjectsFromResponseData(data);
+  const objects = getObjectsFromResponseData(data);
   if (!data || !objects) {
     throw new Error(
       resourceName
@@ -37,22 +37,23 @@ export async function getPaginatedApiData<ApiResponse, MapperResponse>({
   const numberOfPages = Math.ceil(pagination.total / pageLimit);
 
   const promises: Promise<ApiResponse>[] = [];
-  for (page = 2; page < numberOfPages + 1; page++) {
+  for (page = page + 1; page < numberOfPages + 1; page++) {
     promises.push(callApi(page));
   }
 
-  return Promise.all(promises).then((responses) => {
-    responses.forEach((response) => {
-      const objs = getObjectsFromResponseData(response) as any[];
-      if (!response || !objs) {
-        throw new Error(
-          resourceName
-            ? `Could not fetch ${resourceName} data`
-            : "Could not fetch data"
-        );
-      }
-      objects = objects.concat(objs);
-    });
-    return objects;
+  const responses = await Promise.all(promises);
+
+  responses.forEach((response) => {
+    const objs = getObjectsFromResponseData(response) as any[];
+    if (!response || !objs) {
+      throw new Error(
+        resourceName
+          ? `Could not fetch ${resourceName} data`
+          : "Could not fetch data"
+      );
+    }
+    objects.push(...objs);
   });
+
+  return objects;
 }

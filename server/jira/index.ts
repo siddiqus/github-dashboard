@@ -16,8 +16,6 @@ interface JiraIssueSearchProps {
   startIndex?: number;
 }
 
-// const cookie = `ajs_user_id=8cadd06c6104773624b5333dd960bbce0cbb94ec; ajs_anonymous_id=0cae107f-ffec-4b73-93db-40f7dda1d79d; JSESSIONID=D3EA3F1D5D81F14E02E9AB890861B78B; atlassian.xsrf.token=BR4X-UQWM-TBQH-S2PN_d166b39203de3df971a657885898076395f4c252_lin; slack.inapp.links.first.clicked.Sabbir.Siddiqui%40optimizely.com=false`;
-
 async function callSearchApi(body: string) {
   const cookie = await chromeCookies.getCookiesPromised(
     "https://jira.sso.episerver.net",
@@ -33,33 +31,39 @@ async function callSearchApi(body: string) {
     } as JiraSearchResponse;
   }
 
-  return fetch("https://jira.sso.episerver.net/rest/issueNav/1/issueTable", {
-    headers: {
-      __amdmodulename: "jira/issue/utils/xsrf-token-header",
-      accept: "*/*",
-      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-      "cache-control": "no-cache",
-      "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-      pragma: "no-cache",
-      priority: "u=1, i",
-      "sec-ch-ua":
-        '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": '"macOS"',
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "x-atlassian-token": "no-check",
-      "x-requested-with": "XMLHttpRequest",
-      cookie,
-    },
-    // referrer: "https://jira.sso.episerver.net/issues/?jql=",
-    // referrerPolicy: "strict-origin-when-cross-origin",
-    body,
-    method: "POST",
-    mode: "no-cors",
-    credentials: "include",
-  }).then((d) => d.json());
+  const result = await fetch(
+    "https://jira.sso.episerver.net/rest/issueNav/1/issueTable",
+    {
+      headers: {
+        __amdmodulename: "jira/issue/utils/xsrf-token-header",
+        accept: "*/*",
+        "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+        "cache-control": "no-cache",
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        pragma: "no-cache",
+        priority: "u=1, i",
+        "sec-ch-ua":
+          '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"macOS"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "x-atlassian-token": "no-check",
+        "x-requested-with": "XMLHttpRequest",
+        cookie,
+      },
+      // referrer: "https://jira.sso.episerver.net/issues/?jql=",
+      // referrerPolicy: "strict-origin-when-cross-origin",
+      body,
+      method: "POST",
+      mode: "no-cors",
+      credentials: "include",
+    }
+  );
+
+  const json = await result.json();
+  return json;
 }
 
 async function searchJiraIssues(
@@ -99,9 +103,9 @@ function responseToJsonMapper(response: JiraSearchResponse) {
       issueRow.querySelector(".issuetype .issue-link img") as any
     ).attributes.alt;
     const issueKey = issueRow.querySelector(".issuekey")!.innerText.trim();
-    const description = decodeURIComponent(
-      issueRow.querySelector(".summary")!.innerText.trim()
-    );
+
+    const description = issueRow.querySelector(".summary")!.innerText.trim();
+
     const status = issueRow.querySelector(".status")!.innerText.trim();
     const createdAt = issueRow.querySelector(".created")!.innerText.trim();
     const resolvedAt = issueRow
