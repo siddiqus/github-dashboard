@@ -257,12 +257,22 @@ function UserPrChart({ userDataList, jiraChartData }) {
     chartData: jiraChartData?.chartData || [],
   });
 
+  const chartHeight = "250px";
+
   return (
     <div>
       <Row>
-        <Col>
+        <Col lg={5}>
           <Card
-            style={{ height: "400px", padding: "1em", marginBottom: "1em" }}
+            style={{ height: chartHeight, padding: "1em", marginBottom: "1em" }}
+          >
+            <Line
+              options={jiraClosedTicketOptions.chartOptions}
+              data={jiraClosedTicketOptions.data}
+            />
+          </Card>
+          <Card
+            style={{ height: chartHeight, padding: "1em", marginBottom: "1em" }}
           >
             <Line
               options={prClosedChartOptions.chartOptions}
@@ -270,31 +280,9 @@ function UserPrChart({ userDataList, jiraChartData }) {
             />
           </Card>
         </Col>
-        <Col>
+        <Col lg={7}>
           <Card
-            style={{ height: "400px", padding: "1em", marginBottom: "1em" }}
-          >
-            <Line
-              options={jiraClosedTicketOptions.chartOptions}
-              data={jiraClosedTicketOptions.data}
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Card
-            style={{ height: "400px", padding: "1em", marginBottom: "1em" }}
-          >
-            <Line
-              options={prReviewChartOptions.chartOptions}
-              data={prReviewChartOptions.data}
-            />
-          </Card>
-        </Col>
-        <Col>
-          <Card
-            style={{ height: "400px", padding: "1em", marginBottom: "1em" }}
+            style={{ height: '400px', padding: "1em", marginBottom: "1em" }}
           >
             <Line
               options={prCycleTimeChartOptions.chartOptions}
@@ -302,6 +290,20 @@ function UserPrChart({ userDataList, jiraChartData }) {
             />
           </Card>
         </Col>
+        <Col></Col>
+      </Row>
+      <Row>
+        <Col lg={5}>
+          <Card
+            style={{ height: chartHeight, padding: "1em", marginBottom: "1em" }}
+          >
+            <Line
+              options={prReviewChartOptions.chartOptions}
+              data={prReviewChartOptions.data}
+            />
+          </Card>
+        </Col>
+        <Col></Col>
       </Row>
     </div>
   );
