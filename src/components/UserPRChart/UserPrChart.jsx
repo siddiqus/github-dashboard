@@ -1,16 +1,19 @@
 import {
+  ArcElement,
   CategoryScale,
   Chart as ChartJS,
   Legend,
   LineElement,
   LinearScale,
   PointElement,
+  PolarAreaController,
+  RadialLinearScale,
   Title,
-  Tooltip,
+  Tooltip
 } from "chart.js";
 import _ from "lodash";
 import { Card, Col, Row } from "react-bootstrap";
-import { Line } from "react-chartjs-2";
+import { Line, Radar } from "react-chartjs-2";
 import {
   daysDifference,
   getMonthsStringFromIssueList,
@@ -23,7 +26,10 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  RadialLinearScale,
+  PolarAreaController,
+  ArcElement
 );
 
 export const baseChartOptions = {
@@ -225,6 +231,52 @@ function getJiraClosedTicketData({ months, chartData }) {
   return { chartOptions, data };
 }
 
+const getPrDistributionChartData = (inputList) => {
+  if (!inputList) {
+    return;
+  }
+
+  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
+  chartOptions.plugins.title.text = "PR Distribution";
+
+  const allReposEver = Array.from(
+    new Set([...inputList.map((i) => i.allRepos)].flat())
+  );
+
+  // Prepare the chart data structure
+  const chartData = {
+    labels: allReposEver, // Repositories as labels
+    datasets: [],
+  };
+
+  inputList.forEach((input, index) => {
+    const { prCountsPerRepoPerMonth, allRepos } = input;
+
+    // Initialize an object to hold total counts for each repository
+    const totalCounts = {};
+
+    // Loop through each month's data
+    for (const monthData of Object.values(prCountsPerRepoPerMonth)) {
+      for (const repo of allRepos) {
+        // Sum up the pull request counts for each repository
+        totalCounts[repo] = (totalCounts[repo] || 0) + (monthData[repo] || 0);
+      }
+    }
+
+    // Prepare the chart data structure
+    const data = {
+      label: input.username,
+      data: allRepos.map((repo) => totalCounts[repo] || 0), // Total counts for each repo
+      borderColor: colorNames[index],
+      borderWidth: 2,
+    };
+
+    chartData.datasets.push(data);
+  });
+
+  return { chartOptions, data: chartData };
+};
+
 function UserPrChart({ userDataList, jiraChartData }) {
   const months = Array.from(
     new Set(
@@ -257,53 +309,66 @@ function UserPrChart({ userDataList, jiraChartData }) {
     chartData: jiraChartData?.chartData || [],
   });
 
-  const chartHeight = "250px";
+  const prDistributionChartOptions = getPrDistributionChartData(userDataList);
+
+  // const chartHeight = "250px";
+
+  const chartStyle = { padding: "1em", marginBottom: "1em" };
+
+  const prClosedChart = (
+    <Card style={chartStyle}>
+      <Line
+        options={prClosedChartOptions.chartOptions}
+        data={prClosedChartOptions.data}
+      />
+    </Card>
+  );
+
+  const prReviewedChart = (
+    <Card style={chartStyle}>
+      <Line
+        options={prReviewChartOptions.chartOptions}
+        data={prReviewChartOptions.data}
+      />
+    </Card>
+  );
+
+  const cycleTimeChart = (
+    <Card style={chartStyle}>
+      <Line
+        options={prCycleTimeChartOptions.chartOptions}
+        data={prCycleTimeChartOptions.data}
+      />
+    </Card>
+  );
+
+  const jiraIssuesChart = (
+    <Card style={chartStyle}>
+      <Line
+        options={jiraClosedTicketOptions.chartOptions}
+        data={jiraClosedTicketOptions.data}
+      />
+    </Card>
+  );
+
+  const prDistributionChart = (
+    <Card style={chartStyle}>
+      <Radar
+        options={prDistributionChartOptions.chartOptions}
+        data={prDistributionChartOptions.data}
+      />
+    </Card>
+  );
 
   return (
     <div>
       <Row>
-        <Col lg={5}>
-          <Card
-            style={{ height: chartHeight, padding: "1em", marginBottom: "1em" }}
-          >
-            <Line
-              options={jiraClosedTicketOptions.chartOptions}
-              data={jiraClosedTicketOptions.data}
-            />
-          </Card>
-          <Card
-            style={{ height: chartHeight, padding: "1em", marginBottom: "1em" }}
-          >
-            <Line
-              options={prClosedChartOptions.chartOptions}
-              data={prClosedChartOptions.data}
-            />
-          </Card>
+        <Col lg={6}>
+          {prClosedChart}
+          {prReviewedChart}
+          {cycleTimeChart}
         </Col>
-        <Col lg={7}>
-          <Card
-            style={{ height: '400px', padding: "1em", marginBottom: "1em" }}
-          >
-            <Line
-              options={prCycleTimeChartOptions.chartOptions}
-              data={prCycleTimeChartOptions.data}
-            />
-          </Card>
-        </Col>
-        <Col></Col>
-      </Row>
-      <Row>
-        <Col lg={5}>
-          <Card
-            style={{ height: chartHeight, padding: "1em", marginBottom: "1em" }}
-          >
-            <Line
-              options={prReviewChartOptions.chartOptions}
-              data={prReviewChartOptions.data}
-            />
-          </Card>
-        </Col>
-        <Col></Col>
+        <Col lg={6}>{prDistributionChart}</Col>
       </Row>
     </div>
   );
