@@ -118,16 +118,33 @@ function getMonthlyReviewStats(reviewedData) {
     return month;
   });
 
+  const allRepos = [
+    ...new Set(reviewedData.map((pr) => pr.repository_url.split("/").pop())),
+  ];
+
   const reviewCountsPerMonth = {};
+  const prReviewCountsPerRepoPerMonth = {};
 
   for (const month of Object.keys(issuesByMonth)) {
     const issues = issuesByMonth[month];
 
     reviewCountsPerMonth[month] = issues.length;
+    prReviewCountsPerRepoPerMonth[month] = {};
+
+    const groupedPerRepo = _.groupBy(issues, (pr) => {
+      const repository = pr.repository_url.split("/").pop();
+      return repository;
+    });
+
+    for (const repo of allRepos) {
+      const countForRepo = groupedPerRepo[repo] || [];
+      prReviewCountsPerRepoPerMonth[month][repo] = countForRepo.length;
+    }
   }
 
   return {
     reviewCountsPerMonth,
+    prReviewCountsPerRepoPerMonth,
   };
 }
 

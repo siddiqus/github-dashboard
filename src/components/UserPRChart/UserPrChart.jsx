@@ -9,7 +9,7 @@ import {
   PolarAreaController,
   RadialLinearScale,
   Title,
-  Tooltip
+  Tooltip,
 } from "chart.js";
 import _ from "lodash";
 import { Card, Col, Row } from "react-bootstrap";
@@ -231,13 +231,13 @@ function getJiraClosedTicketData({ months, chartData }) {
   return { chartOptions, data };
 }
 
-const getPrDistributionChartData = (inputList) => {
+const getPrCreatedDistributionChartData = (inputList) => {
   if (!inputList) {
     return;
   }
 
   const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
-  chartOptions.plugins.title.text = "PR Distribution";
+  chartOptions.plugins.title.text = "PRs Created";
 
   const allReposEver = Array.from(
     new Set([...inputList.map((i) => i.allRepos)].flat())
@@ -257,6 +257,52 @@ const getPrDistributionChartData = (inputList) => {
 
     // Loop through each month's data
     for (const monthData of Object.values(prCountsPerRepoPerMonth)) {
+      for (const repo of allRepos) {
+        // Sum up the pull request counts for each repository
+        totalCounts[repo] = (totalCounts[repo] || 0) + (monthData[repo] || 0);
+      }
+    }
+
+    // Prepare the chart data structure
+    const data = {
+      label: input.username,
+      data: allRepos.map((repo) => totalCounts[repo] || 0), // Total counts for each repo
+      borderColor: colorNames[index],
+      borderWidth: 2,
+    };
+
+    chartData.datasets.push(data);
+  });
+
+  return { chartOptions, data: chartData };
+};
+
+const getPrReviewedDistributionChartData = (inputList) => {
+  if (!inputList) {
+    return;
+  }
+
+  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
+  chartOptions.plugins.title.text = "PRs Reviewed";
+
+  const allReposEver = Array.from(
+    new Set([...inputList.map((i) => i.allRepos)].flat())
+  );
+
+  // Prepare the chart data structure
+  const chartData = {
+    labels: allReposEver, // Repositories as labels
+    datasets: [],
+  };
+
+  inputList.forEach((input, index) => {
+    const { prReviewCountsPerRepoPerMonth, allRepos } = input;
+
+    // Initialize an object to hold total counts for each repository
+    const totalCounts = {};
+
+    // Loop through each month's data
+    for (const monthData of Object.values(prReviewCountsPerRepoPerMonth)) {
       for (const repo of allRepos) {
         // Sum up the pull request counts for each repository
         totalCounts[repo] = (totalCounts[repo] || 0) + (monthData[repo] || 0);
@@ -309,7 +355,11 @@ function UserPrChart({ userDataList, jiraChartData }) {
     chartData: jiraChartData?.chartData || [],
   });
 
-  const prDistributionChartOptions = getPrDistributionChartData(userDataList);
+  const prDistributionChartOptions =
+    getPrCreatedDistributionChartData(userDataList);
+
+  const prReviewDistributionChartOptions =
+    getPrReviewedDistributionChartData(userDataList);
 
   // const chartHeight = "250px";
 
@@ -351,7 +401,7 @@ function UserPrChart({ userDataList, jiraChartData }) {
     </Card>
   );
 
-  const prDistributionChart = (
+  const prCreatedDistributionChart = (
     <Card style={chartStyle}>
       <Radar
         options={prDistributionChartOptions.chartOptions}
@@ -359,16 +409,25 @@ function UserPrChart({ userDataList, jiraChartData }) {
       />
     </Card>
   );
+  const prReviewedDistributionChart = (
+    <Card style={chartStyle}>
+      <Radar
+        options={prReviewDistributionChartOptions.chartOptions}
+        data={prReviewDistributionChartOptions.data}
+      />
+    </Card>
+  );
 
   return (
     <div>
       <Row>
-        <Col lg={6}>
-          {prClosedChart}
-          {prReviewedChart}
-          {cycleTimeChart}
-        </Col>
-        <Col lg={6}>{prDistributionChart}</Col>
+        <Col lg={4}>{prClosedChart}</Col>
+        <Col lg={4}>{prReviewedChart}</Col>
+        <Col lg={4}> {cycleTimeChart}</Col>
+      </Row>
+      <Row>
+        <Col lg={6}>{prCreatedDistributionChart}</Col>
+        <Col lg={6}>{prReviewedDistributionChart}</Col>
       </Row>
     </div>
   );
