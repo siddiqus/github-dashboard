@@ -1,5 +1,7 @@
 import { openDB } from "idb";
 
+const DEFAULT_TTL = 30 * 86400000; // 30 days
+
 class IndexedDBService {
   constructor(dbName, storeName) {
     this.dbName = dbName;
@@ -36,7 +38,7 @@ class IndexedDBService {
     return value;
   }
 
-  async setData(key, json, ttl = 86400000) {
+  async setData(key, json, ttl = DEFAULT_TTL) {
     // Default TTL is 24 hours
     const db = await this.dbPromise;
     const tx = db.transaction(this.storeName, "readwrite");

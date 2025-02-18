@@ -421,9 +421,9 @@ function UserPrChart({ userDataList, jiraChartData }) {
   return (
     <div>
       <Row>
-        <Col lg={4}>{prClosedChart}</Col>
-        <Col lg={4}>{prReviewedChart}</Col>
-        <Col lg={4}> {cycleTimeChart}</Col>
+        <Col lg={6}>{prClosedChart}</Col>
+        <Col lg={6}>{prReviewedChart}</Col>
+        {/* <Col lg={4}> {cycleTimeChart}</Col> */}
       </Row>
       <Row>
         <Col lg={6}>{prCreatedDistributionChart}</Col>
