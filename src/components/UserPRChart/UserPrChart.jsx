@@ -11,7 +11,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import _ from "lodash";
+import _, { groupBy } from "lodash";
 import { Card, Col, Row } from "react-bootstrap";
 import { Line, Radar } from "react-chartjs-2";
 import {
@@ -108,9 +108,16 @@ function getPrCycleTimeChartOptions({ userDataList }) {
     .sort((a, b) => a - b)
     .map((d) => d.toISOString().substr(0, 10));
 
+  const usernames = Array.from(
+    new Set(userDataList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(userDataList, "username");
+
   const data = {
     labels: dates,
-    datasets: userDataList.map((userData, index) => {
+    datasets: usernames.map((username, index) => {
+      const userData = dataPerUser[username];
       const prs = userData.prList;
       const prPerDay = _.groupBy(prs, (pr) =>
         new Date(pr.created_at).toISOString().substring(0, 10)
@@ -146,9 +153,16 @@ function getPrCycleTimeChartOptions({ userDataList }) {
 }
 
 function getPrReviewChartOptions({ months, userDataList }) {
+  const usernames = Array.from(
+    new Set(userDataList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(userDataList, "username");
+
   const data = {
     labels: months,
-    datasets: userDataList.map((userData, index) => {
+    datasets: usernames.map((username, index) => {
+      const userData = dataPerUser[username];
       const reviewsPerMonth = Object.values(userData.reviewCountsPerMonth);
       return {
         label: userData.username,
@@ -165,11 +179,20 @@ function getPrReviewChartOptions({ months, userDataList }) {
 }
 
 function getPrClosedChartData({ months, userDataList }) {
+  const usernames = Array.from(
+    new Set(userDataList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(userDataList, "username");
+
   const data = {
     labels: months,
-    datasets: userDataList.map((userData, index) => {
+    datasets: usernames.map((username, index) => {
+      const userData = dataPerUser[username];
       const grouped = _.groupBy(
-        userData.prList.filter((p) => !!p.closed_at).sort((a, b) => a - b),
+        (userData.prList || [])
+          .filter((p) => !!p.closed_at)
+          .sort((a, b) => a - b),
         (p) => {
           return new Date(p.closed_at).toISOString().substring(0, 7);
         }
@@ -199,9 +222,16 @@ function getJiraClosedTicketData({ months, chartData }) {
   const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
   chartOptions.plugins.title.text = "JIRA Issues Closed";
 
+  const usernames = Array.from(
+    new Set(chartData.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(chartData, "username");
+
   const data = {
     labels: months,
-    datasets: chartData.map((data, index) => {
+    datasets: usernames.map((username, index) => {
+      const data = dataPerUser[username];
       return {
         label: data.username,
         data: data.monthDataList,
@@ -231,7 +261,14 @@ const getPrCreatedDistributionChartData = (inputList) => {
     datasets: [],
   };
 
-  inputList.forEach((input, index) => {
+  const usernames = Array.from(
+    new Set(inputList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(inputList, "username");
+
+  usernames.forEach((username, index) => {
+    const input = dataPerUser[username];
     const { prCountsPerRepoPerMonth, allRepos } = input;
 
     // Initialize an object to hold total counts for each repository
@@ -277,7 +314,14 @@ const getPrReviewedDistributionChartData = (inputList) => {
     datasets: [],
   };
 
-  inputList.forEach((input, index) => {
+  const usernames = Array.from(
+    new Set(inputList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(inputList, "username");
+
+  usernames.forEach((username, index) => {
+    const input = dataPerUser[username];
     const { prReviewCountsPerRepoPerMonth, allRepos } = input;
 
     // Initialize an object to hold total counts for each repository
