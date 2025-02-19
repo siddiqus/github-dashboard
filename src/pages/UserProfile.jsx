@@ -10,9 +10,18 @@ function UserProfile() {
   const { username } = useParams();
 
   const [userData, setUserData] = useState(null);
+  const [jiraData, setJiraData] = useState(null);
 
   useEffect(() => {
     const userDataList = JSON.parse(localStorage.getItem("opti-gh-data"));
+    const jiraData = JSON.parse(localStorage.getItem("opti-jira-data"));
+    if (jiraData) {
+      jiraData.chartData = jiraData.chartData.filter(
+        (d) => d.username === username
+      );
+      setJiraData(jiraData);
+    }
+
     const userData = (userDataList || []).find((u) => u.username === username);
     setUserData(userData);
   }, []);
@@ -138,7 +147,10 @@ function UserProfile() {
         className="mb-3"
       >
         <Tab eventKey="prStats" title="PR Stats">
-          <UserPrChart userDataList={userData ? [userData] : []}></UserPrChart>
+          <UserPrChart
+            jiraChartData={jiraData}
+            userDataList={userData ? [userData] : []}
+          ></UserPrChart>
           <PrStats />
         </Tab>
         <Tab eventKey="prList" title="PR List">
