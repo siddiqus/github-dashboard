@@ -340,35 +340,12 @@ function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
 
   months.sort((a, b) => a.localeCompare(b));
 
-  const prReviewChartOptions = getPrReviewChartOptions({
-    months,
-    userDataList,
-  });
-
-  const prCycleTimeChartOptions = getPrCycleTimeChartOptions({
-    userDataList,
-  });
+  const chartStyle = { padding: "1em", marginBottom: "1em" };
 
   const prClosedChartOptions = getPrClosedChartData({
     months,
     userDataList,
   });
-
-  const jiraClosedTicketOptions = getJiraClosedTicketData({
-    months,
-    chartData: padMonthDataForJira(months, jiraChartData) || [],
-  });
-
-  const prDistributionChartOptions =
-    getPrCreatedDistributionChartData(userDataList);
-
-  const prReviewDistributionChartOptions =
-    getPrReviewedDistributionChartData(userDataList);
-
-  // const chartHeight = "250px";
-
-  const chartStyle = { padding: "1em", marginBottom: "1em" };
-
   const prClosedChart = (
     <Card style={chartStyle}>
       <Line
@@ -378,6 +355,10 @@ function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
     </Card>
   );
 
+  const prReviewChartOptions = getPrReviewChartOptions({
+    months,
+    userDataList,
+  });
   const prReviewedChart = (
     <Card style={chartStyle}>
       <Line
@@ -387,6 +368,9 @@ function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
     </Card>
   );
 
+  const prCycleTimeChartOptions = getPrCycleTimeChartOptions({
+    userDataList,
+  });
   const cycleTimeChart = (
     <Card style={chartStyle}>
       <Line
@@ -396,6 +380,10 @@ function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
     </Card>
   );
 
+  const jiraClosedTicketOptions = getJiraClosedTicketData({
+    months,
+    chartData: padMonthDataForJira(months, jiraChartData) || [],
+  });
   const jiraIssuesChart = (
     <Card style={chartStyle}>
       {jiraIsLoading ? (
@@ -409,14 +397,19 @@ function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
     </Card>
   );
 
+  const prCreatedDistributionChartOptions =
+    getPrCreatedDistributionChartData(userDataList);
   const prCreatedDistributionChart = (
     <Card style={chartStyle}>
       <Radar
-        options={prDistributionChartOptions.chartOptions}
-        data={prDistributionChartOptions.data}
+        options={prCreatedDistributionChartOptions.chartOptions}
+        data={prCreatedDistributionChartOptions.data}
       />
     </Card>
   );
+
+  const prReviewDistributionChartOptions =
+    getPrReviewedDistributionChartData(userDataList);
   const prReviewedDistributionChart = (
     <Card style={chartStyle}>
       <Radar
