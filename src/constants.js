@@ -45,15 +45,9 @@ export const TEAM_MEMBERS = {
     "mauricecruz",
     "syednabilashraf",
     "tajrian",
-    "gaspardip",
     "tanvirstreame",
   ],
-  "Team 1": [
-    "kmtusher97",
-    "kamrul1157024",
-    "raykibul",
-    "zhdzmn",
-  ],
+  "Team 1": ["kmtusher97", "kamrul1157024", "raykibul", "zhdzmn"],
   "Team 8": ["imran2140", "jjmalina", "mumin91", "sajedul-karim"],
   "Team 2": ["fzamd", "faisalhmohd", "amandachen13", "danielnuggets"],
 };
