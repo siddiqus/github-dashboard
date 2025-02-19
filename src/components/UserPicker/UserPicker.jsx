@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Button, Col, Form, Row, Dropdown } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
 import userList from "../../../cmp-users.json";
@@ -7,30 +7,24 @@ import { resetUserDataCache } from "../../services/index";
 import { formatDate } from "../../services/utils";
 
 import "./UserPicker.css";
+import db from "../../services/idb";
 
 function getDefaultDates() {
-  const localStorageStartDate = localStorage.getItem("opti-gh-startDate");
-  const localStorageEndDate = localStorage.getItem("opti-gh-endDate");
+  const startDateFromStorage = localStorage.getItem("opti-gh-startDate");
+  const endDateFromStorage = localStorage.getItem("opti-gh-endDate");
 
-  let defaultEndDate = new Date();
-  if (localStorageEndDate) {
-    defaultEndDate = new Date(localStorageEndDate);
-  } else {
-    defaultEndDate.setDate(-1);
-  }
+  const defaultEndDate = endDateFromStorage
+    ? new Date(endDateFromStorage)
+    : new Date().setDate(-1);
 
-  let defaultStartDate = new Date(
-    defaultEndDate.getTime() - 6 * 30 * 24 * 60 * 60 * 1000
-  );
-  if (localStorageStartDate) {
-    defaultStartDate = new Date(localStorageStartDate);
-  } else {
-    defaultStartDate.setDate(1);
-  }
+  const sixMonthsInMs = 6 * 30 * 24 * 60 * 60 * 1000;
+  const defaultStartDate = startDateFromStorage
+    ? new Date(startDateFromStorage)
+    : new Date(defaultEndDate.getTime() - sixMonthsInMs).setDate(1);
 
   return {
-    defaultStartDate,
-    defaultEndDate,
+    defaultStartDate: new Date(defaultStartDate),
+    defaultEndDate: new Date(defaultEndDate),
   };
 }
 
@@ -64,9 +58,13 @@ function TeamModeSelectionDropdown({ chooseUsers }) {
 }
 
 function UserPicker({ onSubmit, onReset }) {
-  const [usernames, setUsernames] = useState(
-    JSON.parse(localStorage.getItem("opti-gh-userlist") || "[]")
-  );
+  const [usernames, setUsernames] = useState([]);
+
+  useEffect(() => {
+    if (!usernames.length) {
+      db.getData("opti-gh-userlist").then((d) => setUsernames(d || []));
+    }
+  }, []);
 
   const { defaultStartDate, defaultEndDate } = getDefaultDates();
 
@@ -93,7 +91,8 @@ function UserPicker({ onSubmit, onReset }) {
     }
 
     const names = Array.from(new Set([...usernames, ...newNames]));
-    localStorage.setItem("opti-gh-userlist", JSON.stringify(names));
+    db.setData("opti-gh-userlist", names);
+
     setUsernames(names);
     e.target.value = "";
   }
@@ -106,7 +105,7 @@ function UserPicker({ onSubmit, onReset }) {
   function removeTag(index) {
     const newUsernames = usernames.filter((el, i) => i !== index);
     setUsernames(newUsernames);
-    localStorage.setItem("opti-gh-userlist", JSON.stringify(newUsernames));
+    db.setData("opti-gh-userlist", newUsernames);
   }
 
   function handleUserPicketInputChange(event) {
@@ -141,10 +140,19 @@ function UserPicker({ onSubmit, onReset }) {
 
   function resetForm() {
     setUsernames([]);
-    localStorage.setItem("opti-gh-userlist", JSON.stringify([]));
+    db.setData("opti-gh-userlist", []);
     setStartDate(null);
     setEndDate(null);
     onReset();
+  }
+
+  function setUsernamesAndCache(usernames) {
+    if (!usernames.length) {
+      return;
+    }
+
+    setUsernames(usernames);
+    db.setData("opti-gh-userlist", usernames);
   }
 
   function resetDataCache() {
@@ -173,7 +181,7 @@ function UserPicker({ onSubmit, onReset }) {
     <div style={{ opacity: `${isLoading ? 60 : 100}%` }}>
       <div>
         <TeamModeSelectionDropdown
-          chooseUsers={(users) => setUsernames(users)}
+          chooseUsers={(users) => setUsernamesAndCache(users)}
         />
         <div className="tags-input-container">
           {usernames.map((tag, index) => (

@@ -6,6 +6,7 @@ import UserPicker from "../components/UserPicker/UserPicker";
 import { userListByUsername } from "../services/github/utils";
 import { getUserData } from "../services/index";
 import { getJiraMonthWiseIssueDataByUsername } from "../services/jira";
+import db from "../services/idb";
 
 const statusMap = {
   LOADING: "loading",
@@ -49,7 +50,7 @@ function Home() {
       })
         .then((jiraData) => {
           setJiraChartData(jiraData);
-          localStorage.setItem("opti-jira-data", JSON.stringify(jiraData));
+          db.setData("opti-jira-data", jiraData);
           setJiraIsLoading(false);
         })
         .catch((er) => {
@@ -57,7 +58,7 @@ function Home() {
           console.error(er);
         });
 
-      localStorage.setItem("opti-gh-data", JSON.stringify(githubData));
+      db.setData("opti-gh-data", githubData);
     } catch (error) {
       setErrorMessage(error.message);
       setDataStatus(statusMap.ERROR);

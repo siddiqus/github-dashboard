@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserProfilePrList from "../components/UserProfilePrList/UserProfilePrList";
 import { getMonthsStringFromIssueList } from "../services/utils";
+import db from "../services/idb";
 
 function UserProfile() {
   const { username } = useParams();
@@ -13,17 +14,24 @@ function UserProfile() {
   const [jiraData, setJiraData] = useState(null);
 
   useEffect(() => {
-    const userDataList = JSON.parse(localStorage.getItem("opti-gh-data"));
-    const jiraData = JSON.parse(localStorage.getItem("opti-jira-data"));
-    if (jiraData) {
-      jiraData.chartData = jiraData.chartData.filter(
-        (d) => d.username === username
+    async function setDefaults() {
+      const userDataList = await db.getData("opti-gh-data");
+      const jiraData = await db.getData("opti-jira-data");
+
+      if (jiraData) {
+        jiraData.chartData = jiraData.chartData.filter(
+          (d) => d.username === username
+        );
+        setJiraData(jiraData);
+      }
+
+      const userData = (userDataList || []).find(
+        (u) => u.username === username
       );
-      setJiraData(jiraData);
+      setUserData(userData);
     }
 
-    const userData = (userDataList || []).find((u) => u.username === username);
-    setUserData(userData);
+    setDefaults();
   }, []);
 
   const localStorageStartDate = localStorage.getItem("opti-gh-startDate");

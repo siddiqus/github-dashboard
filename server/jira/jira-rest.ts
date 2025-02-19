@@ -37,7 +37,7 @@ function transformIssueData(issue: any): IssueSearchResponse {
       .replaceAll(/\n/g, "\n"), // Ensure a default value if description is null
     status: issue.fields.status.name,
     createdAt: issue.fields.created, // Assuming 'created' field exists and is in the correct format
-    resolvedAt: issue.fields.resolutiondate || "", // Use an empty string if resolutiondate is null
+    resolvedAt: issue.fields.resolutiondate || issue.fields.created || "", // Use an empty string if resolutiondate is null
     userEmail: issue.fields.assignee?.emailAddress || "Unassigned", //Handle unassigned issues
     storyPoints: issue.fields.customfield_12919, // Assuming this field holds story points
   };
