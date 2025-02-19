@@ -36,11 +36,18 @@ function getUserNameFromEmail(email: string) {
 }
 
 async function getJiraIssuesCached(opts: JiraIssueSearchParams) {
-  return getFromCache({
-    getCacheKey: () =>
-      `${opts.userEmails.join(",")}-${opts.startDate}-${opts.endDate}`,
-    fn: () => searchJiraIssues(opts),
-  });
+  const emails = opts.userEmails;
+
+  const results = await Promise.all(
+    emails.map((email) => {
+      return getFromCache({
+        getCacheKey: () => `${email}-${opts.startDate}-${opts.endDate}`,
+        fn: () => searchJiraIssues(opts),
+      });
+    })
+  );
+
+  return results.map((r) => r.issues).flat();
 }
 
 export async function getJiraMonthWiseIssueDataByUsername(
@@ -53,7 +60,7 @@ export async function getJiraMonthWiseIssueDataByUsername(
     endDate,
   });
 
-  const issues = jiraData.issues.filter((issue) => issue.status === "Done");
+  const issues = jiraData.filter((issue) => issue.status === "Done");
 
   const months = Array.from(
     new Set(issues.map((d) => d.resolvedAt!.substring(0, 7)))
