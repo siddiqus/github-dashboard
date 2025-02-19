@@ -47,6 +47,27 @@ function UserProfile() {
         </thead>
         <tbody>
           <tr>
+            <td>PR Reviews</td>
+            {Object.keys(userData.reviewCountsPerMonth).map((month, index) => {
+              return (
+                <td key={index}>{userData.reviewCountsPerMonth[month]}</td>
+              );
+            })}
+          </tr>
+
+          <tr>
+            <td>Avg. PR Cycle Time (days)</td>
+            {Object.keys(userData.averagePrCycleTimePerMonth).map(
+              (month, index) => {
+                return (
+                  <td key={index}>
+                    {userData.averagePrCycleTimePerMonth[month]}
+                  </td>
+                );
+              }
+            )}
+          </tr>
+          <tr>
             <td>Total PR Count ({userData.totalPrCounts})</td>
             {months.map((month, index) => {
               const monthData = userData.statList.find(
@@ -79,28 +100,6 @@ function UserProfile() {
               </tr>
             );
           })}
-
-          <tr>
-            <td>PR Reviews</td>
-            {Object.keys(userData.reviewCountsPerMonth).map((month, index) => {
-              return (
-                <td key={index}>{userData.reviewCountsPerMonth[month]}</td>
-              );
-            })}
-          </tr>
-
-          <tr>
-            <td>Avg. PR Cycle Time (days)</td>
-            {Object.keys(userData.averagePrCycleTimePerMonth).map(
-              (month, index) => {
-                return (
-                  <td key={index}>
-                    {userData.averagePrCycleTimePerMonth[month]}
-                  </td>
-                );
-              }
-            )}
-          </tr>
         </tbody>
       </Table>
     );
