@@ -1,6 +1,7 @@
 import axios from "axios";
 import userList from "../../cmp-users.json";
 import { getFromCache } from "./utils";
+import db from "./idb";
 
 export type JiraIssue = {
   issueType: string;
@@ -50,6 +51,13 @@ async function getJiraIssuesCached(opts: JiraIssueSearchParams) {
   return results.map((r) => r.issues).flat();
 }
 
+export async function resetJiraCache(opts: JiraIssueSearchParams) {
+  for (const email of opts.userEmails) {
+    const cacheKey = `${email}-${opts.startDate}-${opts.endDate}`;
+    await db.unsetData(cacheKey);
+  }
+}
+
 export async function getJiraMonthWiseIssueDataByUsername(
   opts: JiraIssueSearchParams
 ) {
@@ -73,7 +81,8 @@ export async function getJiraMonthWiseIssueDataByUsername(
   issues.forEach((issue) => {
     const month = issue.resolvedAt!.substring(0, 7);
     const username = getUserNameFromEmail(issue.userEmail);
-    if (username) {
+    const isInData = opts.userEmails.includes(issue.userEmail);
+    if (username && isInData) {
       groupedByUser[username] = groupedByUser[username] ?? {};
       groupedByUser[username][month] = groupedByUser[username][month] ?? 0;
       groupedByUser[username][month]++;

@@ -1,4 +1,6 @@
 import * as githubUtils from "./github/utils";
+import { resetJiraCache } from "./jira";
+import userList from "../../cmp-users.json";
 
 export async function getUserData({
   author,
@@ -18,6 +20,12 @@ export async function resetUserDataCache(data, organization = "newscred") {
       author,
       startDate,
       endDate,
+    });
+
+    await resetJiraCache({
+      startDate,
+      endDate,
+      userEmails: [userList.find((u) => u.username === author).email],
     });
   }
 }
