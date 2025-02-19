@@ -1,6 +1,9 @@
-import express from "express";
-import { fetchAllJiraIssues } from "./jira/index";
+import dotenv from "dotenv";
+dotenv.config();
+
 import cors from "cors";
+import express from "express";
+import { fetchAllJiraIssues } from "./jira/jira-rest";
 
 const app: any = express();
 

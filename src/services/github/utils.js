@@ -3,6 +3,7 @@ import { getAllIssues, getPrData } from "./github-api.service";
 
 import userList from "../../../cmp-users.json";
 import db from "../idb";
+import { getFromCache } from "../utils";
 
 export const userListByUsername = _.keyBy(userList, "username");
 
@@ -159,30 +160,24 @@ async function getAllIssuesCached({
   endDate,
   mode,
 }) {
-  const cacheKey = getDataCacheKey({
-    organization,
-    author,
-    startDate,
-    endDate,
-    mode,
+  return getFromCache({
+    getCacheKey: () =>
+      getDataCacheKey({
+        organization,
+        author,
+        startDate,
+        endDate,
+        mode,
+      }),
+    fn: () =>
+      getAllIssues({
+        organization,
+        author,
+        startDate,
+        endDate,
+        mode,
+      }),
   });
-
-  const cachedData = await db.getData(cacheKey);
-  if (cachedData) {
-    return cachedData;
-  }
-
-  const data = await getAllIssues({
-    organization,
-    author,
-    startDate,
-    endDate,
-    mode,
-  });
-
-  await db.setData(cacheKey, data);
-
-  return data;
 }
 
 function getPrCacheKey({ owner, repo, pullNumber }) {
@@ -190,18 +185,10 @@ function getPrCacheKey({ owner, repo, pullNumber }) {
 }
 
 export async function getPrDataCached({ owner, repo, pullNumber }) {
-  const cacheKey = getPrCacheKey({ owner, repo, pullNumber });
-
-  const cachedData = await db.getData(cacheKey);
-
-  if (cachedData) {
-    return cachedData;
-  }
-
-  const result = await getPrData({ owner, repo, pullNumber });
-
-  await db.setData(cacheKey, result);
-  return result;
+  return getFromCache({
+    getCacheKey: () => getPrCacheKey({ owner, repo, pullNumber }),
+    fn: () => getPrData({ owner, repo, pullNumber }),
+  });
 }
 
 export async function getUserData({

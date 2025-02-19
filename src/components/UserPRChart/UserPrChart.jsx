@@ -164,24 +164,6 @@ function getPrReviewChartOptions({ months, userDataList }) {
   return { chartOptions, data: data };
 }
 
-function getPrCreatedChartData({ months, userDataList }) {
-  const data = {
-    labels: months,
-    datasets: userDataList.map((userData, index) => {
-      return {
-        label: userData.username,
-        data: userData.statList.map((s) => s.prCount),
-        borderColor: colorNames[index] || "red",
-      };
-    }),
-  };
-
-  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
-  chartOptions.plugins.title.text = "PRs Raised";
-
-  return { chartOptions, data };
-}
-
 function getPrClosedChartData({ months, userDataList }) {
   const data = {
     labels: months,
@@ -323,7 +305,29 @@ const getPrReviewedDistributionChartData = (inputList) => {
   return { chartOptions, data: chartData };
 };
 
-function UserPrChart({ userDataList, jiraChartData }) {
+function padMonthDataForJira(months, data) {
+  if (!data || !data.chartData) {
+    return [];
+  }
+  const allMonths = [...months]; // Create a copy to avoid modifying the original array
+
+  return data.chartData.map((item) => {
+    const paddedMonthDataList = allMonths.map((month) => {
+      // Check if the current month exists in the original monthDataList
+      const monthIndex = data.months.indexOf(month);
+
+      // If the month exists, use its value; otherwise, pad with 0
+      return monthIndex !== -1 ? item.monthDataList[monthIndex] : 0;
+    });
+
+    return {
+      ...item,
+      monthDataList: paddedMonthDataList,
+    };
+  });
+}
+
+function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
   const months = Array.from(
     new Set(
       userDataList.map((u) => getMonthsStringFromIssueList(u.prList)).flat()
@@ -351,8 +355,8 @@ function UserPrChart({ userDataList, jiraChartData }) {
   });
 
   const jiraClosedTicketOptions = getJiraClosedTicketData({
-    months: jiraChartData?.months || [],
-    chartData: jiraChartData?.chartData || [],
+    months,
+    chartData: padMonthDataForJira(months, jiraChartData) || [],
   });
 
   const prDistributionChartOptions =
@@ -394,10 +398,14 @@ function UserPrChart({ userDataList, jiraChartData }) {
 
   const jiraIssuesChart = (
     <Card style={chartStyle}>
-      <Line
-        options={jiraClosedTicketOptions.chartOptions}
-        data={jiraClosedTicketOptions.data}
-      />
+      {jiraIsLoading ? (
+        "JIRA Data Loading..."
+      ) : (
+        <Line
+          options={jiraClosedTicketOptions.chartOptions}
+          data={jiraClosedTicketOptions.data}
+        />
+      )}
     </Card>
   );
 
@@ -424,6 +432,10 @@ function UserPrChart({ userDataList, jiraChartData }) {
         <Col lg={6}>{prClosedChart}</Col>
         <Col lg={6}>{prReviewedChart}</Col>
         {/* <Col lg={4}> {cycleTimeChart}</Col> */}
+      </Row>
+      <Row>
+        <Col lg={6}>{jiraIssuesChart}</Col>
+        <Col lg={6}>{cycleTimeChart}</Col>
       </Row>
       <Row>
         <Col lg={6}>{prCreatedDistributionChart}</Col>

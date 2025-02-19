@@ -1,4 +1,4 @@
-import { JiraIssue } from "./jira";
+import db from "./idb";
 
 export function formatDate(theDate) {
   const date = new Date(theDate);
@@ -54,4 +54,22 @@ export function getMonthsStringFromIssueList(prList) {
   const last = sorted[sorted.length - 1].created_at;
 
   return getMonthsBetween(first, last);
+}
+
+export async function getFromCache<D>(params: {
+  getCacheKey: () => string;
+  fn: () => Promise<D>;
+}): Promise<D> {
+  const cacheKey = params.getCacheKey();
+
+  const cachedData = await db.getData(cacheKey);
+  if (cachedData) {
+    return cachedData;
+  }
+
+  const data = await params.fn();
+
+  await db.setData(cacheKey, data);
+
+  return data;
 }

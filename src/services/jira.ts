@@ -1,5 +1,6 @@
 import axios from "axios";
 import userList from "../../cmp-users.json";
+import { getFromCache } from "./utils";
 
 export type JiraIssue = {
   issueType: string;
@@ -12,11 +13,13 @@ export type JiraIssue = {
   userEmail: string;
 };
 
-export async function searchJiraIssues(opts: {
+type JiraIssueSearchParams = {
+  userEmails: string[];
   startDate: string;
   endDate: string;
-  userEmails: string[];
-}) {
+};
+
+export async function searchJiraIssues(opts: JiraIssueSearchParams) {
   const response = await axios.post(
     "http://localhost:4089/jira/issue-search",
     opts
@@ -32,19 +35,25 @@ function getUserNameFromEmail(email: string) {
   return user ? user.username : null;
 }
 
-export async function getJiraMonthWiseIssueDataByUsername(opts: {
-  startDate: string;
-  endDate: string;
-  userEmails: string[];
-}) {
+async function getJiraIssuesCached(opts: JiraIssueSearchParams) {
+  return getFromCache({
+    getCacheKey: () =>
+      `${opts.userEmails.join(",")}-${opts.startDate}-${opts.endDate}`,
+    fn: () => searchJiraIssues(opts),
+  });
+}
+
+export async function getJiraMonthWiseIssueDataByUsername(
+  opts: JiraIssueSearchParams
+) {
   const { userEmails, startDate, endDate } = opts;
-  const jiraData = await searchJiraIssues({
+  const jiraData = await getJiraIssuesCached({
     userEmails,
     startDate,
     endDate,
   });
 
-  const issues = jiraData.issues.filter((issue) => !!issue.resolvedAt);
+  const issues = jiraData.issues.filter((issue) => issue.status === "Done");
 
   const months = Array.from(
     new Set(issues.map((d) => d.resolvedAt!.substring(0, 7)))
@@ -69,7 +78,8 @@ export async function getJiraMonthWiseIssueDataByUsername(opts: {
     monthDataList: number[];
   }> = [];
 
-  Object.keys(groupedByUser).forEach((username) => {
+  const usernames = Object.keys(groupedByUser).sort();
+  usernames.forEach((username) => {
     const monthWiseData = groupedByUser[username];
 
     const monthDataList: number[] = [];

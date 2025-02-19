@@ -5,9 +5,7 @@ import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
 import { userListByUsername } from "../services/github/utils";
 import { getUserData } from "../services/index";
-import {
-  getJiraMonthWiseIssueDataByUsername
-} from "../services/jira";
+import { getJiraMonthWiseIssueDataByUsername } from "../services/jira";
 
 const statusMap = {
   LOADING: "loading",
@@ -23,22 +21,12 @@ function Home() {
   const [jiraChartData, setJiraChartData] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [jiraIsLoading, setJiraIsLoading] = useState(false);
+
   async function onSubmit({ startDate, endDate, usernames }) {
     try {
       setErrorMessage("");
       setDataStatus(statusMap.LOADING);
-
-      getJiraMonthWiseIssueDataByUsername({
-        userEmails: usernames.map((u) => userListByUsername[u].email),
-        startDate: startDate,
-        endDate: endDate,
-      })
-        .then((jiraData) => {
-          setJiraChartData(jiraData);
-        })
-        .catch((er) => {
-          console.error(er);
-        });
 
       const githubData = await Promise.all(
         usernames.map((u) =>
@@ -52,6 +40,22 @@ function Home() {
 
       setUserDataList(githubData);
       setDataStatus(statusMap.LOADED);
+
+      setJiraIsLoading(true);
+      getJiraMonthWiseIssueDataByUsername({
+        userEmails: usernames.map((u) => userListByUsername[u].email),
+        startDate: startDate,
+        endDate: endDate,
+      })
+        .then((jiraData) => {
+          setJiraChartData(jiraData);
+          localStorage.setItem("opti-jira-data", JSON.stringify(jiraData));
+          setJiraIsLoading(false);
+        })
+        .catch((er) => {
+          setJiraIsLoading(false);
+          console.error(er);
+        });
 
       localStorage.setItem("opti-gh-data", JSON.stringify(githubData));
     } catch (error) {
@@ -81,6 +85,7 @@ function Home() {
         <UserPrChart
           userDataList={userDataList}
           jiraChartData={jiraChartData}
+          jiraIsLoading={jiraIsLoading}
         ></UserPrChart>
       ) : (
         <></>
