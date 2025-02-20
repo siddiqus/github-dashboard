@@ -29,36 +29,40 @@ function Home() {
       setErrorMessage("");
       setDataStatus(statusMap.LOADING);
 
-      const githubData = await Promise.all(
-        usernames.map((u) =>
-          getUserData({
-            author: u,
-            startDate,
-            endDate,
-          })
-        )
-      );
-
-      setUserDataList(githubData);
-      setDataStatus(statusMap.LOADED);
-
       setJiraIsLoading(true);
-      getJiraMonthWiseIssueDataByUsername({
-        userEmails: usernames.map((u) => userListByUsername[u].email),
-        startDate: startDate,
-        endDate: endDate,
-      })
-        .then((jiraData) => {
-          setJiraChartData(jiraData);
-          db.setData("opti-jira-data", jiraData);
-          setJiraIsLoading(false);
-        })
-        .catch((er) => {
-          setJiraIsLoading(false);
-          console.error(er);
-        });
 
-      db.setData("opti-gh-data", githubData);
+      await Promise.all([
+        Promise.all(
+          usernames.map((u) =>
+            getUserData({
+              author: u,
+              startDate,
+              endDate,
+            })
+          )
+        ).then((githubData) => {
+          setUserDataList(githubData);
+          setDataStatus(statusMap.LOADED);
+          db.setData("opti-gh-data", githubData);
+        }),
+
+        getJiraMonthWiseIssueDataByUsername({
+          userEmails: usernames.map((u) => userListByUsername[u].email),
+          startDate: startDate,
+          endDate: endDate,
+        })
+          .then((jiraData) => {
+            if (jiraData) {
+              setJiraChartData(jiraData);
+              db.setData("opti-jira-data", jiraData);
+            }
+            setJiraIsLoading(false);
+          })
+          .catch((er) => {
+            console.error(er);
+            setJiraIsLoading(false);
+          }),
+      ]);
     } catch (error) {
       setErrorMessage(error.message);
       setDataStatus(statusMap.ERROR);

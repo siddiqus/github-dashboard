@@ -20,6 +20,14 @@ type JiraIssueSearchParams = {
   endDate: string;
 };
 
+type JiraChartData = {
+  months: string[];
+  chartData: {
+    username: string;
+    monthDataList: number[];
+  }[];
+};
+
 export async function searchJiraIssues(opts: JiraIssueSearchParams) {
   const response = await axios.post(
     "http://localhost:4089/jira/issue-search",
@@ -31,12 +39,14 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
   };
 }
 
-function getUserNameFromEmail(email: string) {
+function getUserNameFromEmail(email: string): string | null {
   const user = userList.find((u) => u.email === email);
   return user ? user.username : null;
 }
 
-async function getJiraIssuesCached(opts: JiraIssueSearchParams) {
+async function getJiraIssuesCached(
+  opts: JiraIssueSearchParams
+): Promise<JiraIssue[]> {
   const emails = opts.userEmails;
 
   const results = await Promise.all(
@@ -60,7 +70,7 @@ export async function resetJiraCache(opts: JiraIssueSearchParams) {
 
 export async function getJiraMonthWiseIssueDataByUsername(
   opts: JiraIssueSearchParams
-) {
+): Promise<JiraChartData> {
   const { userEmails, startDate, endDate } = opts;
   const jiraData = await getJiraIssuesCached({
     userEmails,
@@ -72,7 +82,7 @@ export async function getJiraMonthWiseIssueDataByUsername(
 
   const months = Array.from(
     new Set(issues.map((d) => d.resolvedAt!.substring(0, 7)))
-  );
+  ) as string[];
 
   months.sort((a, b) => a.localeCompare(b));
 
@@ -89,10 +99,10 @@ export async function getJiraMonthWiseIssueDataByUsername(
     }
   });
 
-  const chartData: Array<{
+  const chartData: {
     username: string;
     monthDataList: number[];
-  }> = [];
+  }[] = [];
 
   const usernames = Object.keys(groupedByUser).sort();
   usernames.forEach((username) => {
