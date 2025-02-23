@@ -294,7 +294,7 @@ function UserProfileJiraList({ jiraData }) {
               </thead>
               <tbody>
                 {Object.entries(monthlyStats)
-                  .sort((a, b) => b[0].localeCompare(a[0])) // Sort by month descending
+                  .sort((a, b) => a[0].localeCompare(b[0])) // Sort by month descending
                   .map(([month, stats]) => (
                     <tr key={month}>
                       <td>{month}</td>
@@ -324,7 +324,7 @@ function UserProfileJiraList({ jiraData }) {
               </thead>
               <tbody>
                 {Object.entries(monthlyStats)
-                  .sort((a, b) => b[0].localeCompare(a[0])) // Sort by month descending
+                  .sort((a, b) => a[0].localeCompare(b[0])) // Sort by month descending
                   .map(([month, stats]) => (
                     <tr key={month}>
                       <td>{month}</td>
