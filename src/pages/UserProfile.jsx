@@ -184,6 +184,7 @@ function UserProfile() {
       >
         <Tab eventKey="prStats" title="PR Stats">
           <GitHubCalendar username={username} colorScheme="light" />
+          <hr />
           <UserPrChart
             jiraData={jiraData}
             userDataList={userData ? [userData] : []}
