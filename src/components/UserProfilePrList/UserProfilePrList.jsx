@@ -94,7 +94,7 @@ function PrList({ prList }) {
 
   return prList.length ? (
     <DataTable
-      fixedHeaderScrollHeight="500px"
+      fixedHeaderScrollHeight="600px"
       highlightOnHover
       columns={tableColumns}
       data={prList}

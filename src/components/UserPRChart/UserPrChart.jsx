@@ -18,6 +18,7 @@ import {
   daysDifference,
   getMonthsStringFromIssueList,
 } from "../../services/utils";
+import { getJiraMonthWiseIssueDataByUsername } from "../../services/jira";
 
 ChartJS.register(
   CategoryScale,
@@ -371,7 +372,7 @@ function padMonthDataForJira(months, data) {
   });
 }
 
-function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
+function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const months = Array.from(
     new Set(
       userDataList.map((u) => getMonthsStringFromIssueList(u.prList)).flat()
@@ -424,6 +425,10 @@ function UserPrChart({ userDataList, jiraChartData, jiraIsLoading }) {
     </Card>
   );
 
+  const jiraChartData = getJiraMonthWiseIssueDataByUsername(
+    userDataList.map((u) => u.username),
+    jiraData
+  );
   const jiraClosedTicketOptions = getJiraClosedTicketData({
     months,
     chartData: padMonthDataForJira(months, jiraChartData) || [],

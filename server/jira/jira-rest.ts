@@ -32,9 +32,9 @@ function transformIssueData(issue: any): IssueSearchResponse {
   return {
     issueType: issue.fields.issuetype.name,
     issueKey: issue.key,
-    description: (issue.fields.description || "")
-      .replaceAll(/\r\n/g, "\n")
-      .replaceAll(/\n/g, "\n"), // Ensure a default value if description is null
+    description: (issue.fields.description || ""),
+      // .replaceAll(/\r\n/g, "\n")
+      // .replaceAll(/\n/g, "\n"), // Ensure a default value if description is null
     status: issue.fields.status.name,
     createdAt: issue.fields.created, // Assuming 'created' field exists and is in the correct format
     resolvedAt: issue.fields.resolutiondate || issue.fields.created || "", // Use an empty string if resolutiondate is null

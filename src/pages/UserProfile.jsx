@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Tab, Table, Tabs } from "react-bootstrap";
+import { Tab, Table, Tabs, Container } from "react-bootstrap";
 import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserProfilePrList from "../components/UserProfilePrList/UserProfilePrList";
 import { getMonthsStringFromIssueList } from "../services/utils";
 import db from "../services/idb";
+import UserProfileJiraList from "../components/UserProfileJiraList";
 
 function UserProfile() {
   const { username } = useParams();
@@ -18,12 +19,10 @@ function UserProfile() {
       const userDataList = await db.getData("opti-gh-data");
       const jiraData = await db.getData("opti-jira-data");
 
-      if (jiraData) {
-        jiraData.chartData = jiraData.chartData.filter(
-          (d) => d.username === username
-        );
-        setJiraData(jiraData);
-      }
+      const userJiraData = (jiraData || []).filter(
+        (j) => j.username === username
+      );
+      setJiraData(userJiraData);
 
       const userData = (userDataList || []).find(
         (u) => u.username === username
@@ -122,6 +121,41 @@ function UserProfile() {
     );
   }
 
+  function JiraList({ jiraData }) {
+    return (
+      <div className="table-responsive">
+        <Table bordered hover responsive>
+          <thead>
+            <tr>
+              <th>Issue Type</th>
+              <th>Issue Key</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Resolved At</th>
+              <th>Story Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {jiraData.map((jira, index) => {
+              return (
+                <tr key={index}>
+                  <td>{jira.issueType}</td>
+                  <td>{jira.issueKey}</td>
+                  <td>{jira.description}</td>
+                  <td>{jira.status}</td>
+                  <td>{jira.createdAt}</td>
+                  <td>{jira.resolvedAt || "-"}</td>
+                  <td>{jira.storyPoints}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -143,26 +177,27 @@ function UserProfile() {
         </div>
       </div>
 
-      <div>
-        <GitHubCalendar username={username} colorScheme="light" />
-      </div>
-
-      <hr />
-
       <Tabs
         defaultActiveKey="prStats"
         id="user-profile-stats-tabs"
         className="mb-3"
       >
         <Tab eventKey="prStats" title="PR Stats">
+          <GitHubCalendar username={username} colorScheme="light" />
           <UserPrChart
-            jiraChartData={jiraData}
+            jiraData={jiraData}
             userDataList={userData ? [userData] : []}
           ></UserPrChart>
           <PrStats />
         </Tab>
         <Tab eventKey="prList" title="PR List">
           <UserProfilePrList userData={userData} />
+        </Tab>
+        <Tab eventKey="jiraList" title="JIRA Tickets">
+          <UserProfileJiraList jiraData={jiraData || []} />
+          {/* <div style={{ width: "100%", overflowX: "auto" }}>
+            <JiraList jiraData={jiraData || []} />
+          </div> */}
         </Tab>
       </Tabs>
       <br />

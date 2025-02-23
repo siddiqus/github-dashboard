@@ -4,9 +4,9 @@ import Loading from "../components/Loading";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
 import { userListByUsername } from "../services/github/utils";
-import { getUserData } from "../services/index";
-import { getJiraMonthWiseIssueDataByUsername } from "../services/jira";
 import db from "../services/idb";
+import { getUserData } from "../services/index";
+import { getJiraIssuesCached } from "../services/jira";
 
 const statusMap = {
   LOADING: "loading",
@@ -19,7 +19,7 @@ function Home() {
   const [dataStatus, setDataStatus] = useState(statusMap.NO_DATA);
 
   const [userDataList, setUserDataList] = useState([]);
-  const [jiraChartData, setJiraChartData] = useState({});
+  const [jiraData, setJiraData] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
   const [jiraIsLoading, setJiraIsLoading] = useState(false);
@@ -46,14 +46,14 @@ function Home() {
           db.setData("opti-gh-data", githubData);
         }),
 
-        getJiraMonthWiseIssueDataByUsername({
+        getJiraIssuesCached({
           userEmails: usernames.map((u) => userListByUsername[u].email),
-          startDate: startDate,
-          endDate: endDate,
+          startDate,
+          endDate,
         })
           .then((jiraData) => {
             if (jiraData) {
-              setJiraChartData(jiraData);
+              setJiraData(jiraData);
               db.setData("opti-jira-data", jiraData);
             }
             setJiraIsLoading(false);
@@ -89,7 +89,7 @@ function Home() {
       {isLoaded ? (
         <UserPrChart
           userDataList={userDataList}
-          jiraChartData={jiraChartData}
+          jiraData={jiraData}
           jiraIsLoading={jiraIsLoading}
         ></UserPrChart>
       ) : (
@@ -99,7 +99,7 @@ function Home() {
       {isLoaded ? (
         <HomeUserTable
           userDataList={userDataList}
-          jiraChartData={jiraChartData}
+          jiraData={jiraData}
         ></HomeUserTable>
       ) : (
         <></>

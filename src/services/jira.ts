@@ -12,6 +12,7 @@ export type JiraIssue = {
   resolvedAt: string | null;
   storyPoints: number;
   userEmail: string;
+  username: string;
 };
 
 type JiraIssueSearchParams = {
@@ -34,8 +35,16 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
     opts
   );
 
-  return response.data as {
-    issues: JiraIssue[];
+  const issues: JiraIssue[] = response.data.issues.map((issue) => {
+    const username = getUserNameFromEmail(issue.userEmail);
+    return {
+      ...issue,
+      username,
+    };
+  });
+
+  return {
+    issues,
   };
 }
 
@@ -44,7 +53,7 @@ function getUserNameFromEmail(email: string): string | null {
   return user ? user.username : null;
 }
 
-async function getJiraIssuesCached(
+export async function getJiraIssuesCached(
   opts: JiraIssueSearchParams
 ): Promise<JiraIssue[]> {
   const emails = opts.userEmails;
@@ -68,16 +77,10 @@ export async function resetJiraCache(opts: JiraIssueSearchParams) {
   }
 }
 
-export async function getJiraMonthWiseIssueDataByUsername(
-  opts: JiraIssueSearchParams
-): Promise<JiraChartData> {
-  const { userEmails, startDate, endDate } = opts;
-  const jiraData = await getJiraIssuesCached({
-    userEmails,
-    startDate,
-    endDate,
-  });
-
+export function getJiraMonthWiseIssueDataByUsername(
+  usernames: string[],
+  jiraData: JiraIssue[]
+): JiraChartData {
   const issues = jiraData.filter((issue) => issue.status === "Done");
 
   const months = Array.from(
@@ -90,9 +93,9 @@ export async function getJiraMonthWiseIssueDataByUsername(
 
   issues.forEach((issue) => {
     const month = issue.resolvedAt!.substring(0, 7);
-    const username = getUserNameFromEmail(issue.userEmail);
-    const isInData = opts.userEmails.includes(issue.userEmail);
-    if (username && isInData) {
+    const username = issue.username;
+
+    if (username && usernames.includes(username)) {
       groupedByUser[username] = groupedByUser[username] ?? {};
       groupedByUser[username][month] = groupedByUser[username][month] ?? 0;
       groupedByUser[username][month]++;
@@ -104,8 +107,8 @@ export async function getJiraMonthWiseIssueDataByUsername(
     monthDataList: number[];
   }[] = [];
 
-  const usernames = Object.keys(groupedByUser).sort();
-  usernames.forEach((username) => {
+  const sortedUsernames = [...usernames].sort();
+  sortedUsernames.forEach((username) => {
     const monthWiseData = groupedByUser[username];
 
     const monthDataList: number[] = [];
