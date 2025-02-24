@@ -280,16 +280,16 @@ function UserProfileJiraList({ jiraData }) {
     return (
       <>
         <Card className="mb-3">
-          <Card.Header>Monthly Performance Metrics</Card.Header>
+          <Card.Header>Monthly Task Metrics</Card.Header>
           <Card.Body>
-            <Table bordered size="sm">
+            <Table hover size="sm">
               <thead>
                 <tr>
                   <th>Month</th>
                   <th>Total</th>
-                  <th>Bugs</th>
                   <th>Tasks</th>
-                  <th>Story Points</th>
+                  <th>Bugs</th>
+                  <th>Avg Resolution Days</th>
                 </tr>
               </thead>
               <tbody>
@@ -299,45 +299,9 @@ function UserProfileJiraList({ jiraData }) {
                     <tr key={month}>
                       <td>{month}</td>
                       <td>{stats.issues.length}</td>
-                      <td>{stats.bugs}</td>
                       <td>{stats.tasks}</td>
-                      <td>{stats.storyPoints}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-
-        <Card className="mb-3">
-          <Card.Header>Current Month Breakdown</Card.Header>
-          <Card.Body>
-            <Table bordered size="sm">
-              <thead>
-                <tr>
-                  <th>Month</th>
-                  <th>Total Issues</th>
-                  <th>Bug Ratio</th>
-
-                  <th>Story Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(monthlyStats)
-                  .sort((a, b) => a[0].localeCompare(b[0])) // Sort by month descending
-                  .map(([month, stats]) => (
-                    <tr key={month}>
-                      <td>{month}</td>
-                      <td>{stats.issues.length}</td>
-                      <td>
-                        {stats.issues.length
-                          ? ((stats.bugs / stats.issues.length) * 100).toFixed(
-                              1
-                            )
-                          : 0}
-                        %
-                      </td>
-                      <td>{stats.storyPoints}</td>
+                      <td>{stats.bugs}</td>
+                      <td>{stats.avgResolutionDays}</td>
                     </tr>
                   ))}
               </tbody>
