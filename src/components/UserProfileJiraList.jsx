@@ -126,6 +126,42 @@ function JiraList({ jiraData }) {
   );
 }
 
+function JiraStats({ monthlyStats }) {
+  return (
+    <>
+      <Card className="mb-3">
+        <Card.Header>Monthly Performance Metrics</Card.Header>
+        <Card.Body>
+          <Table bordered size="sm">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Total</th>
+                <th>Bugs</th>
+                <th>Tasks</th>
+                <th>Story Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(monthlyStats)
+                .sort((a, b) => b[0].localeCompare(a[0]))
+                .map(([month, stats]) => (
+                  <tr key={month}>
+                    <td>{month}</td>
+                    <td>{stats.issues.length}</td>
+                    <td>{stats.bugs}</td>
+                    <td>{stats.tasks}</td>
+                    <td>{stats.storyPoints}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
+    </>
+  );
+}
+
 function UserProfileJiraList({ jiraData }) {
   if (!jiraData || !jiraData.length) {
     return null;
@@ -133,6 +169,55 @@ function UserProfileJiraList({ jiraData }) {
   const [listFilter, setListFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [filteredList, setFilteredList] = useState(jiraData);
+
+  const monthlyStats = useMemo(() => {
+    // Group issues by month
+    const monthlyData = jiraData.reduce((acc, issue) => {
+      const month = issue.createdAt.substring(0, 7); // YYYY-MM format
+      if (!acc[month]) {
+        acc[month] = {
+          issues: [],
+          bugs: 0,
+          tasks: 0,
+          storyPoints: 0,
+          resolved: 0,
+          avgResolutionDays: 0,
+        };
+      }
+
+      if (issue.issueType === "Bug") {
+        acc[month].bugs++;
+      } else {
+        acc[month].tasks++;
+      }
+
+      if (issue.status === "Done") {
+        acc[month].storyPoints += issue.storyPoints || 0;
+      }
+
+      if (issue.resolvedAt) {
+        acc[month].resolved++;
+        const resolutionTime =
+          (new Date(issue.resolvedAt) - new Date(issue.createdAt)) /
+          (1000 * 60 * 60 * 24);
+        acc[month].avgResolutionDays += resolutionTime;
+      }
+
+      acc[month].issues.push(issue);
+      return acc;
+    }, {});
+
+    Object.keys(monthlyData).forEach((month) => {
+      const monthData = monthlyData[month];
+      if (monthData.resolved > 0) {
+        monthData.avgResolutionDays = (
+          monthData.avgResolutionDays / monthData.resolved
+        ).toFixed(1);
+      }
+    });
+
+    return monthlyData;
+  }, [jiraData]);
 
   function setListFilterValue(filter) {
     setListFilter(filter);
@@ -223,95 +308,6 @@ function UserProfileJiraList({ jiraData }) {
     }, [jiraData, listFilter, statusFilter]);
   }
 
-  function JiraStats() {
-    const monthlyStats = useMemo(() => {
-      // Group issues by month
-      const monthlyData = jiraData.reduce((acc, issue) => {
-        const month = issue.createdAt.substring(0, 7); // YYYY-MM format
-        if (!acc[month]) {
-          acc[month] = {
-            issues: [],
-            bugs: 0,
-            tasks: 0,
-            storyPoints: 0,
-            resolved: 0,
-            avgResolutionDays: 0,
-          };
-        }
-
-        // Count by type
-        if (issue.issueType === "Bug") {
-          acc[month].bugs++;
-        } else {
-          acc[month].tasks++;
-        }
-
-        // Count story points for completed issues
-        if (issue.status === "Done") {
-          acc[month].storyPoints += issue.storyPoints || 0;
-        }
-
-        // Count resolved issues and calculate resolution time
-        if (issue.resolvedAt) {
-          acc[month].resolved++;
-          const resolutionTime =
-            (new Date(issue.resolvedAt) - new Date(issue.createdAt)) /
-            (1000 * 60 * 60 * 24);
-          acc[month].avgResolutionDays += resolutionTime;
-        }
-
-        acc[month].issues.push(issue);
-        return acc;
-      }, {});
-
-      // Calculate averages and format data
-      Object.keys(monthlyData).forEach((month) => {
-        const monthData = monthlyData[month];
-        if (monthData.resolved > 0) {
-          monthData.avgResolutionDays = (
-            monthData.avgResolutionDays / monthData.resolved
-          ).toFixed(1);
-        }
-      });
-
-      return monthlyData;
-    }, [jiraData]);
-
-    return (
-      <>
-        <Card className="mb-3">
-          <Card.Header>Monthly Task Metrics</Card.Header>
-          <Card.Body>
-            <Table hover size="sm">
-              <thead>
-                <tr>
-                  <th>Month</th>
-                  <th>Total</th>
-                  <th>Tasks</th>
-                  <th>Bugs</th>
-                  <th>Avg Resolution Days</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(monthlyStats)
-                  .sort((a, b) => a[0].localeCompare(b[0])) // Sort by month descending
-                  .map(([month, stats]) => (
-                    <tr key={month}>
-                      <td>{month}</td>
-                      <td>{stats.issues.length}</td>
-                      <td>{stats.tasks}</td>
-                      <td>{stats.bugs}</td>
-                      <td>{stats.avgResolutionDays}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-      </>
-    );
-  }
-
   return (
     <>
       <Row>
@@ -326,14 +322,14 @@ function UserProfileJiraList({ jiraData }) {
               </div>
             </div>
           </div>
-
           <JiraList jiraData={filteredList} />
         </Col>
         <Col lg={4}>
-          <JiraStats />
+          <JiraStats monthlyStats={monthlyStats} />
         </Col>
       </Row>
     </>
   );
 }
+
 export default UserProfileJiraList;

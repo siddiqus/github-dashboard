@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Dropdown, InputGroup } from "react-bootstrap";
+import {
+  Button,
+  Dropdown,
+  InputGroup,
+  Row,
+  Col,
+  Card,
+  Table,
+} from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import { getPr, clearPrCache } from "../../services/index";
 import {
@@ -18,7 +26,7 @@ function PrList({ prList }) {
         const [__, repo] = repoUrl.split("/");
         return repo;
       },
-      width: "150px",
+      width: "130px",
     },
     {
       name: "Title",
@@ -30,7 +38,7 @@ function PrList({ prList }) {
           </a>
         </>
       ),
-      width: "350px",
+      width: "280px",
     },
     {
       name: "Created",
@@ -99,6 +107,14 @@ function PrList({ prList }) {
       columns={tableColumns}
       data={prList}
       fixedHeader
+      customStyles={{
+        cells: {
+          style: {
+            paddingTop: "15px",
+            paddingBottom: "15px",
+          },
+        },
+      }}
     />
   ) : (
     <>N/A</>
@@ -125,36 +141,83 @@ const LOADING_STATUS = {
   loading: "loading",
 };
 
-function UserProfilePrList({ userData }) {
-  if (!userData || !userData.prList || !userData.prList.length) {
-    return null;
-  }
-  const [prListFilter, setPrListFilter] = useState("");
-  const [loadingStatus, setLoadingStatus] = useState("");
+function calculateMonthlyStats(prList) {
+  // Group PRs by month
+  const monthlyData = prList.reduce((acc, pr) => {
+    const month = pr.created_at.substring(0, 7); // YYYY-MM format
+    if (!acc[month]) {
+      acc[month] = {
+        prs: [],
+        totalAdditions: 0,
+        totalDeletions: 0,
+        totalCycleTime: 0,
+      };
+    }
+    acc[month].prs.push(pr);
+    acc[month].totalAdditions += pr.additions || 0;
+    acc[month].totalDeletions += pr.deletions || 0;
+    if (pr.closed_at) {
+      acc[month].totalCycleTime += daysDifference(
+        new Date(pr.created_at),
+        new Date(pr.closed_at)
+      );
+    }
+    return acc;
+  }, {});
 
-  const [prList, setPrList] = useState([]);
+  // Calculate averages
+  Object.keys(monthlyData).forEach((month) => {
+    const data = monthlyData[month];
+    const count = data.prs.length;
+    data.avgCycleTime = (data.totalCycleTime / count).toFixed(1);
+  });
+
+  return monthlyData;
+}
+
+function MonthlyPrMetrics({ prList }) {
+  const monthlyStats = useMemo(() => calculateMonthlyStats(prList), [prList]);
+
+  return (
+    <Card className="mb-3">
+      <Card.Header>Monthly PR Stats</Card.Header>
+      <Card.Body>
+        <Table hover size="sm">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Total PRs</th>
+              <th>Total Adds</th>
+              <th>Total Dels</th>
+              <th>Avg Cycle (days)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(monthlyStats)
+              .sort((a, b) => a[0].localeCompare(b[0]))
+              .map(([month, stats]) => (
+                <tr key={month}>
+                  <td>{month}</td>
+                  <td>{stats.prs.length}</td>
+                  <td>{stats.totalAdditions}</td>
+                  <td>{stats.totalDeletions}</td>
+                  <td>{stats.avgCycleTime}</td>
+                </tr>
+              ))}
+          </tbody>
+        </Table>
+      </Card.Body>
+    </Card>
+  );
+}
+
+function PrListWithFilter({ prList, onRefreshCache }) {
+  const [prListFilter, setPrListFilter] = useState("");
   const [filteredPrList, setFilteredPrList] = useState(prList);
 
-  const [error, setError] = useState(null);
-
-  async function getPrData() {
-    try {
-      setLoadingStatus(LOADING_STATUS.loading);
-      const prList = getPrApiBody(userData.prList);
-      prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      const userPrs = await getPr(prList);
-      setPrList(userPrs);
-      setFilteredPrList(userPrs);
-      setLoadingStatus(LOADING_STATUS.loaded);
-    } catch (error) {
-      setError(error);
-      setLoadingStatus(LOADING_STATUS.loaded);
-    }
-  }
-
   useEffect(() => {
-    getPrData();
-  }, []);
+    setFilteredPrList(prList);
+  }, [prList]);
 
   function setPrListFilterValue(filter) {
     setPrListFilter(filter);
@@ -181,16 +244,14 @@ function UserProfilePrList({ userData }) {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              {months.map((month, index) => {
-                return (
-                  <Dropdown.Item
-                    key={index}
-                    onClick={() => setPrListFilterValue(month)}
-                  >
-                    {month}
-                  </Dropdown.Item>
-                );
-              })}
+              {months.map((month, index) => (
+                <Dropdown.Item
+                  key={index}
+                  onClick={() => setPrListFilterValue(month)}
+                >
+                  {month}
+                </Dropdown.Item>
+              ))}
             </Dropdown.Menu>
           </Dropdown>
 
@@ -206,8 +267,63 @@ function UserProfilePrList({ userData }) {
     }, [prList]);
   }
 
+  return (
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ padding: "15px", fontWeight: "600" }}>
+          Items: {filteredPrList.length}
+        </div>
+        <div style={{ display: "inline-flex" }}>
+          <div>
+            <SearchFilter />
+          </div>
+          <div>
+            <Button
+              style={{ marginLeft: "20px" }}
+              variant="light"
+              onClick={onRefreshCache}
+            >
+              Refresh Cache
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <PrList prList={filteredPrList} />
+    </>
+  );
+}
+
+function UserProfilePrList({ userData }) {
+  if (!userData || !userData.prList || !userData.prList.length) {
+    return null;
+  }
+
+  const [loadingStatus, setLoadingStatus] = useState("");
+  const [prList, setPrList] = useState([]);
+  const [error, setError] = useState(null);
+
+  async function getPrData() {
+    try {
+      setLoadingStatus(LOADING_STATUS.loading);
+      const prList = getPrApiBody(userData.prList);
+      prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      const userPrs = await getPr(prList);
+      setPrList(userPrs);
+      setLoadingStatus(LOADING_STATUS.loaded);
+    } catch (error) {
+      setError(error);
+      setLoadingStatus(LOADING_STATUS.loaded);
+    }
+  }
+
+  useEffect(() => {
+    getPrData();
+  }, []);
+
   async function resetPrCacheData() {
     try {
+      setError(null);
       await clearPrCache(getPrApiBody(userData.prList));
       await getPrData();
     } catch (error) {
@@ -218,35 +334,20 @@ function UserProfilePrList({ userData }) {
   return (
     <>
       {error && <h5>Error: {error.message}</h5>}
-      {loadingStatus && loadingStatus === LOADING_STATUS.loading && (
-        // <h5>Loading...</h5>
-        <Loading></Loading>
-      )}
+      {loadingStatus && loadingStatus === LOADING_STATUS.loading && <Loading />}
 
       {loadingStatus === LOADING_STATUS.loaded && prList && prList.length ? (
-        <>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div style={{ padding: "15px", fontWeight: "600" }}>
-              Items: {filteredPrList.length}
-            </div>
-            <div style={{ display: "inline-flex" }}>
-              <div>
-                <SearchFilter></SearchFilter>
-              </div>
-              <div>
-                <Button
-                  style={{ marginLeft: "20px" }}
-                  variant="light"
-                  onClick={resetPrCacheData}
-                >
-                  Refresh Cache
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <PrList prList={filteredPrList} />
-        </>
+        <Row>
+          <Col lg={7}>
+            <PrListWithFilter
+              prList={prList}
+              onRefreshCache={resetPrCacheData}
+            />
+          </Col>
+          <Col lg={5}>
+            <MonthlyPrMetrics prList={prList} />
+          </Col>
+        </Row>
       ) : (
         <></>
       )}

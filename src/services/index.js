@@ -47,7 +47,7 @@ export async function getPr(prList) {
 export async function clearPrCache(prList) {
   for (const d of prList) {
     const { owner, repo, pullNumber } = d;
-    removePrCache({
+    await githubUtils.removePrCache({
       owner,
       pullNumber,
       repo,
