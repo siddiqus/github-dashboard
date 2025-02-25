@@ -20,6 +20,7 @@ interface JiraIssueSearchProps {
 interface IssueSearchResponse {
   issueType: string;
   issueKey: string;
+  summary: string;
   description: string;
   status: string;
   createdAt: string;
@@ -32,14 +33,15 @@ function transformIssueData(issue: any): IssueSearchResponse {
   return {
     issueType: issue.fields.issuetype.name,
     issueKey: issue.key,
-    description: (issue.fields.description || ""),
-      // .replaceAll(/\r\n/g, "\n")
-      // .replaceAll(/\n/g, "\n"), // Ensure a default value if description is null
+    description: issue.fields.description || "",
+    // .replaceAll(/\r\n/g, "\n")
+    // .replaceAll(/\n/g, "\n"), // Ensure a default value if description is null
     status: issue.fields.status.name,
     createdAt: issue.fields.created, // Assuming 'created' field exists and is in the correct format
     resolvedAt: issue.fields.resolutiondate || issue.fields.created || "", // Use an empty string if resolutiondate is null
     userEmail: issue.fields.assignee?.emailAddress || "Unassigned", //Handle unassigned issues
     storyPoints: issue.fields.customfield_12919, // Assuming this field holds story points
+    summary: issue.fields.summary,
   };
 }
 

@@ -19,7 +19,7 @@ function Home() {
   const [dataStatus, setDataStatus] = useState(statusMap.NO_DATA);
 
   const [userDataList, setUserDataList] = useState([]);
-  const [jiraData, setJiraData] = useState({});
+  const [jiraData, setJiraData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
   const [jiraIsLoading, setJiraIsLoading] = useState(false);

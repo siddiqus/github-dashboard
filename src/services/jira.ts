@@ -109,7 +109,7 @@ export function getJiraMonthWiseIssueDataByUsername(
 
   const sortedUsernames = [...usernames].sort();
   sortedUsernames.forEach((username) => {
-    const monthWiseData = groupedByUser[username];
+    const monthWiseData = groupedByUser[username] || {};
 
     const monthDataList: number[] = [];
 

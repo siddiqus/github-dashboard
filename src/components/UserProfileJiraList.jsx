@@ -36,12 +36,8 @@ function JiraList({ jiraData }) {
       sortable: true,
     },
     {
-      name: "Description",
+      name: "Summary",
       selector: (row) => {
-        const truncatedDesc =
-          row.description.length > 400
-            ? row.description.substring(0, 400).split("\n").join("\n") + "..."
-            : row.description.split("\n").join("\n");
         return (
           <span
             style={{ cursor: "pointer", whiteSpace: "pre-line" }}
@@ -50,7 +46,7 @@ function JiraList({ jiraData }) {
               setShowModal(true);
             }}
           >
-            {truncatedDesc}
+            {row.summary}
           </span>
         );
       },

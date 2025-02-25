@@ -121,41 +121,6 @@ function UserProfile() {
     );
   }
 
-  function JiraList({ jiraData }) {
-    return (
-      <div className="table-responsive">
-        <Table bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Issue Type</th>
-              <th>Issue Key</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Resolved At</th>
-              <th>Story Points</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jiraData.map((jira, index) => {
-              return (
-                <tr key={index}>
-                  <td>{jira.issueType}</td>
-                  <td>{jira.issueKey}</td>
-                  <td>{jira.description}</td>
-                  <td>{jira.status}</td>
-                  <td>{jira.createdAt}</td>
-                  <td>{jira.resolvedAt || "-"}</td>
-                  <td>{jira.storyPoints}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-      </div>
-    );
-  }
-
   return (
     <>
       <div
@@ -196,9 +161,6 @@ function UserProfile() {
         </Tab>
         <Tab eventKey="jiraList" title="JIRA Tickets">
           <UserProfileJiraList jiraData={jiraData || []} />
-          {/* <div style={{ width: "100%", overflowX: "auto" }}>
-            <JiraList jiraData={jiraData || []} />
-          </div> */}
         </Tab>
       </Tabs>
       <br />
