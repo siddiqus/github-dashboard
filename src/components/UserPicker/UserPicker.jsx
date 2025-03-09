@@ -15,7 +15,7 @@ function getDefaultDates() {
 
   const defaultEndDate = endDateFromStorage
     ? new Date(endDateFromStorage)
-    : new Date().setDate(-1);
+    : new Date();
 
   const sixMonthsInMs = 6 * 30 * 24 * 60 * 60 * 1000;
   const defaultStartDate = startDateFromStorage
