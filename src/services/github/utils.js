@@ -191,45 +191,85 @@ export async function getPrDataCached({ owner, repo, pullNumber }) {
   });
 }
 
-export async function getUserData({
+export async function getUserPrCreatedStats({
   organization,
   author,
   startDate,
   endDate,
 }) {
-  const [prCreatedData, reviewedData] = await Promise.all([
-    getAllIssuesCached({
-      organization,
-      author,
-      startDate,
-      endDate,
-      mode: "author",
-    }),
-    getAllIssuesCached({
-      organization,
-      author,
-      startDate,
-      endDate,
-      mode: "reviewer",
-    }),
-  ]);
+  const prCreatedData = await getAllIssuesCached({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode: "author",
+  })
 
   const avatarUrl = prCreatedData.length
     ? prCreatedData[0].author_avatar_url
     : null;
 
   const monthlyPrStats = getMonthlyPrStats(prCreatedData);
+
+  return {
+    avatarUrl,
+    monthlyPrStats,
+    prList: prCreatedData
+  }
+}
+
+export async function getUserPrReviewStats({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
+  const reviewedData = await getAllIssuesCached({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode: "reviewer",
+  })
+
   const monthlyReviewData = getMonthlyReviewStats(reviewedData);
+
+  return {
+    monthlyReviewData
+  }
+}
+
+export async function getUserData({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
+
+  const [prCreatedData, reviewedData] = await Promise.all([
+    getUserPrCreatedStats({
+      organization,
+      author,
+      startDate,
+      endDate,
+    }),
+    getUserPrReviewStats({
+      organization,
+      author,
+      startDate,
+      endDate,
+    })
+  ])
 
   const user = userListByUsername[author];
 
   return {
     name: user ? user.name : author,
     username: author,
-    avatarUrl,
-    prList: prCreatedData,
-    ...monthlyPrStats,
-    ...monthlyReviewData,
+    avatarUrl: prCreatedData.avatarUrl,
+    prList: prCreatedData.prList,
+    ...prCreatedData.monthlyPrStats,
+    ...reviewedData.monthlyReviewData,
   };
 }
 
