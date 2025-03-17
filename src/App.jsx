@@ -22,35 +22,36 @@ function App() {
     return localStorage.getItem("gh_stats_app_isAuthenticated") === "true";
   });
 
-  const authenticate = useCallback(() => {
-    // If already authenticated, don't show prompts
-    if (localStorage.getItem("gh_stats_app_isAuthenticated") === "true") {
-      setIsAuthenticated(true);
-      return;
-    }
+  // const authenticate = useCallback(() => {
+  //   // If already authenticated, don't show prompts
+  //   if (localStorage.getItem("gh_stats_app_isAuthenticated") === "true") {
+  //     setIsAuthenticated(true);
+  //     return;
+  //   }
 
-    const username = prompt("Username:");
-    if (username === null) return;
+  //   const username = prompt("Username:");
+  //   if (username === null) return;
 
-    const password = prompt("Password:");
-    if (password === null) return;
+  //   const password = prompt("Password:");
+  //   if (password === null) return;
 
-    if (
-      username === import.meta.env.VITE_AUTH_USERNAME &&
-      password === import.meta.env.VITE_AUTH_PASSWORD
-    ) {
-      setIsAuthenticated(true);
-      localStorage.setItem("gh_stats_app_isAuthenticated", "true");
-    } else {
-      alert("Invalid credentials");
-      authenticate();
-    }
-  }, []);
+  //   if (
+  //     username === import.meta.env.VITE_AUTH_USERNAME &&
+  //     password === import.meta.env.VITE_AUTH_PASSWORD
+  //   ) {
+  //     setIsAuthenticated(true);
+  //     localStorage.setItem("gh_stats_app_isAuthenticated", "true");
+  //   } else {
+  //     alert("Invalid credentials");
+  //     authenticate();
+  //   }
+  // }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      authenticate();
-    }
+    // if (!isAuthenticated) {
+    //   authenticate();
+    // }
+    setIsAuthenticated(true)
   }, []); // Remove isAuthenticated from dependencies
 
   function goToHomePage() {
