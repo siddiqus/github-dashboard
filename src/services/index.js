@@ -1,6 +1,6 @@
 import * as githubUtils from "./github/utils";
 import { resetJiraCache } from "./jira";
-import userList from "../../cmp-users.json";
+import { getUsersFromStore } from "./utils";
 
 export async function getUserData({
   author,
@@ -13,6 +13,8 @@ export async function getUserData({
 
 // data: Array<{ author, startDate, endDate }>
 export async function resetUserDataCache(data, organization = "newscred") {
+  const userList = await getUsersFromStore();
+
   for (const d of data) {
     const { author, startDate, endDate } = d;
     await githubUtils.removeUserDataCache({

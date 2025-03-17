@@ -1,6 +1,5 @@
 import axios from "axios";
-import userList from "../../cmp-users.json";
-import { getFromCache } from "./utils";
+import { getFromCache, getUsersFromStore } from "./utils";
 import { dbStore } from "./idb";
 
 export type JiraIssue = {
@@ -35,8 +34,9 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
     opts
   );
 
+  const userList = await getUsersFromStore();
   const issues: JiraIssue[] = response.data.issues.map((issue) => {
-    const username = getUserNameFromEmail(issue.userEmail);
+    const username = getUserNameFromEmail(issue.userEmail, userList);
     return {
       ...issue,
       username,
@@ -48,7 +48,7 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
   };
 }
 
-function getUserNameFromEmail(email: string): string | null {
+function getUserNameFromEmail(email: string, userList: any[]): string | null {
   const user = userList.find((u) => u.email === email);
   return user ? user.username : null;
 }

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Tab, Table, Tabs, Container } from "react-bootstrap";
+import { Tab, Table, Tabs } from "react-bootstrap";
 import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
-import UserProfilePrList from "../components/UserProfilePrList/UserProfilePrList";
-import { getMonthsStringFromIssueList } from "../services/utils";
-import { dbStore } from "../services/idb";
 import UserProfileJiraList from "../components/UserProfileJiraList";
+import UserProfilePrList from "../components/UserProfilePrList/UserProfilePrList";
+import { dbStore } from "../services/idb";
+import { getMonthsStringFromIssueList } from "../services/utils";
 
 function UserProfile() {
   const { username } = useParams();

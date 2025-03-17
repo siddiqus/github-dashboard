@@ -3,10 +3,10 @@ import { HomeUserTable } from "../components/HomeUserTable/HomeUserTable";
 import Loading from "../components/Loading";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
-import { userListByUsername } from "../services/github/utils";
 import { dbStore } from "../services/idb";
 import { getUserData } from "../services/index";
 import { getJiraIssuesCached } from "../services/jira";
+import { getUsersFromStore } from "../services/utils";
 
 const statusMap = {
   LOADING: "loading",
@@ -31,6 +31,8 @@ function Home() {
 
       setJiraIsLoading(true);
 
+      const userList = await getUsersFromStore();
+
       await Promise.all([
         Promise.all(
           usernames.map((u) =>
@@ -47,7 +49,7 @@ function Home() {
         }),
 
         getJiraIssuesCached({
-          userEmails: usernames.map((u) => userListByUsername[u].email),
+          userEmails: usernames.map((u) => userList.find(u2 => u2.username === u)?.email),
           startDate,
           endDate,
         })

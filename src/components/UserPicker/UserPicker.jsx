@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Col, Form, Row, Dropdown } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
-import userList from "../../../cmp-users.json";
 import { TEAM_MEMBERS } from "../../constants";
 import { resetUserDataCache } from "../../services/index";
-import { formatDate } from "../../services/utils";
+import { formatDate, getUsersFromStore } from "../../services/utils";
 
 import "./UserPicker.css";
 import { dbStore } from "../../services/idb";
@@ -59,11 +58,16 @@ function TeamModeSelectionDropdown({ chooseUsers }) {
 
 function UserPicker({ onSubmit, onReset }) {
   const [usernames, setUsernames] = useState([]);
+  const [userList, setUserList] = useState([]);
 
   useEffect(() => {
     if (!usernames.length) {
       dbStore.getData("opti-gh-userlist").then((d) => setUsernames(d || []));
     }
+
+    getUsersFromStore().then((users) => {
+      setUserList(users);
+    });
   }, []);
 
   const { defaultStartDate, defaultEndDate } = getDefaultDates();

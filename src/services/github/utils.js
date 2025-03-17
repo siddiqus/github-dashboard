@@ -1,11 +1,8 @@
 import _ from "lodash";
 import { getAllIssues, getPrData } from "./github-api.service";
 
-import userList from "../../../cmp-users.json";
 import { dbStore } from "../idb";
-import { getFromCache } from "../utils";
-
-export const userListByUsername = _.keyBy(userList, "username");
+import { getFromCache, getUsersFromStore } from "../utils";
 
 function sortMonthsAscending(monthsArray) {
   return monthsArray.sort((a, b) => {
@@ -245,7 +242,6 @@ export async function getUserData({
   startDate,
   endDate,
 }) {
-
   const [prCreatedData, reviewedData] = await Promise.all([
     getUserPrCreatedStats({
       organization,
@@ -261,7 +257,8 @@ export async function getUserData({
     })
   ])
 
-  const user = userListByUsername[author];
+  const userList = await getUsersFromStore();
+  const user = userList.find(u => u.username === author);
 
   return {
     name: user ? user.name : author,
