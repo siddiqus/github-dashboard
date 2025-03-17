@@ -7,7 +7,7 @@ import { resetUserDataCache } from "../../services/index";
 import { formatDate } from "../../services/utils";
 
 import "./UserPicker.css";
-import { ghStore } from "../../services/idb";
+import { dbStore } from "../../services/idb";
 
 function getDefaultDates() {
   const startDateFromStorage = localStorage.getItem("opti-gh-startDate");
@@ -62,7 +62,7 @@ function UserPicker({ onSubmit, onReset }) {
 
   useEffect(() => {
     if (!usernames.length) {
-      ghStore.getData("opti-gh-userlist").then((d) => setUsernames(d || []));
+      dbStore.getData("opti-gh-userlist").then((d) => setUsernames(d || []));
     }
   }, []);
 
@@ -91,7 +91,7 @@ function UserPicker({ onSubmit, onReset }) {
     }
 
     const names = Array.from(new Set([...usernames, ...newNames]));
-    ghStore.setData("opti-gh-userlist", names);
+    dbStore.setData("opti-gh-userlist", names);
 
     setUsernames(names);
     e.target.value = "";
@@ -105,7 +105,7 @@ function UserPicker({ onSubmit, onReset }) {
   function removeTag(index) {
     const newUsernames = usernames.filter((el, i) => i !== index);
     setUsernames(newUsernames);
-    ghStore.setData("opti-gh-userlist", newUsernames);
+    dbStore.setData("opti-gh-userlist", newUsernames);
   }
 
   function handleUserPicketInputChange(event) {
@@ -140,7 +140,7 @@ function UserPicker({ onSubmit, onReset }) {
 
   function resetForm() {
     setUsernames([]);
-    ghStore.setData("opti-gh-userlist", []);
+    dbStore.setData("opti-gh-userlist", []);
     setStartDate(null);
     setEndDate(null);
     onReset();
@@ -152,7 +152,7 @@ function UserPicker({ onSubmit, onReset }) {
     }
 
     setUsernames(usernames);
-    ghStore.setData("opti-gh-userlist", usernames);
+    dbStore.setData("opti-gh-userlist", usernames);
   }
 
   function resetDataCache() {

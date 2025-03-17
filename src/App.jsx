@@ -1,7 +1,8 @@
 import Home from "./pages/Home";
 import UserProfile from "./pages/UserProfile";
+import Settings from "./pages/Settings";
 
-import { Container } from "react-bootstrap";
+import { Container, Button } from "react-bootstrap";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
   {
     path: "/users/:username",
     element: <UserProfile />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
   },
 ]);
 
@@ -64,15 +69,19 @@ function App() {
 
   return (
     <Container style={{ minHeight: "100vh" }}>
-      <h2
-        style={{
-          paddingTop: "20px",
-          cursor: "pointer",
-        }}
-        onClick={() => goToHomePage()}
-      >
-        Github Stats
-      </h2>
+      <div className="d-flex justify-content-between align-items-center" style={{ paddingTop: "20px" }}>
+        <h2
+          style={{
+            cursor: "pointer",
+          }}
+          onClick={() => goToHomePage()}
+        >
+          Github Stats
+        </h2>
+        <Button variant="light" onClick={() => router.navigate("/settings")}>
+          Settings
+        </Button>
+      </div>
       <hr />
       <RouterProvider router={router} />
     </Container>

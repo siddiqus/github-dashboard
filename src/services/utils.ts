@@ -1,4 +1,4 @@
-import { ghStore } from "./idb";
+import { dbStore } from "./idb";
 
 export function formatDate(theDate) {
   const date = new Date(theDate);
@@ -62,14 +62,76 @@ export async function getFromCache<D>(params: {
 }): Promise<D> {
   const cacheKey = params.getCacheKey();
 
-  const cachedData = await ghStore.getData(cacheKey);
+  const cachedData = await dbStore.getData(cacheKey);
   if (cachedData) {
     return cachedData;
   }
 
   const data = await params.fn();
 
-  await ghStore.setData(cacheKey, data);
+  await dbStore.setData(cacheKey, data);
 
   return data;
+}
+
+export async function getUsersFromStore() {
+  const results = await dbStore.getData('gh-stats-user-list');
+  return JSON.parse(results) || []
+}
+
+export async function getTeamsFromStore() {
+  const results = await dbStore.getData('gh-stats-teams-list');
+  return JSON.parse(results) || []
+}
+
+export async function addUserToStore(user) {
+  const users = await getUsersFromStore();
+  if (!users) {
+    await dbStore.setData('gh-stats-user-list', JSON.stringify([user]));
+  } else {
+    await dbStore.setData('gh-stats-user-list', JSON.stringify([...users, user]));
+  }
+}
+
+export async function deleteUserFromStore(email: string) {
+  const users = await getUsersFromStore();
+  const updatedUsers = users.filter(user => user.email !== email);
+  await dbStore.setData('gh-stats-user-list', JSON.stringify(updatedUsers));
+}
+
+export async function updateUserInStore(user) {
+  const users = await getUsersFromStore();
+  const userIndex = users.findIndex(u => u.email === user.email);
+  users[userIndex] = user
+  await dbStore.setData('gh-stats-user-list', JSON.stringify(users));
+}
+
+export async function setTeamsInStore(teams) {
+  await dbStore.setData('gh-stats-teams-list', JSON.stringify(teams));
+}
+
+export async function setUsersInStore(users) {
+  await dbStore.setData('gh-stats-user-list', JSON.stringify(users));
+}
+
+export async function addTeamToStore(team) {
+  const teams = await getTeamsFromStore();
+  if (!teams) {
+    await dbStore.setData('gh-stats-teams-list', JSON.stringify([team]));
+  } else {
+    await dbStore.setData('gh-stats-teams-list', JSON.stringify([...teams, team]));
+  }
+}
+
+export async function updateTeamInStore(team) {
+  const teams = await getTeamsFromStore();
+  const teamIndex = teams.findIndex(t => t.id === team.id);
+  teams[teamIndex] = team;
+  await dbStore.setData('gh-stats-teams-list', JSON.stringify(teams));
+}
+
+export async function deleteTeamFromStore(teamId: string) {
+  const teams = await getTeamsFromStore();
+  const updatedTeams = teams.filter(team => team.id !== teamId);
+  await dbStore.setData('gh-stats-teams-list', JSON.stringify(updatedTeams));
 }

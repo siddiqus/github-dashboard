@@ -4,7 +4,7 @@ import Loading from "../components/Loading";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
 import { userListByUsername } from "../services/github/utils";
-import { ghStore } from "../services/idb";
+import { dbStore } from "../services/idb";
 import { getUserData } from "../services/index";
 import { getJiraIssuesCached } from "../services/jira";
 
@@ -43,7 +43,7 @@ function Home() {
         ).then((githubData) => {
           setUserDataList(githubData);
           setDataStatus(statusMap.LOADED);
-          ghStore.setData("opti-gh-data", githubData);
+          dbStore.setData("opti-gh-data", githubData);
         }),
 
         getJiraIssuesCached({
@@ -54,7 +54,7 @@ function Home() {
           .then((jiraData) => {
             if (jiraData) {
               setJiraData(jiraData);
-              ghStore.setData("opti-jira-data", jiraData);
+              dbStore.setData("opti-jira-data", jiraData);
             }
             setJiraIsLoading(false);
           })

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Container, Tab, Tabs } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import { Button, Modal, Form } from "react-bootstrap";
-import db, { STORES, teamsStore, userStore } from "../services/idb";
+import { getTeamsFromStore, getUsersFromStore, setTeamsInStore, setUsersInStore } from "../services/utils";
 
 function UserForm({ user, onSubmit, onClose }) {
   const [formData, setFormData] = useState({
@@ -61,6 +61,7 @@ function UserForm({ user, onSubmit, onClose }) {
 }
 
 function UsersTab() {
+  const [originalUsers, setOriginalUsers] = useState([]);
   const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -69,9 +70,10 @@ function UsersTab() {
 
   useEffect(() => {
     const loadUsers = async () => {
-      const storedUsers = await userStore.getData('usersList')
-      if (storedUsers) {
+      const storedUsers = await getUsersFromStore()
+      if (storedUsers && storedUsers.length > 0) {
         setUsers(storedUsers);
+        setOriginalUsers(storedUsers);
       }
     };
     loadUsers();
@@ -80,14 +82,17 @@ function UsersTab() {
   const handleDeleteUser = async (user) => {
     const updatedUsers = users.filter((u) => u.username !== user.username);
     setUsers(updatedUsers);
-    await userStore.setData("usersList", updatedUsers);
+    setOriginalUsers(updatedUsers);
+
+    await setUsersInStore(updatedUsers);
     setShowDeleteModal(false);
     setSelectedUser(null);
   };
 
   const handleDeleteAllUsers = async () => {
     setUsers([]);
-    await userStore.setData("usersList", []);
+    setOriginalUsers([]);
+    await setUsersInStore([]);
     setShowDeleteAllModal(false);
   };
 
@@ -143,9 +148,18 @@ function UsersTab() {
       reader.onload = async (e) => {
         try {
           const uploadedUsers = JSON.parse(e.target.result);
-          const updatedUsers = [...users, ...uploadedUsers];
-          await userStore.setData("usersList", updatedUsers);
+          const updatedUsers = [...users, ...uploadedUsers].filter((user, index, self) =>
+            index === self.findIndex((u) => u.email === user.email)
+          ).map(u => {
+            const id = Date.now()
+            return {
+              ...u,
+              id
+            }
+          });
+          await setUsersInStore(updatedUsers)
           setUsers(updatedUsers);
+          setOriginalUsers(updatedUsers);
         } catch (error) {
           console.error("Error parsing JSON:", error);
         }
@@ -160,7 +174,8 @@ function UsersTab() {
       : [...users, userData];
 
     setUsers(updatedUsers);
-    await userStore.setData("usersList", updatedUsers);
+    setOriginalUsers(updatedUsers);
+    await setUsersInStore(updatedUsers)
     setShowModal(false);
     setSelectedUser(null);
   };
@@ -205,7 +220,13 @@ function UsersTab() {
             placeholder="Search users..."
             className="form-control w-25"
             onChange={(e) => {
-              // Implement search functionality
+              const searchTerm = e.target.value.toLowerCase();
+              const filteredUsers = originalUsers.filter(user =>
+                user.name.toLowerCase().includes(searchTerm) ||
+                user.username.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm)
+              );
+              setUsers(filteredUsers);
             }}
           />
         }
@@ -278,7 +299,7 @@ function TeamsTab() {
 
   useEffect(() => {
     const loadTeams = async () => {
-      const storedTeams = await teamsStore.getData("teamsList");
+      const storedTeams = await getTeamsFromStore();
       if (storedTeams) {
         setTeams(storedTeams);
       }
@@ -291,16 +312,18 @@ function TeamsTab() {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   const handleCreateTeam = async () => {
+    const id = Date.now();
+    const newTeam = { id, name: teamName, users: selectedUsers }
     const updatedTeams = selectedTeam
       ? teams.map((t) =>
         t.name === selectedTeam.name
-          ? { name: teamName, users: selectedUsers }
+          ? newTeam
           : t
       )
-      : [...teams, { name: teamName, users: selectedUsers }];
+      : [...teams, newTeam];
 
     setTeams(updatedTeams);
-    await teamsStore.setData("teamsList", updatedTeams);
+    await setTeamsInStore(updatedTeams);
     setShowModal(false);
     setSelectedTeam(null);
     setTeamName("");

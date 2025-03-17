@@ -2,7 +2,7 @@ import _ from "lodash";
 import { getAllIssues, getPrData } from "./github-api.service";
 
 import userList from "../../../cmp-users.json";
-import { ghStore } from "../idb";
+import { dbStore } from "../idb";
 import { getFromCache } from "../utils";
 
 export const userListByUsername = _.keyBy(userList, "username");
@@ -298,12 +298,12 @@ export async function removeUserDataCache({
     mode: "reviewer",
   });
 
-  await ghStore.unsetData(authorCachePath);
-  await ghStore.unsetData(reviewerCachePath);
+  await dbStore.unsetData(authorCachePath);
+  await dbStore.unsetData(reviewerCachePath);
 }
 
 export async function removePrCache({ owner, repo, pullNumber }) {
   const cachePath = getPrCacheKey({ owner, repo, pullNumber });
 
-  await ghStore.unsetData(cachePath);
+  await dbStore.unsetData(cachePath);
 }

@@ -1,7 +1,7 @@
 import axios from "axios";
 import userList from "../../cmp-users.json";
 import { getFromCache } from "./utils";
-import { ghStore } from "./idb";
+import { dbStore } from "./idb";
 
 export type JiraIssue = {
   issueType: string;
@@ -73,7 +73,7 @@ export async function getJiraIssuesCached(
 export async function resetJiraCache(opts: JiraIssueSearchParams) {
   for (const email of opts.userEmails) {
     const cacheKey = `${email}-${opts.startDate}-${opts.endDate}`;
-    await ghStore.unsetData(cacheKey);
+    await dbStore.unsetData(cacheKey);
   }
 }
 
