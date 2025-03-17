@@ -1,4 +1,4 @@
-import db from "./idb";
+import { ghStore } from "./idb";
 
 export function formatDate(theDate) {
   const date = new Date(theDate);
@@ -62,14 +62,14 @@ export async function getFromCache<D>(params: {
 }): Promise<D> {
   const cacheKey = params.getCacheKey();
 
-  const cachedData = await db.getData(cacheKey);
+  const cachedData = await ghStore.getData(cacheKey);
   if (cachedData) {
     return cachedData;
   }
 
   const data = await params.fn();
 
-  await db.setData(cacheKey, data);
+  await ghStore.setData(cacheKey, data);
 
   return data;
 }

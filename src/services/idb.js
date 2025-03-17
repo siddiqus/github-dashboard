@@ -59,5 +59,9 @@ class IndexedDBService {
   }
 }
 
-const db = new IndexedDBService("gh-stats-react-app", "gh-stats-user-data");
-export default db;
+export const ghStore = new IndexedDBService("gh-stats-react-app", "gh-stats-user-data");
+
+export const userStore = new IndexedDBService("gh-stats-react-app", "gh-stats-users");
+export const teamsStore = new IndexedDBService("gh-stats-react-app", "gh-stats-teams");
+
+export default ghStore;

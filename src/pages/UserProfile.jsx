@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserProfilePrList from "../components/UserProfilePrList/UserProfilePrList";
 import { getMonthsStringFromIssueList } from "../services/utils";
-import db from "../services/idb";
+import { ghStore } from "../services/idb";
 import UserProfileJiraList from "../components/UserProfileJiraList";
 
 function UserProfile() {
@@ -16,8 +16,8 @@ function UserProfile() {
 
   useEffect(() => {
     async function setDefaults() {
-      const userDataList = await db.getData("opti-gh-data");
-      const jiraData = await db.getData("opti-jira-data");
+      const userDataList = await ghStore.getData("opti-gh-data");
+      const jiraData = await ghStore.getData("opti-jira-data");
 
       const userJiraData = (jiraData || []).filter(
         (j) => j.username === username
