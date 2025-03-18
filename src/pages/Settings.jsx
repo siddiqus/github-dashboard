@@ -5,7 +5,6 @@ import SettingsUsersTab from "../components/Settings/SettingsUsersTab";
 function Settings() {
   return (
     <Container>
-      <h2 className="mb-4">Settings</h2>
       <Tabs defaultActiveKey="users" className="mb-3">
         <Tab eventKey="users" title="Users">
           <SettingsUsersTab />
