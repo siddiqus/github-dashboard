@@ -140,11 +140,11 @@ function SettingsTeamTab() {
                 {teams.map((team, index) => (
                     <div key={index} className="card mb-3">
                         <div className="card-body">
-                            <div className="d-flex justify-content-between align-items-center">
-                                <h5 className="card-title">{team.name}</h5>
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="card-title m-0">{team.name}</h5>
                                 <div>
                                     <Button
-                                        variant="light"
+                                        variant="outline-primary"
                                         size="sm"
                                         onClick={() => {
                                             setSelectedTeam(team);
@@ -156,7 +156,7 @@ function SettingsTeamTab() {
                                         Edit
                                     </Button>
                                     <Button
-                                        variant="danger"
+                                        variant="outline-danger"
                                         size="sm"
                                         className="ms-2"
                                         onClick={() => handleDeleteTeam(team)}
@@ -165,9 +165,22 @@ function SettingsTeamTab() {
                                     </Button>
                                 </div>
                             </div>
-                            <p className="card-text">
-                                {team.users.map(u => `${u.name} (${u.username})`).join(', ')}
-                            </p>
+                            <div className="user-chips">
+                                {team.users.map(user => (
+                                    <span key={user.id} className="badge bg-light text-dark me-2 mb-2" 
+                                          style={{
+                                              padding: '8px 12px',
+                                              borderRadius: '20px',
+                                              border: '1px solid #dee2e6',
+                                              fontSize: '0.9em'
+                                          }}>
+                                        {user.name}
+                                        <span className="text-muted ms-1" style={{ fontSize: '0.9em' }}>
+                                            @{user.username}
+                                        </span>
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 ))}
