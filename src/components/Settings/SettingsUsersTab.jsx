@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { getTeamsFromStore, getUsersFromStore, setUsersInStore } from "../../services/utils";
+import { getTeamsFromStore, getUsersFromStore, setTeamsInStore, setUsersInStore } from "../../services/utils";
 
 
 function UserForm({ user, onSubmit, onClose }) {
@@ -68,6 +68,11 @@ function SettingsUsersTab() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+    const [showTeamModal, setShowTeamModal] = useState(false);
+    const [availableTeams, setAvailableTeams] = useState([]);
+    const [selectedTeams, setSelectedTeams] = useState([]);
+    const [teamSearchValue, setTeamSearchValue] = useState('');
+    const [filteredTeams, setFilteredTeams] = useState([]);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -89,6 +94,15 @@ function SettingsUsersTab() {
         loadUsers();
     }, []);
 
+    useEffect(() => {
+        const loadTeams = async () => {
+            const teams = await getTeamsFromStore();
+            setAvailableTeams(teams || []);
+            setFilteredTeams(teams || []);
+        };
+        loadTeams();
+    }, []);
+
     const handleDeleteUser = async (user) => {
         const updatedUsers = users.filter((u) => u.username !== user.username);
         setUsers(updatedUsers);
@@ -104,6 +118,49 @@ function SettingsUsersTab() {
         setOriginalUsers([]);
         await setUsersInStore([]);
         setShowDeleteAllModal(false);
+    };
+
+    const handleTeamSearch = (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filtered = availableTeams.filter(team =>
+            team.name.toLowerCase().includes(searchTerm)
+        );
+        setFilteredTeams(filtered);
+        setTeamSearchValue(searchTerm);
+    };
+
+    const handleTeamSelect = (team) => {
+        setSelectedTeams(prev => {
+            if (prev.find(t => t.id === team.id)) {
+                return prev.filter(t => t.id !== team.id);
+            }
+            return [...prev, team];
+        });
+    };
+
+    const handleTeamAssignment = async () => {
+        const updatedTeams = availableTeams.map(team => ({
+            ...team,
+            users: team.users.filter(u => u.username !== selectedUser.username)
+        }));
+
+        selectedTeams.forEach(team => {
+            const teamToUpdate = updatedTeams.find(t => t.id === team.id);
+            if (teamToUpdate && !teamToUpdate.users.find(u => u.username === selectedUser.username)) {
+                teamToUpdate.users.push(selectedUser);
+            }
+        });
+
+        await setTeamsInStore(updatedTeams);
+        setAvailableTeams(updatedTeams);
+        setShowTeamModal(false);
+        setSelectedUser(null);
+        setSelectedTeams([]);
+
+        // Refresh users to show updated team assignments
+        const storedUsers = await getUsersFromStore();
+        setUsers(storedUsers);
+        setOriginalUsers(storedUsers);
     };
 
     const columns = [
@@ -140,6 +197,20 @@ function SettingsUsersTab() {
                         }}
                     >
                         Edit
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => {
+                            setSelectedUser(row);
+                            const userTeams = availableTeams.filter(team =>
+                                team.users.some(u => u.username === row.username)
+                            );
+                            setSelectedTeams(userTeams);
+                            setShowTeamModal(true);
+                        }}
+                    >
+                        Teams
                     </Button>
                     <Button
                         size="sm"
@@ -302,6 +373,58 @@ function SettingsUsersTab() {
                         Delete All
                     </Button>
                 </Modal.Footer>
+            </Modal>
+
+            <Modal show={showTeamModal} onHide={() => {
+                setShowTeamModal(false);
+                setSelectedUser(null);
+                setSelectedTeams([]);
+                setTeamSearchValue('');
+            }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Assign Teams - {selectedUser?.name}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Search Teams</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Search teams..."
+                                onChange={handleTeamSearch}
+                                value={teamSearchValue}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Available Teams</Form.Label>
+                            <div className="user-list mt-2" style={{ border: '1px solid lightgray', borderRadius: '4px', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                {filteredTeams.map(team => (
+                                    <Form.Check
+                                        key={team.id}
+                                        type="checkbox"
+                                        label={team.name}
+                                        checked={selectedTeams.some(t => t.id === team.id)}
+                                        onChange={() => handleTeamSelect(team)}
+                                    />
+                                ))}
+                            </div>
+                        </Form.Group>
+
+                        <div className="d-flex justify-content-end gap-2">
+                            <Button variant="secondary" onClick={() => {
+                                setShowTeamModal(false);
+                                setSelectedUser(null);
+                                setSelectedTeams([]);
+                            }}>
+                                Cancel
+                            </Button>
+                            <Button variant="primary" onClick={handleTeamAssignment}>
+                                Save
+                            </Button>
+                        </div>
+                    </Form>
+                </Modal.Body>
             </Modal>
         </div>
     );
