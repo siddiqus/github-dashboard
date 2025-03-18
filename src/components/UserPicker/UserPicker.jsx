@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Col, Form, Row, Dropdown } from "react-bootstrap";
+import { Alert, Button, Col, Dropdown, Form, Row } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
-import { TEAM_MEMBERS } from "../../constants";
 import { resetUserDataCache } from "../../services/index";
 import { formatDate, getTeamsFromStore, getUsersFromStore } from "../../services/utils";
 
-import "./UserPicker.css";
 import { dbStore } from "../../services/idb";
+import "./UserPicker.css";
 
 function getDefaultDates() {
   const startDateFromStorage = localStorage.getItem("opti-gh-startDate");
@@ -67,6 +66,7 @@ function TeamModeSelectionDropdown({ chooseUsers }) {
 function UserPicker({ onSubmit, onReset }) {
   const [usernames, setUsernames] = useState([]);
   const [userList, setUserList] = useState([]);
+  const [teams, setTeams] = useState([]);
 
   useEffect(() => {
     if (!usernames.length) {
@@ -75,6 +75,10 @@ function UserPicker({ onSubmit, onReset }) {
 
     getUsersFromStore().then((users) => {
       setUserList(users);
+    });
+
+    getTeamsFromStore().then((teams) => {
+      setTeams(teams);
     });
   }, []);
 
@@ -92,15 +96,7 @@ function UserPicker({ onSubmit, onReset }) {
 
     if (!value.trim()) return;
 
-    let newNames;
-
-    const selectedTeam = Object.keys(TEAM_MEMBERS).find((v) => v === value);
-
-    if (selectedTeam) {
-      newNames = TEAM_MEMBERS[selectedTeam] || [];
-    } else {
-      newNames = value.split(",").map((v) => v.trim());
-    }
+    const newNames = value.split(",").map((v) => v.trim());
 
     const names = Array.from(new Set([...usernames, ...newNames]));
     dbStore.setData("opti-gh-userlist", names);
