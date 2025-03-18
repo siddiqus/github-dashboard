@@ -118,12 +118,20 @@ function SettingsTeamTab() {
         reader.readAsText(file);
     };
 
+    const handleDeleteAllTeams = async () => {
+        if (window.confirm("Are you sure you want to delete all teams?")) {
+            setTeams([]);
+            await setTeamsInStore([]);
+        }
+    };
+
     return (
         <div className="mt-4">
             <div className="mb-4">
                 <Button onClick={() => setShowModal(true)}>Create Team</Button>
                 <input type="file" accept=".json" onChange={handleUploadJson} style={{ display: 'none' }} id="upload-json" />
                 <Button variant="secondary" onClick={() => document.getElementById('upload-json').click()} className="ms-2">Upload JSON</Button>
+                <Button variant="danger" onClick={handleDeleteAllTeams} className="ms-2">Delete All Teams</Button>
             </div>
 
             <div className="teams-list">
