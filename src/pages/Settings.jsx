@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Container, Tab, Tabs } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Button, Container, Form, Modal, Tab, Tabs } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { Button, Modal, Form } from "react-bootstrap";
-import { getTeamsFromStore, getUsersFromStore, setTeamsInStore, setUsersInStore } from "../services/utils";
+import SettingsTeamTab from "../components/SettingsTeamTab";
+import { getUsersFromStore, setUsersInStore } from "../services/utils";
 
 function UserForm({ user, onSubmit, onClose }) {
   const [formData, setFormData] = useState({
@@ -150,8 +150,8 @@ function UsersTab() {
           const uploadedUsers = JSON.parse(e.target.result);
           const updatedUsers = [...users, ...uploadedUsers].filter((user, index, self) =>
             index === self.findIndex((u) => u.email === user.email)
-          ).map(u => {
-            const id = Date.now()
+          ).map((u, index) => {
+            const id = `${Date.now()}_${index}`;
             return {
               ...u,
               id
@@ -294,123 +294,7 @@ function UsersTab() {
   );
 }
 
-function TeamsTab() {
-  const [teams, setTeams] = useState([]);
 
-  useEffect(() => {
-    const loadTeams = async () => {
-      const storedTeams = await getTeamsFromStore();
-      if (storedTeams) {
-        setTeams(storedTeams);
-      }
-    };
-    loadTeams();
-  }, []);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [teamName, setTeamName] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState([]);
-
-  const handleCreateTeam = async () => {
-    const id = Date.now();
-    const newTeam = { id, name: teamName, users: selectedUsers }
-    const updatedTeams = selectedTeam
-      ? teams.map((t) =>
-        t.name === selectedTeam.name
-          ? newTeam
-          : t
-      )
-      : [...teams, newTeam];
-
-    setTeams(updatedTeams);
-    await setTeamsInStore(updatedTeams);
-    setShowModal(false);
-    setSelectedTeam(null);
-    setTeamName("");
-    setSelectedUsers([]);
-  };
-
-  return (
-    <div className="mt-4">
-      <div className="mb-4">
-        <Button onClick={() => setShowModal(true)}>Create Team</Button>
-      </div>
-
-      <div className="teams-list">
-        {teams.map((team, index) => (
-          <div key={index} className="card mb-3">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-center">
-                <h5 className="card-title">{team.name}</h5>
-                <Button
-                  variant="light"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedTeam(team);
-                    setTeamName(team.name);
-                    setSelectedUsers(team.users);
-                    setShowModal(true);
-                  }}
-                >
-                  Edit
-                </Button>
-              </div>
-              <p className="card-text">
-                {team.users.length} members
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <Modal show={showModal} onHide={() => {
-        setShowModal(false);
-        setSelectedTeam(null);
-        setTeamName("");
-        setSelectedUsers([]);
-      }}>
-        <Modal.Header closeButton>
-          <Modal.Title>{selectedTeam ? "Edit Team" : "Create Team"}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Team Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Select Users</Form.Label>
-              {/* Implement user search and multi-select */}
-            </Form.Group>
-
-            <div className="d-flex justify-content-end gap-2">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setShowModal(false);
-                  setSelectedTeam(null);
-                  setTeamName("");
-                  setSelectedUsers([]);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={handleCreateTeam}>
-                {selectedTeam ? "Update" : "Create"}
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal>
-    </div>
-  );
-}
 
 function Settings() {
   return (
@@ -421,7 +305,7 @@ function Settings() {
           <UsersTab />
         </Tab>
         <Tab eventKey="teams" title="Teams">
-          <TeamsTab />
+          <SettingsTeamTab />
         </Tab>
       </Tabs>
     </Container>
