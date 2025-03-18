@@ -4,16 +4,36 @@ import DataTable from "react-data-table-component";
 import { getTeamsFromStore, getUsersFromStore, setTeamsInStore, setUsersInStore } from "../../services/utils";
 
 
-function UserForm({ user, onSubmit, onClose }) {
+function UserForm({ user, teams, onSubmit, onClose }) {
     const [formData, setFormData] = useState({
         name: user?.name || "",
         username: user?.username || "",
         email: user?.email || "",
     });
+    const [selectedTeams, setSelectedTeams] = useState(user?.teams || []);
+    const [teamSearchValue, setTeamSearchValue] = useState('');
+    const [filteredTeams, setFilteredTeams] = useState(teams);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        onSubmit({ ...formData, teams: selectedTeams });
+    };
+
+    const handleTeamSearch = (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        setTeamSearchValue(searchTerm);
+        setFilteredTeams(teams.filter(team => 
+            team.name.toLowerCase().includes(searchTerm)
+        ));
+    };
+
+    const handleTeamSelect = (team) => {
+        setSelectedTeams(prev => {
+            if (prev.find(t => t.id === team.id)) {
+                return prev.filter(t => t.id !== team.id);
+            }
+            return [...prev, team];
+        });
     };
 
     return (
@@ -48,6 +68,27 @@ function UserForm({ user, onSubmit, onClose }) {
                 />
             </Form.Group>
 
+            <Form.Group className="mb-3">
+                <Form.Label>Teams</Form.Label>
+                <Form.Control
+                    type="text"
+                    placeholder="Search teams..."
+                    onChange={handleTeamSearch}
+                    value={teamSearchValue}
+                />
+                <div className="user-list mt-2" style={{ border: '1px solid lightgray', borderRadius: '4px', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                    {filteredTeams.map(team => (
+                        <Form.Check
+                            key={team.id}
+                            type="checkbox"
+                            label={team.name}
+                            checked={selectedTeams.some(t => t.id === team.id)}
+                            onChange={() => handleTeamSelect(team)}
+                        />
+                    ))}
+                </div>
+            </Form.Group>
+
             <div className="d-flex justify-content-end gap-2">
                 <Button variant="secondary" onClick={onClose}>
                     Cancel
@@ -68,11 +109,7 @@ function SettingsUsersTab() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
-    const [showTeamModal, setShowTeamModal] = useState(false);
     const [availableTeams, setAvailableTeams] = useState([]);
-    const [selectedTeams, setSelectedTeams] = useState([]);
-    const [teamSearchValue, setTeamSearchValue] = useState('');
-    const [filteredTeams, setFilteredTeams] = useState([]);
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -98,7 +135,6 @@ function SettingsUsersTab() {
         const loadTeams = async () => {
             const teams = await getTeamsFromStore();
             setAvailableTeams(teams || []);
-            setFilteredTeams(teams || []);
         };
         loadTeams();
     }, []);
@@ -120,47 +156,80 @@ function SettingsUsersTab() {
         setShowDeleteAllModal(false);
     };
 
-    const handleTeamSearch = (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filtered = availableTeams.filter(team =>
-            team.name.toLowerCase().includes(searchTerm)
-        );
-        setFilteredTeams(filtered);
-        setTeamSearchValue(searchTerm);
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const uploadedUsers = JSON.parse(e.target.result);
+                    const updatedUsers = [...users, ...uploadedUsers].filter((user, index, self) =>
+                        index === self.findIndex((u) => u.email === user.email)
+                    ).map((u, index) => {
+                        const id = `${Date.now()}_${index}`;
+                        return {
+                            ...u,
+                            id
+                        }
+                    });
+                    await setUsersInStore(updatedUsers)
+                    setUsers(updatedUsers);
+                    setOriginalUsers(updatedUsers);
+                } catch (error) {
+                    console.error("Error parsing JSON:", error);
+                }
+            };
+            reader.readAsText(file);
+        }
     };
 
-    const handleTeamSelect = (team) => {
-        setSelectedTeams(prev => {
-            if (prev.find(t => t.id === team.id)) {
-                return prev.filter(t => t.id !== team.id);
-            }
-            return [...prev, team];
-        });
-    };
+    const handleUserSubmit = async (userData) => {
+        const { teams: userTeams, ...userDetails } = userData;
+        
+        // Update user in users list, preserving the teams property
+        const updatedUsers = selectedUser
+            ? users.map((u) => {
+                if (u.username === selectedUser.username) {
+                    return { ...userDetails, teams: userTeams };
+                }
+                return u;
+            })
+            : [...users, { ...userDetails, teams: userTeams }];
 
-    const handleTeamAssignment = async () => {
+        // Update team assignments
         const updatedTeams = availableTeams.map(team => ({
             ...team,
-            users: team.users.filter(u => u.username !== selectedUser.username)
+            users: team.users.filter(u => u.username !== userDetails.username)
         }));
 
-        selectedTeams.forEach(team => {
+        userTeams.forEach(team => {
             const teamToUpdate = updatedTeams.find(t => t.id === team.id);
-            if (teamToUpdate && !teamToUpdate.users.find(u => u.username === selectedUser.username)) {
-                teamToUpdate.users.push(selectedUser);
+            if (teamToUpdate) {
+                teamToUpdate.users.push(userDetails);
             }
         });
 
-        await setTeamsInStore(updatedTeams);
-        setAvailableTeams(updatedTeams);
-        setShowTeamModal(false);
-        setSelectedUser(null);
-        setSelectedTeams([]);
+        await Promise.all([
+            setUsersInStore(updatedUsers),
+            setTeamsInStore(updatedTeams)
+        ]);
 
-        // Refresh users to show updated team assignments
+        // Load fresh data to ensure UI is in sync
         const storedUsers = await getUsersFromStore();
+        const teams = await getTeamsFromStore();
+
+        // Update teams data for all users
+        for (const user of storedUsers) {
+            user.teams = teams.filter(team => 
+                team.users.some(u => u.username === user.username)
+            );
+        }
+
         setUsers(storedUsers);
         setOriginalUsers(storedUsers);
+        setAvailableTeams(teams);
+        setShowModal(false);
+        setSelectedUser(null);
     };
 
     const columns = [
@@ -200,20 +269,6 @@ function SettingsUsersTab() {
                     </Button>
                     <Button
                         size="sm"
-                        variant="primary"
-                        onClick={() => {
-                            setSelectedUser(row);
-                            const userTeams = availableTeams.filter(team =>
-                                team.users.some(u => u.username === row.username)
-                            );
-                            setSelectedTeams(userTeams);
-                            setShowTeamModal(true);
-                        }}
-                    >
-                        Teams
-                    </Button>
-                    <Button
-                        size="sm"
                         variant="danger"
                         onClick={() => {
                             setSelectedUser(row);
@@ -226,45 +281,6 @@ function SettingsUsersTab() {
             ),
         },
     ];
-
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const uploadedUsers = JSON.parse(e.target.result);
-                    const updatedUsers = [...users, ...uploadedUsers].filter((user, index, self) =>
-                        index === self.findIndex((u) => u.email === user.email)
-                    ).map((u, index) => {
-                        const id = `${Date.now()}_${index}`;
-                        return {
-                            ...u,
-                            id
-                        }
-                    });
-                    await setUsersInStore(updatedUsers)
-                    setUsers(updatedUsers);
-                    setOriginalUsers(updatedUsers);
-                } catch (error) {
-                    console.error("Error parsing JSON:", error);
-                }
-            };
-            reader.readAsText(file);
-        }
-    };
-
-    const handleUserSubmit = async (userData) => {
-        const updatedUsers = selectedUser
-            ? users.map((u) => (u.username === selectedUser.username ? userData : u))
-            : [...users, userData];
-
-        setUsers(updatedUsers);
-        setOriginalUsers(updatedUsers);
-        await setUsersInStore(updatedUsers)
-        setShowModal(false);
-        setSelectedUser(null);
-    };
 
     return (
         <div className="mt-4">
@@ -326,6 +342,7 @@ function SettingsUsersTab() {
                 <Modal.Body>
                     <UserForm
                         user={selectedUser}
+                        teams={availableTeams}
                         onSubmit={handleUserSubmit}
                         onClose={() => {
                             setShowModal(false);
@@ -373,58 +390,6 @@ function SettingsUsersTab() {
                         Delete All
                     </Button>
                 </Modal.Footer>
-            </Modal>
-
-            <Modal show={showTeamModal} onHide={() => {
-                setShowTeamModal(false);
-                setSelectedUser(null);
-                setSelectedTeams([]);
-                setTeamSearchValue('');
-            }}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Assign Teams - {selectedUser?.name}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Search Teams</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Search teams..."
-                                onChange={handleTeamSearch}
-                                value={teamSearchValue}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Available Teams</Form.Label>
-                            <div className="user-list mt-2" style={{ border: '1px solid lightgray', borderRadius: '4px', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
-                                {filteredTeams.map(team => (
-                                    <Form.Check
-                                        key={team.id}
-                                        type="checkbox"
-                                        label={team.name}
-                                        checked={selectedTeams.some(t => t.id === team.id)}
-                                        onChange={() => handleTeamSelect(team)}
-                                    />
-                                ))}
-                            </div>
-                        </Form.Group>
-
-                        <div className="d-flex justify-content-end gap-2">
-                            <Button variant="secondary" onClick={() => {
-                                setShowTeamModal(false);
-                                setSelectedUser(null);
-                                setSelectedTeams([]);
-                            }}>
-                                Cancel
-                            </Button>
-                            <Button variant="primary" onClick={handleTeamAssignment}>
-                                Save
-                            </Button>
-                        </div>
-                    </Form>
-                </Modal.Body>
             </Modal>
         </div>
     );
