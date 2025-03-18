@@ -97,9 +97,9 @@ function SettingsTeamTab() {
         reader.onload = async (e) => {
             try {
                 const json = JSON.parse(e.target.result);
-                const newTeams = json.map(team => {
+                const newTeams = json.map((team, index) => {
                     const teamUsers = team.users.map(email => users.find(user => user.email === email)).filter(Boolean);
-                    return { id: Date.now(), name: team.name, users: teamUsers };
+                    return { id: `${Date.now()}_${index}`, name: team.name, users: teamUsers };
                 });
 
                 const allTeams = [...teams, ...newTeams];
