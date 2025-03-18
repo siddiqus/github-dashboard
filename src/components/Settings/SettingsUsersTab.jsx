@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { getUsersFromStore, setUsersInStore } from "../../services/utils";
+import { getTeamsFromStore, getUsersFromStore, setUsersInStore } from "../../services/utils";
 
 
 function UserForm({ user, onSubmit, onClose }) {
@@ -72,6 +72,15 @@ function SettingsUsersTab() {
     useEffect(() => {
         const loadUsers = async () => {
             const storedUsers = await getUsersFromStore()
+            const teams = await getTeamsFromStore();
+
+            for (const user of storedUsers) {
+                const userTeams = teams.filter(team => {
+                    return !!team.users.find(u => u.username === user.username)
+                })
+                user.teams = userTeams;
+            }
+
             if (storedUsers && storedUsers.length > 0) {
                 setUsers(storedUsers);
                 setOriginalUsers(storedUsers);
@@ -111,6 +120,11 @@ function SettingsUsersTab() {
         {
             name: "Email",
             selector: (row) => row.email,
+            sortable: true,
+        },
+        {
+            name: "Teams",
+            selector: (row) => row.teams?.map(t => t.name).join(", ") || "-",
             sortable: true,
         },
         {
@@ -193,7 +207,8 @@ function SettingsUsersTab() {
                         const filteredUsers = originalUsers.filter(user =>
                             user.name.toLowerCase().includes(searchTerm) ||
                             user.username.toLowerCase().includes(searchTerm) ||
-                            user.email.toLowerCase().includes(searchTerm)
+                            user.email.toLowerCase().includes(searchTerm) ||
+                            user.teams?.map(t => t.name).some(t => t.toLowerCase().includes(searchTerm))
                         );
                         setUsers(filteredUsers);
                     }}
