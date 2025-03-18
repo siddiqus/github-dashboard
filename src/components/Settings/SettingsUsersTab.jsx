@@ -183,15 +183,23 @@ function SettingsUsersTab() {
 
     return (
         <div className="mt-4">
-            <div className="d-flex justify-content-between mb-4">
-                <Button
-                    variant="danger"
-                    onClick={() => setShowDeleteAllModal(true)}
-                    disabled={users.length === 0}
-                >
-                    Delete All Users
-                </Button>
-                <div className="d-flex gap-3">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <input
+                    type="text"
+                    placeholder="Search users..."
+                    className="form-control w-25"
+                    onChange={(e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const filteredUsers = originalUsers.filter(user =>
+                            user.name.toLowerCase().includes(searchTerm) ||
+                            user.username.toLowerCase().includes(searchTerm) ||
+                            user.email.toLowerCase().includes(searchTerm)
+                        );
+                        setUsers(filteredUsers);
+                    }}
+                />
+                <div className="d-flex gap-2">
+                    <Button onClick={() => setShowModal(true)}>Add User</Button>
                     <div>
                         <input
                             type="file"
@@ -200,11 +208,17 @@ function SettingsUsersTab() {
                             style={{ display: "none" }}
                             id="fileUpload"
                         />
-                        <label htmlFor="fileUpload" className="btn btn-outline-primary">
+                        <label htmlFor="fileUpload" className="btn btn-outline-primary mb-0">
                             Upload Users
                         </label>
                     </div>
-                    <Button onClick={() => setShowModal(true)}>Add User</Button>
+                    <Button
+                        variant="danger"
+                        onClick={() => setShowDeleteAllModal(true)}
+                        disabled={users.length === 0}
+                    >
+                        Delete All Users
+                    </Button>
                 </div>
             </div>
 
@@ -214,23 +228,6 @@ function SettingsUsersTab() {
                 pagination
                 highlightOnHover
                 searchable
-                subHeader
-                subHeaderComponent={
-                    <input
-                        type="text"
-                        placeholder="Search users..."
-                        className="form-control w-25"
-                        onChange={(e) => {
-                            const searchTerm = e.target.value.toLowerCase();
-                            const filteredUsers = originalUsers.filter(user =>
-                                user.name.toLowerCase().includes(searchTerm) ||
-                                user.username.toLowerCase().includes(searchTerm) ||
-                                user.email.toLowerCase().includes(searchTerm)
-                            );
-                            setUsers(filteredUsers);
-                        }}
-                    />
-                }
             />
 
             <Modal show={showModal} onHide={() => {
