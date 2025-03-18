@@ -98,7 +98,7 @@ function SettingsTeamTab() {
             try {
                 const json = JSON.parse(e.target.result);
                 const newTeams = json.map(team => {
-                    const teamUsers = team.users.map(email => users.find(user => user.username === email)).filter(Boolean);
+                    const teamUsers = team.users.map(email => users.find(user => user.email === email)).filter(Boolean);
                     return { id: Date.now(), name: team.name, users: teamUsers };
                 });
 
@@ -131,7 +131,9 @@ function SettingsTeamTab() {
                 <Button onClick={() => setShowModal(true)}>Create Team</Button>
                 <input type="file" accept=".json" onChange={handleUploadJson} style={{ display: 'none' }} id="upload-json" />
                 <Button variant="secondary" onClick={() => document.getElementById('upload-json').click()} className="ms-2">Upload JSON</Button>
-                <Button variant="danger" onClick={handleDeleteAllTeams} className="ms-2">Delete All Teams</Button>
+                {
+                    teams.length > 0 && (<Button variant="danger" onClick={handleDeleteAllTeams} className="ms-2">Delete All Teams</Button>)
+                }
             </div>
 
             <div className="teams-list">
@@ -248,6 +250,7 @@ function SettingsTeamTab() {
                     </Form>
                 </Modal.Body>
             </Modal>
+            <p>&nbsp;</p>
         </div>
     );
 }
