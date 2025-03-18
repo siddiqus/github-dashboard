@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import { getTeamsFromStore, getUsersFromStore, setTeamsInStore } from "../services/utils";
+import { getTeamsFromStore, getUsersFromStore, setTeamsInStore } from "../../services/utils";
 
 function SettingsTeamTab() {
     const [teams, setTeams] = useState([]);
@@ -83,10 +83,47 @@ function SettingsTeamTab() {
         setSearchValue('');
     };
 
+    const handleDeleteTeam = async (teamToDelete) => {
+        const updatedTeams = teams.filter(team => team.id !== teamToDelete.id);
+        setTeams(updatedTeams);
+        await setTeamsInStore(updatedTeams);
+    };
+
+    const handleUploadJson = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                const newTeams = json.map(team => {
+                    const teamUsers = team.users.map(email => users.find(user => user.username === email)).filter(Boolean);
+                    return { id: Date.now(), name: team.name, users: teamUsers };
+                });
+
+                const allTeams = [...teams, ...newTeams];
+
+                const uniqueTeams = allTeams.filter(newTeam => !teams.some(existingTeam => existingTeam.name.toLowerCase() === newTeam.name.toLowerCase()));
+                if (uniqueTeams.length !== allTeams.length) {
+                    alert("Some teams were not added because they have duplicate names.");
+                }
+
+                setTeams(uniqueTeams);
+                await setTeamsInStore(uniqueTeams);
+            } catch (error) {
+                alert("Invalid JSON format.");
+            }
+        };
+        reader.readAsText(file);
+    };
+
     return (
         <div className="mt-4">
             <div className="mb-4">
                 <Button onClick={() => setShowModal(true)}>Create Team</Button>
+                <input type="file" accept=".json" onChange={handleUploadJson} style={{ display: 'none' }} id="upload-json" />
+                <Button variant="secondary" onClick={() => document.getElementById('upload-json').click()} className="ms-2">Upload JSON</Button>
             </div>
 
             <div className="teams-list">
@@ -95,18 +132,28 @@ function SettingsTeamTab() {
                         <div className="card-body">
                             <div className="d-flex justify-content-between align-items-center">
                                 <h5 className="card-title">{team.name}</h5>
-                                <Button
-                                    variant="light"
-                                    size="sm"
-                                    onClick={() => {
-                                        setSelectedTeam(team);
-                                        setTeamName(team.name);
-                                        setSelectedUsers(team.users);
-                                        setShowModal(true);
-                                    }}
-                                >
-                                    Edit
-                                </Button>
+                                <div>
+                                    <Button
+                                        variant="light"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSelectedTeam(team);
+                                            setTeamName(team.name);
+                                            setSelectedUsers(team.users);
+                                            setShowModal(true);
+                                        }}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        className="ms-2"
+                                        onClick={() => handleDeleteTeam(team)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
                             </div>
                             <p className="card-text">
                                 {team.users.map(u => `${u.name} (${u.username})`).join(', ')}
