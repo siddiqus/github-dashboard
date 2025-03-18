@@ -72,9 +72,10 @@ function SettingsTeamTab() {
         if (selectedUsers.find(u => u.id === user.id)) {
             return;
         }
+
         setSelectedUsers(prevSelected => {
-            if (prevSelected.includes(user)) {
-                return prevSelected.filter(u => u !== user);
+            if (prevSelected.find(u => u.id === user.id)) {
+                return prevSelected.filter(u => u.id !== user.id);
             } else {
                 return [...prevSelected, user];
             }
@@ -167,13 +168,13 @@ function SettingsTeamTab() {
                             </div>
                             <div className="user-chips">
                                 {team.users.map(user => (
-                                    <span key={user.id} className="badge bg-light text-dark me-2 mb-2" 
-                                          style={{
-                                              padding: '8px 12px',
-                                              borderRadius: '20px',
-                                              border: '1px solid #dee2e6',
-                                              fontSize: '0.9em'
-                                          }}>
+                                    <span key={user.id} className="badge bg-light text-dark me-2 mb-2"
+                                        style={{
+                                            padding: '8px 12px',
+                                            borderRadius: '20px',
+                                            border: '1px solid #dee2e6',
+                                            fontSize: '0.9em'
+                                        }}>
                                         {user.name}
                                         <span className="text-muted ms-1" style={{ fontSize: '0.9em' }}>
                                             @{user.username}
