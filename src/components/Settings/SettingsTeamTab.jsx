@@ -204,7 +204,7 @@ function SettingsTeamTab() {
                             />
                             <div className="user-list mt-2" style={{ border: '1px solid lightgray', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
                                 {filteredUsers
-                                    .filter(user => !selectedUsers.includes(user))
+                                    .filter(user => !selectedUsers.find(u => u.email === user.email))
                                     .map(user => (
                                         <div
                                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eaeaea'}
