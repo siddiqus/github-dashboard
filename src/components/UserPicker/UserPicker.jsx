@@ -3,7 +3,7 @@ import { Alert, Button, Col, Form, Row, Dropdown } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
 import { TEAM_MEMBERS } from "../../constants";
 import { resetUserDataCache } from "../../services/index";
-import { formatDate, getUsersFromStore } from "../../services/utils";
+import { formatDate, getTeamsFromStore, getUsersFromStore } from "../../services/utils";
 
 import "./UserPicker.css";
 import { dbStore } from "../../services/idb";
@@ -29,7 +29,14 @@ function getDefaultDates() {
 
 function TeamModeSelectionDropdown({ chooseUsers }) {
   const [selected, setSelected] = useState();
-  const teams = Object.keys(TEAM_MEMBERS);
+  const [teams, setTeams] = useState([]);
+
+  useEffect(() => {
+    getTeamsFromStore().then((teams) => {
+      setTeams(teams);
+    });
+  }, []);
+
   return (
     <Dropdown
       onSelect={(e) => {
@@ -37,17 +44,18 @@ function TeamModeSelectionDropdown({ chooseUsers }) {
           setSelected("Choose manually");
           chooseUsers([]);
         } else {
-          chooseUsers(TEAM_MEMBERS[e]);
+          const users = teams.find(t => t.id.toString() === e).users;
+          chooseUsers(users.map(u => u.username));
           setSelected(e);
         }
       }}
     >
-      <Dropdown.Toggle>{selected || "Select team"} </Dropdown.Toggle>
+      <Dropdown.Toggle>{teams.find(t => t.id.toString() === selected)?.name || "Select team"} </Dropdown.Toggle>
 
       <Dropdown.Menu>
-        {teams.sort().map((t, index) => (
-          <Dropdown.Item eventKey={t} key={index}>
-            {t}
+        {teams.sort((a, b) => a.name.localeCompare(b.name)).map((team, index) => (
+          <Dropdown.Item eventKey={team.id} key={index}>
+            {team.name}
           </Dropdown.Item>
         ))}
         <Dropdown.Item eventKey={"manual"}>Choose manually</Dropdown.Item>
