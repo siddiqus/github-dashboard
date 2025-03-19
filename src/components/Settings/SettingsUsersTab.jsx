@@ -22,7 +22,7 @@ function UserForm({ user, teams, onSubmit, onClose }) {
     const handleTeamSearch = (e) => {
         const searchTerm = e.target.value.toLowerCase();
         setTeamSearchValue(searchTerm);
-        setFilteredTeams(teams.filter(team => 
+        setFilteredTeams(teams.filter(team =>
             team.name.toLowerCase().includes(searchTerm)
         ));
     };
@@ -185,7 +185,7 @@ function SettingsUsersTab() {
 
     const handleUserSubmit = async (userData) => {
         const { teams: userTeams, ...userDetails } = userData;
-        
+
         // Update user in users list, preserving the teams property
         const updatedUsers = selectedUser
             ? users.map((u) => {
@@ -220,7 +220,7 @@ function SettingsUsersTab() {
 
         // Update teams data for all users
         for (const user of storedUsers) {
-            user.teams = teams.filter(team => 
+            user.teams = teams.filter(team =>
                 team.users.some(u => u.username === user.username)
             );
         }
@@ -233,7 +233,7 @@ function SettingsUsersTab() {
     };
 
     const handleExportUsers = () => {
-        const usersWithoutTeams = users.map(({ teams, ...user }) => user);
+        const usersWithoutTeams = users.map(({ id, teams, ...user }) => user);
         const dataStr = JSON.stringify(usersWithoutTeams, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
