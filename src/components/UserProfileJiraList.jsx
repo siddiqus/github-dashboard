@@ -1,5 +1,3 @@
-// https://jira.sso.episerver.net/browse/APP-43
-
 import { useMemo, useState } from "react";
 import {
   Button,
@@ -25,7 +23,7 @@ function JiraList({ jiraData }) {
         <>
           <a
             target="_blank"
-            href={`https://jira.sso.episerver.net/browse/${row.issueKey}`}
+            href={`${import.meta.env.VITE_APP_JIRA_URL}/browse/${row.issueKey}`.replaceAll(/\/\//g, '/')}
           >
             {row.issueKey}
           </a>

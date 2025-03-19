@@ -4,7 +4,7 @@ dotenv.config();
 import { Version2Client } from "jira.js";
 
 const client = new Version2Client({
-  host: "https://jira.sso.episerver.net/",
+  host: process.env.VITE_APP_JIRA_URL || "",
   authentication: {
     personalAccessToken: process.env.VITE_APP_JIRA_PAT || "",
   },

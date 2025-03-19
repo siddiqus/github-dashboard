@@ -6,13 +6,13 @@ export async function getUserData({
   author,
   startDate,
   endDate,
-  organization = "newscred",
+  organization = import.meta.env.VITE_APP_GITHUB_ORG,
 }) {
   return githubUtils.getUserData({ organization, author, startDate, endDate });
 }
 
 // data: Array<{ author, startDate, endDate }>
-export async function resetUserDataCache(data, organization = "newscred") {
+export async function resetUserDataCache(data, organization = import.meta.env.VITE_APP_GITHUB_ORG) {
   const userList = await getUsersFromStore();
 
   for (const d of data) {
