@@ -233,7 +233,8 @@ function SettingsUsersTab() {
     };
 
     const handleExportUsers = () => {
-        const dataStr = JSON.stringify(users, null, 2);
+        const usersWithoutTeams = users.map(({ teams, ...user }) => user);
+        const dataStr = JSON.stringify(usersWithoutTeams, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
