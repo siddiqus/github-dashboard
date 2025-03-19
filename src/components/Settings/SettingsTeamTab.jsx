@@ -126,12 +126,30 @@ function SettingsTeamTab() {
         }
     };
 
+    const handleExportJson = () => {
+        const exportData = teams.map(team => ({
+            name: team.name,
+            users: team.users.map(user => user.email)
+        }));
+        
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'teams.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="mt-4">
             <div className="mb-4">
                 <Button onClick={() => setShowModal(true)}>Create Team</Button>
                 <input type="file" accept=".json" onChange={handleUploadJson} style={{ display: 'none' }} id="upload-json" />
                 <Button variant="secondary" onClick={() => document.getElementById('upload-json').click()} className="ms-2">Upload JSON</Button>
+                <Button variant="outline-secondary" onClick={handleExportJson} className="ms-2">Export JSON</Button>
                 {
                     teams.length > 0 && (<Button variant="danger" onClick={handleDeleteAllTeams} className="ms-2">Delete All Teams</Button>)
                 }

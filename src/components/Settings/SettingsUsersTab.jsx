@@ -232,6 +232,19 @@ function SettingsUsersTab() {
         setSelectedUser(null);
     };
 
+    const handleExportUsers = () => {
+        const dataStr = JSON.stringify(users, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'users.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     const columns = [
         {
             name: "Name",
@@ -314,6 +327,9 @@ function SettingsUsersTab() {
                             Upload Users
                         </label>
                     </div>
+                    <Button variant="outline-secondary" onClick={handleExportUsers}>
+                        Export Users
+                    </Button>
                     <Button
                         variant="danger"
                         onClick={() => setShowDeleteAllModal(true)}
