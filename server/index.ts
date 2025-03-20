@@ -49,6 +49,7 @@ app.post("/jira/issue-search", async (req, res) => {
   }
 });
 
-app.listen(4089, () => {
-  console.log(`backend is running on port 4089`);
+const port = process.env.VITA_APP_BACKEND_PORT || 4089
+app.listen(port, () => {
+  console.log(`backend is running on port ${port}`);
 });

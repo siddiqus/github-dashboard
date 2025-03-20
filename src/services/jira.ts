@@ -29,8 +29,9 @@ type JiraChartData = {
 };
 
 export async function searchJiraIssues(opts: JiraIssueSearchParams) {
+  const url = `${(import.meta.env.VITA_APP_BACKEND_URL as string).replaceAll(/\/\//g, '/')}:${import.meta.env.VITA_APP_BACKEND_PORT}`
   const response = await axios.post(
-    "http://localhost:4089/jira/issue-search",
+    `${url}/jira/issue-search`,
     opts
   );
 
