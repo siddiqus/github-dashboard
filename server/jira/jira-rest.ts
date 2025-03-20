@@ -88,29 +88,3 @@ export async function fetchAllJiraIssues(
   return allIssues.map(transformIssueData);
 }
 
-// async function run() {
-//   const obj = {
-//     startDate: "2024-06-01",
-//     endDate: "2025-02-17",
-//     userEmails: [
-//       "nabil.ashraf@optimizely.com",
-//       "anjum.haz@optimizely.com",
-//       "tajrian.jahid@optimizely.com",
-//       "jannatul.ferdows@optimizely.com",
-//     ],
-//   };
-
-//   const results = await fetchAllJiraIssues(obj);
-
-//   console.log(results);
-// }
-
-// run()
-//   .then(() => {
-//     console.log("done");
-//     process.exit(0);
-//   })
-//   .catch((err) => {
-//     console.log("error", err);
-//     process.exit(1);
-//   });
