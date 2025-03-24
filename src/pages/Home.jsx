@@ -12,7 +12,7 @@ const statusMap = {
   LOADING: "loading",
   NO_DATA: "no-data",
   LOADED: "loaded",
-  ERROR: "error",
+  ERROR: "error"
 };
 
 function Home() {
