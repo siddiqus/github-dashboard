@@ -29,11 +29,11 @@ type JiraChartData = {
 };
 
 export async function searchJiraIssues(opts: JiraIssueSearchParams) {
-  const url = `${(import.meta.env.VITA_APP_BACKEND_URL as string).replaceAll(/\/\//g, '/')}:${import.meta.env.VITA_APP_BACKEND_PORT}`
-  const response = await axios.post(
-    `${url}/jira/issue-search`,
-    opts
-  );
+  const baseUrl = import.meta.env.VITE_APP_BACKEND_URL as string;
+  const backendPort = import.meta.env.VITE_APP_BACKEND_PORT;
+  const url = `${baseUrl.replace(/\/+$/, "")}:${backendPort}`;
+
+  const response = await axios.post(`${url}/jira/issue-search`, opts);
 
   const userList = await getUsersFromStore();
   const issues: JiraIssue[] = response.data.issues.map((issue) => {
