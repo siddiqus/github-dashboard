@@ -103,13 +103,15 @@ function UserForm({ user, teams, onSubmit, onClose }) {
 
 
 function SettingsUsersTab() {
-    const [originalUsers, setOriginalUsers] = useState([]);
     const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
     const [availableTeams, setAvailableTeams] = useState([]);
+
+    const [searchInputValue, setSearchInputValue] = useState('');
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -125,7 +127,7 @@ function SettingsUsersTab() {
 
             if (storedUsers && storedUsers.length > 0) {
                 setUsers(storedUsers);
-                setOriginalUsers(storedUsers);
+                setFilteredUsers(storedUsers);
             }
         };
         loadUsers();
@@ -142,18 +144,19 @@ function SettingsUsersTab() {
     const handleDeleteUser = async (user) => {
         const updatedUsers = users.filter((u) => u.username !== user.username);
         setUsers(updatedUsers);
-        setOriginalUsers(updatedUsers);
-
+        setFilteredUsers(updatedUsers);
         await setUsersInStore(updatedUsers);
         setShowDeleteModal(false);
         setSelectedUser(null);
+        setSearchInputValue('')
     };
 
     const handleDeleteAllUsers = async () => {
         setUsers([]);
-        setOriginalUsers([]);
+        setFilteredUsers([]);
         await setUsersInStore([]);
         setShowDeleteAllModal(false);
+        setSearchInputValue('')
     };
 
     const handleFileUpload = (event) => {
@@ -172,15 +175,16 @@ function SettingsUsersTab() {
                             id
                         }
                     });
-                    await setUsersInStore(updatedUsers)
+                    await setUsersInStore(updatedUsers);
                     setUsers(updatedUsers);
-                    setOriginalUsers(updatedUsers);
+                    setFilteredUsers(updatedUsers);
                 } catch (error) {
                     console.error("Error parsing JSON:", error);
                 }
             };
             reader.readAsText(file);
         }
+        setSearchInputValue('')
     };
 
     const handleUserSubmit = async (userData) => {
@@ -226,10 +230,11 @@ function SettingsUsersTab() {
         }
 
         setUsers(storedUsers);
-        setOriginalUsers(storedUsers);
+        setFilteredUsers(storedUsers);
         setAvailableTeams(teams);
         setShowModal(false);
         setSelectedUser(null);
+        setSearchInputValue('');
     };
 
     const handleExportUsers = () => {
@@ -300,18 +305,20 @@ function SettingsUsersTab() {
         <div className="mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <input
+                    value={searchInputValue}
                     type="text"
                     placeholder="Search users..."
                     className="form-control w-25"
                     onChange={(e) => {
-                        const searchTerm = e.target.value.toLowerCase();
-                        const filteredUsers = originalUsers.filter(user =>
+                        const searchTerm = e.target.value.toLowerCase().trim();
+                        const searchFilteredUsers = users.filter(user =>
                             user.name.toLowerCase().includes(searchTerm) ||
                             user.username.toLowerCase().includes(searchTerm) ||
                             user.email.toLowerCase().includes(searchTerm) ||
                             user.teams?.map(t => t.name).some(t => t.toLowerCase().includes(searchTerm))
                         );
-                        setUsers(filteredUsers);
+                        setFilteredUsers(searchFilteredUsers);
+                        setSearchInputValue(searchTerm);
                     }}
                 />
                 <div className="d-flex gap-2">
@@ -343,7 +350,7 @@ function SettingsUsersTab() {
 
             <DataTable
                 columns={columns}
-                data={users}
+                data={filteredUsers}
                 pagination
                 highlightOnHover
                 searchable
