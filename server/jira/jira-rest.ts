@@ -17,34 +17,6 @@ interface JiraIssueSearchProps {
   startIndex?: number;
 }
 
-interface IssueSearchResponse {
-  issueType: string;
-  issueKey: string;
-  summary: string;
-  description: string;
-  status: string;
-  createdAt: string;
-  resolvedAt: string;
-  userEmail: string;
-  storyPoints?: number;
-}
-
-function transformIssueData(issue: any): IssueSearchResponse {
-  return {
-    issueType: issue.fields.issuetype.name,
-    issueKey: issue.key,
-    description: issue.fields.description || "",
-    // .replaceAll(/\r\n/g, "\n")
-    // .replaceAll(/\n/g, "\n"), // Ensure a default value if description is null
-    status: issue.fields.status.name,
-    createdAt: issue.fields.created, // Assuming 'created' field exists and is in the correct format
-    resolvedAt: issue.fields.resolutiondate || issue.fields.created || "", // Use an empty string if resolutiondate is null
-    userEmail: issue.fields.assignee?.emailAddress || "Unassigned", //Handle unassigned issues
-    storyPoints: issue.fields.customfield_12919, // Assuming this field holds story points
-    summary: issue.fields.summary,
-  };
-}
-
 async function searchJiraIssues(
   searchProps: JiraIssueSearchProps
 ): Promise<any> {
@@ -63,9 +35,7 @@ async function searchJiraIssues(
   }
 }
 
-export async function fetchAllJiraIssues(
-  searchProps: JiraIssueSearchProps
-): Promise<IssueSearchResponse[]> {
+export async function fetchAllJiraIssues(searchProps: JiraIssueSearchProps) {
   const allIssues: any[] = [];
   let startIndex = searchProps.startIndex || 0;
   let totalIssues = 0;
@@ -85,6 +55,5 @@ export async function fetchAllJiraIssues(
     startIndex += result.maxResults;
   } while (startIndex < totalIssues);
 
-  return allIssues.map(transformIssueData);
+  return allIssues;
 }
-

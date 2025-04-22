@@ -28,6 +28,32 @@ type JiraChartData = {
   }[];
 };
 
+interface IssueSearchResponse {
+  issueType: string;
+  issueKey: string;
+  summary: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  resolvedAt: string;
+  userEmail: string;
+  storyPoints?: number;
+}
+
+function transformIssueData(issue: any): IssueSearchResponse {
+  return {
+    issueType: issue.fields.issuetype.name,
+    issueKey: issue.key,
+    description: issue.fields.description || "",
+    status: issue.fields.status.name,
+    createdAt: issue.fields.created, // Assuming 'created' field exists and is in the correct format
+    resolvedAt: issue.fields.resolutiondate || issue.fields.created || "", // Use an empty string if resolutiondate is null
+    userEmail: issue.fields.assignee?.emailAddress || "Unassigned", //Handle unassigned issues
+    storyPoints: issue.fields.customfield_12919, // Assuming this field holds story points
+    summary: issue.fields.summary,
+  };
+}
+
 export async function searchJiraIssues(opts: JiraIssueSearchParams) {
   const baseUrl = import.meta.env.VITE_APP_BACKEND_URL as string;
   const backendPort = import.meta.env.VITE_APP_BACKEND_PORT;
@@ -37,9 +63,10 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
 
   const userList = await getUsersFromStore();
   const issues: JiraIssue[] = response.data.issues.map((issue) => {
-    const username = getUserNameFromEmail(issue.userEmail, userList);
+    const transformedIssue = transformIssueData(issue);
+    const username = getUserNameFromEmail(transformedIssue.userEmail, userList);
     return {
-      ...issue,
+      ...transformedIssue,
       username,
     };
   });
