@@ -40,6 +40,17 @@ interface IssueSearchResponse {
   storyPoints?: number;
 }
 
+const backendBaseUrl = import.meta.env.VITE_APP_BACKEND_URL as string;
+const backendPort = import.meta.env.VITE_APP_BACKEND_PORT;
+const jiraUrl = `${backendBaseUrl.replace(/\/+$/, "")}:${backendPort}`;
+
+const jiraAxiosClient = axios.create({
+  baseURL: `${jiraUrl}/jira`,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 function transformIssueData(issue: any): IssueSearchResponse {
   return {
     issueType: issue.fields.issuetype.name,
@@ -55,11 +66,7 @@ function transformIssueData(issue: any): IssueSearchResponse {
 }
 
 export async function searchJiraIssues(opts: JiraIssueSearchParams) {
-  const baseUrl = import.meta.env.VITE_APP_BACKEND_URL as string;
-  const backendPort = import.meta.env.VITE_APP_BACKEND_PORT;
-  const url = `${baseUrl.replace(/\/+$/, "")}:${backendPort}`;
-
-  const response = await axios.post(`${url}/jira/issue-search`, opts);
+  const response = await jiraAxiosClient.post(`/issue-search`, opts);
 
   const userList = await getUsersFromStore();
   const issues: JiraIssue[] = response.data.issues.map((issue) => {
