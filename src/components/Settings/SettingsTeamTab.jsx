@@ -69,12 +69,9 @@ function SettingsTeamTab() {
     };
 
     const handleUserSelect = (user) => {
-        if (selectedUsers.find(u => u.id === user.id)) {
-            return;
-        }
-
         setSelectedUsers(prevSelected => {
-            if (prevSelected.find(u => u.id === user.id)) {
+            const isUserSelected = prevSelected.some(u => u.id === user.id);
+            if (isUserSelected) {
                 return prevSelected.filter(u => u.id !== user.id);
             } else {
                 return [...prevSelected, user];
