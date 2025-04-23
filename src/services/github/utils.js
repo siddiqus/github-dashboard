@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { getAllIssues, getPrData } from "./github-api.service";
+import { getAllCommits, getAllIssues, getPrData } from "./github-api.service";
 
 import { dbStore } from "../idb";
 import { getFromCache, getUsersFromStore } from "../utils";
@@ -41,6 +41,48 @@ function getAveragePrCycleTime(issues) {
   }, 0);
 
   return Math.floor(sum / closed.length);
+}
+
+// type CommitData = {
+//   commit: {
+//     author: {
+//       date: string;
+//       name: string;
+//       email: string;
+//     };
+//     message: string;
+//     comment_count: number;
+//   };
+//   author: {
+//     login: string;
+//   };
+//   committer: {
+//     login: string;
+//   };
+//   repository: {
+//     name: string;
+//     full_name: string;
+//   };
+// };
+
+function getMonthlyCommitStats(commitData) {
+  const commitsByMonth = _.groupBy(commitData, (commit) => {
+    const created = commit.commit.author.date;
+    const month = created.substring(0, 7);
+    return month;
+  });
+
+  const commitCountsPerMonth = {};
+
+  for (const month of Object.keys(commitsByMonth)) {
+    const commits = commitsByMonth[month];
+
+    commitCountsPerMonth[month] = commits.length;
+  }
+
+  return {
+    commitCountsPerMonth,
+  };
 }
 
 function getMonthlyPrStats(prCreatedData) {
@@ -177,6 +219,32 @@ async function getAllIssuesCached({
   });
 }
 
+async function getAllCommitsCached({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
+  return getFromCache({
+    getCacheKey: () =>
+      getDataCacheKey({
+        organization,
+        author,
+        startDate,
+        endDate,
+        mode: "commits",
+      }),
+    fn: () =>
+      getAllCommits({
+        organization,
+        author,
+        startDate,
+        endDate,
+        mode: "commits",
+      }),
+  });
+}
+
 function getPrCacheKey({ owner, repo, pullNumber }) {
   return `${owner}-${repo}-${pullNumber}`;
 }
@@ -194,13 +262,21 @@ export async function getUserPrCreatedStats({
   startDate,
   endDate,
 }) {
-  const prCreatedData = await getAllIssuesCached({
-    organization,
-    author,
-    startDate,
-    endDate,
-    mode: "author",
-  })
+  const [prCreatedData, commitData] = await Promise.all([
+    getAllIssuesCached({
+      organization,
+      author,
+      startDate,
+      endDate,
+      mode: "author",
+    }),
+    getAllCommitsCached({
+      organization,
+      author,
+      startDate,
+      endDate,
+    }),
+  ]);
 
   const avatarUrl = prCreatedData.length
     ? prCreatedData[0].author_avatar_url
@@ -208,11 +284,15 @@ export async function getUserPrCreatedStats({
 
   const monthlyPrStats = getMonthlyPrStats(prCreatedData);
 
+  const commitCountByMonth = getMonthlyCommitStats(commitData);
+
   return {
     avatarUrl,
     monthlyPrStats,
-    prList: prCreatedData
-  }
+    prList: prCreatedData,
+    commitData,
+    commitCountByMonth,
+  };
 }
 
 export async function getUserPrReviewStats({
@@ -227,13 +307,13 @@ export async function getUserPrReviewStats({
     startDate,
     endDate,
     mode: "reviewer",
-  })
+  });
 
   const monthlyReviewData = getMonthlyReviewStats(reviewedData);
 
   return {
-    monthlyReviewData
-  }
+    monthlyReviewData,
+  };
 }
 
 export async function getUserData({
@@ -254,11 +334,11 @@ export async function getUserData({
       author,
       startDate,
       endDate,
-    })
-  ])
+    }),
+  ]);
 
   const userList = await getUsersFromStore();
-  const user = userList.find(u => u.username === author);
+  const user = userList.find((u) => u.username === author);
 
   return {
     name: user ? user.name : author,
@@ -267,6 +347,7 @@ export async function getUserData({
     prList: prCreatedData.prList,
     ...prCreatedData.monthlyPrStats,
     ...reviewedData.monthlyReviewData,
+    ...prCreatedData.commitCountByMonth,
   };
 }
 

@@ -33,7 +33,7 @@ ChartJS.register(
   ArcElement
 );
 
-export const baseChartOptions = {
+const baseChartOptions = {
   responsive: true,
   plugins: {
     legend: {
@@ -46,6 +46,9 @@ export const baseChartOptions = {
   options: {
     scales: {
       y: {
+        beginAtZero: true,
+      },
+      x: {
         beginAtZero: true,
       },
     },
@@ -239,6 +242,42 @@ function getJiraClosedTicketData({ months, chartData }) {
         borderColor: colorNames[index] || "red",
       };
     }),
+  };
+
+  return { chartOptions, data };
+}
+
+function getCommitStatsOptions(months, userDataList) {
+  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
+  chartOptions.plugins.title.text = "Github Commits";
+
+  const usernames = Array.from(
+    new Set(userDataList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(userDataList, "username");
+
+  const datasets = [];
+
+  usernames.forEach((username, index) => {
+    const data = dataPerUser[username];
+
+    const dataForUser = [];
+    for (const month of months) {
+      const commitCount = data.commitCountsPerMonth[month] || 0;
+      dataForUser.push(commitCount);
+    }
+
+    datasets.push({
+      label: data.username,
+      data: dataForUser,
+      borderColor: colorNames[index] || "red",
+    });
+  });
+
+  const data = {
+    labels: months,
+    datasets,
   };
 
   return { chartOptions, data };
@@ -468,16 +507,26 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     </Card>
   );
 
+  const commitStatsChartOptions = getCommitStatsOptions(months, userDataList);
+  const commitStatsChart = (
+    <Card style={chartStyle}>
+      <Line
+        options={commitStatsChartOptions.chartOptions}
+        data={commitStatsChartOptions.data}
+      />
+    </Card>
+  );
+
   return (
     <div>
       <Row>
         <Col lg={6}>{prClosedChart}</Col>
         <Col lg={6}>{prReviewedChart}</Col>
-        {/* <Col lg={4}> {cycleTimeChart}</Col> */}
       </Row>
       <Row>
         <Col lg={6}>{jiraIssuesChart}</Col>
-        <Col lg={6}>{cycleTimeChart}</Col>
+        <Col lg={6}>{commitStatsChart}</Col>
+        {/* <Col lg={6}>{cycleTimeChart}</Col> */}
       </Row>
       <Row>
         <Col lg={6}>{prCreatedDistributionChart}</Col>

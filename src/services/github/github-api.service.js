@@ -99,3 +99,31 @@ export async function getMemberDetails(org, username) {
     })
     .then((d) => d.data);
 }
+
+export async function getAllCommits({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
+  const results = [];
+  let page = 1;
+
+  while (page <= 10) {
+    console.log(`fetching commits page ${page} for ${author}`);
+    const res = await client.request("GET /search/commits", {
+      q: `org:${organization} author:${author} author-date:${startDate}..${endDate}`,
+      per_page: 100,
+      page,
+    });
+
+    if (res.data.total_count === results.length) {
+      break;
+    }
+
+    results.push(...res.data.items);
+    page++;
+  }
+
+  return results;
+}
