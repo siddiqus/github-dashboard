@@ -157,7 +157,11 @@ function UserProfile() {
           <PrStats />
         </Tab>
         <Tab eventKey="prList" title="PR List">
-          <UserProfilePrList userData={userData} />
+          {!userData || !userData.prList || !userData.prList.length ? (
+            "No PRs found"
+          ) : (
+            <UserProfilePrList userData={userData} />
+          )}
         </Tab>
         <Tab eventKey="jiraList" title="JIRA Tickets">
           <UserProfileJiraList jiraData={jiraData || []} />

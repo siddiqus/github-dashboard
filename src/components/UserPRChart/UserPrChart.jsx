@@ -11,7 +11,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import _, { groupBy } from "lodash";
+import _ from "lodash";
 import { Card, Col, Row } from "react-bootstrap";
 import { Line, Radar } from "react-chartjs-2";
 import {
@@ -424,7 +424,7 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
 
   months.sort((a, b) => a.localeCompare(b));
 
-  const chartStyle = { padding: "1em", marginBottom: "1em" };
+  const chartStyle = { padding: "10px 15px", marginBottom: "1em" };
 
   const prClosedChartOptions = getPrClosedChartData({
     months,
@@ -433,6 +433,7 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const prClosedChart = (
     <Card style={chartStyle}>
       <Line
+        height={"200px"}
         options={prClosedChartOptions.chartOptions}
         data={prClosedChartOptions.data}
       />
@@ -446,6 +447,7 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const prReviewedChart = (
     <Card style={chartStyle}>
       <Line
+        height={"200px"}
         options={prReviewChartOptions.chartOptions}
         data={prReviewChartOptions.data}
       />
@@ -458,6 +460,7 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const cycleTimeChart = (
     <Card style={chartStyle}>
       <Line
+        height={"200px"}
         options={prCycleTimeChartOptions.chartOptions}
         data={prCycleTimeChartOptions.data}
       />
@@ -478,6 +481,7 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
         "JIRA Data Loading..."
       ) : (
         <Line
+          height={"200px"}
           options={jiraClosedTicketOptions.chartOptions}
           data={jiraClosedTicketOptions.data}
         />
@@ -511,6 +515,7 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const commitStatsChart = (
     <Card style={chartStyle}>
       <Line
+        height={"200px"}
         options={commitStatsChartOptions.chartOptions}
         data={commitStatsChartOptions.data}
       />
@@ -520,13 +525,15 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   return (
     <div>
       <Row>
-        <Col lg={6}>{prClosedChart}</Col>
-        <Col lg={6}>{prReviewedChart}</Col>
-      </Row>
-      <Row>
-        <Col lg={6}>{jiraIssuesChart}</Col>
-        <Col lg={6}>{commitStatsChart}</Col>
-        {/* <Col lg={6}>{cycleTimeChart}</Col> */}
+        <Col lg={4}>
+          {prClosedChart}
+          {commitStatsChart}
+        </Col>
+        <Col lg={4}>
+          {prReviewedChart}
+          {jiraIssuesChart}
+        </Col>
+        <Col lg={4}>{cycleTimeChart}</Col>
       </Row>
       <Row>
         <Col lg={6}>{prCreatedDistributionChart}</Col>

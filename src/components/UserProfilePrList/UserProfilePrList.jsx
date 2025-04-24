@@ -295,10 +295,6 @@ function PrListWithFilter({ prList, onRefreshCache }) {
 }
 
 function UserProfilePrList({ userData }) {
-  if (!userData || !userData.prList || !userData.prList.length) {
-    return null;
-  }
-
   const [loadingStatus, setLoadingStatus] = useState("");
   const [prList, setPrList] = useState([]);
   const [error, setError] = useState(null);
