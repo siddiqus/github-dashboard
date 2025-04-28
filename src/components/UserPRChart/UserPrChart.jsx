@@ -411,6 +411,78 @@ function padMonthDataForJira(months, data) {
   });
 }
 
+function getGithubAddDeleteChartOptions(months, userDataList) {
+  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
+  chartOptions.plugins.title.text = "Github Additions";
+
+  const usernames = Array.from(
+    new Set(userDataList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(userDataList, "username");
+
+  const addDataSets = [];
+  const deleteDataSets = [];
+
+  usernames.forEach((username, index) => {
+    const data = dataPerUser[username];
+
+    const addDataForUser = [];
+    const deleteDataForUser = [];
+    for (const month of months) {
+      const count = data.prAdditionsDeletionsByMonth[month] || 0;
+      addDataForUser.push(count.additions);
+      deleteDataForUser.push(count.deletions);
+    }
+
+    addDataSets.push({
+      label: data.username,
+      data: addDataForUser,
+      borderColor: colorNames[index] || "red",
+    });
+    deleteDataSets.push({
+      label: data.username,
+      data: deleteDataForUser,
+      borderColor: colorNames[index] || "red",
+    });
+  });
+
+  const addData = {
+    data: {
+      labels: months,
+      datasets: addDataSets,
+    },
+    chartOptions: {
+      ...chartOptions,
+      plugins: {
+        ...chartOptions.plugins,
+        title: {
+          ...chartOptions.plugins.title,
+          text: "Github Additions",
+        },
+      },
+    },
+  };
+  const deleteData = {
+    data: {
+      labels: months,
+      datasets: deleteDataSets,
+    },
+    chartOptions: {
+      ...chartOptions,
+      plugins: {
+        ...chartOptions.plugins,
+        title: {
+          ...chartOptions.plugins.title,
+          text: "Github Deletions",
+        },
+      },
+    },
+  };
+
+  return { addData, deleteData };
+}
+
 function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const months = Array.from(
     new Set(
@@ -522,18 +594,45 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     </Card>
   );
 
+  const githubAddDeleteChartOptions = getGithubAddDeleteChartOptions(
+    months,
+    userDataList
+  );
+  const githubAdditionsChart = (
+    <Card style={chartStyle}>
+      <Line
+        height={"200px"}
+        options={githubAddDeleteChartOptions.addData.chartOptions}
+        data={githubAddDeleteChartOptions.addData.data}
+      />
+    </Card>
+  );
+  // const githubDeletionsChart = (
+  //   <Card style={chartStyle}>
+  //     <Line
+  //       height={"200px"}
+  //       options={githubAddDeleteChartOptions.deleteData.chartOptions}
+  //       data={githubAddDeleteChartOptions.deleteData.data}
+  //     />
+  //   </Card>
+  // );
+
   return (
     <div>
       <Row>
         <Col lg={4}>
           {prClosedChart}
-          {commitStatsChart}
+          {jiraIssuesChart}
         </Col>
         <Col lg={4}>
           {prReviewedChart}
-          {jiraIssuesChart}
+          {commitStatsChart}
         </Col>
-        <Col lg={4}>{cycleTimeChart}</Col>
+        <Col lg={4}>
+          {githubAdditionsChart}
+          {/* {githubDeletionsChart} */}
+          {cycleTimeChart}
+        </Col>
       </Row>
       <Row>
         <Col lg={6}>{prCreatedDistributionChart}</Col>

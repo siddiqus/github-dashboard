@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Col, Dropdown, Form, Row } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
-import { resetUserDataCache } from "../../services/index";
 import { formatDate, getTeamsFromStore, getUsersFromStore } from "../../services/utils";
-
+import { resetUserDataCache } from "../../services/github/utils";
 import { dbStore } from "../../services/idb";
+
 import "./UserPicker.css";
 
 function getDefaultDates() {

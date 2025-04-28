@@ -3,6 +3,7 @@ import { getAllCommits, getAllIssues, getPrData } from "./github-api.service";
 
 import { dbStore } from "../idb";
 import { getFromCache, getUsersFromStore } from "../utils";
+import { resetJiraCache } from "../jira";
 
 function sortMonthsAscending(monthsArray) {
   return monthsArray.sort((a, b) => {
@@ -85,7 +86,7 @@ function getMonthlyCommitStats(commitData) {
   };
 }
 
-function getMonthlyPrStats(prCreatedData) {
+function getMonthlyPrStats(prCreatedData, userPrs) {
   const allRepos = [
     ...new Set(prCreatedData.map((pr) => pr.repository_url.split("/").pop())),
   ];
@@ -96,8 +97,14 @@ function getMonthlyPrStats(prCreatedData) {
     return month;
   });
 
+  const prDataByMonth = _.groupBy(userPrs, (pr) => {
+    const month = pr.created_at.substring(0, 7); // YYYY-MM format
+    return month;
+  });
+
   const totalPrCounts = prCreatedData.length;
 
+  const prAdditionsDeletionsByMonth = {};
   const prCountsPerRepoPerMonth = {};
 
   const averagePrCycleTimePerMonth = {};
@@ -119,6 +126,18 @@ function getMonthlyPrStats(prCreatedData) {
       const countForRepo = groupedPerRepo[repo] || [];
       prCountsPerRepoPerMonth[month][repo] = countForRepo.length;
     }
+
+    const prDataAddDelForMonth = prDataByMonth[month] || [];
+    prAdditionsDeletionsByMonth[month] = {
+      additions: prDataAddDelForMonth.reduce(
+        (sum, pr) => sum + (pr.additions || 0),
+        0
+      ),
+      deletions: prDataAddDelForMonth.reduce(
+        (sum, pr) => sum + (pr.deletions || 0),
+        0
+      ),
+    };
   }
 
   const issueStatsByMonth = {};
@@ -148,6 +167,7 @@ function getMonthlyPrStats(prCreatedData) {
     prCountsPerRepoPerMonth,
     allRepos,
     averagePrCycleTimePerMonth,
+    prAdditionsDeletionsByMonth,
   };
 }
 
@@ -256,6 +276,21 @@ export async function getPrDataCached({ owner, repo, pullNumber }) {
   });
 }
 
+export function getPrApiBody(prList) {
+  const data = prList.map((p) => {
+    const url = p.html_url;
+    const [___, ownerRepoPullNumber] = url.split("github.com/");
+    const [owner, repo] = ownerRepoPullNumber.split("/");
+    return {
+      pullNumber: p.number,
+      owner,
+      repo,
+    };
+  });
+
+  return data;
+}
+
 export async function getUserPrCreatedStats({
   organization,
   author,
@@ -282,9 +317,12 @@ export async function getUserPrCreatedStats({
     ? prCreatedData[0].author_avatar_url
     : null;
 
-  const monthlyPrStats = getMonthlyPrStats(prCreatedData);
-
   const commitCountByMonth = getMonthlyCommitStats(commitData);
+
+  const prList = getPrApiBody(prCreatedData);
+  prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  const userPrs = await getPrList(prList);
+  const monthlyPrStats = getMonthlyPrStats(prCreatedData, userPrs);
 
   return {
     avatarUrl,
@@ -292,6 +330,7 @@ export async function getUserPrCreatedStats({
     prList: prCreatedData,
     commitData,
     commitCountByMonth,
+    userPrs,
   };
 }
 
@@ -316,11 +355,60 @@ export async function getUserPrReviewStats({
   };
 }
 
+// data: Array<{ author, startDate, endDate }>
+export async function resetUserDataCache(
+  data,
+  organization = import.meta.env.VITE_APP_GITHUB_ORG
+) {
+  const userList = await getUsersFromStore();
+
+  for (const d of data) {
+    const { author, startDate, endDate } = d;
+    await removeUserDataCache({
+      organization,
+      author,
+      startDate,
+      endDate,
+    });
+
+    await resetJiraCache({
+      startDate,
+      endDate,
+      userEmails: [userList.find((u) => u.username === author).email],
+    });
+  }
+}
+
+export async function getPrList(prList) {
+  const results = await Promise.all(
+    prList.map((p) =>
+      getPrDataCached({
+        owner: p.owner,
+        pullNumber: p.pullNumber,
+        repo: p.repo,
+      })
+    )
+  );
+
+  return results;
+}
+
+export async function clearPrCache(prList) {
+  for (const d of prList) {
+    const { owner, repo, pullNumber } = d;
+    await removePrCache({
+      owner,
+      pullNumber,
+      repo,
+    });
+  }
+}
+
 export async function getUserData({
-  organization,
   author,
   startDate,
   endDate,
+  organization = import.meta.env.VITE_APP_GITHUB_ORG,
 }) {
   const [prCreatedData, reviewedData] = await Promise.all([
     getUserPrCreatedStats({
@@ -346,14 +434,10 @@ export async function getUserData({
     avatarUrl: prCreatedData.avatarUrl,
     prList: prCreatedData.prList,
     ...prCreatedData.monthlyPrStats,
-    ...reviewedData.monthlyReviewData,
     ...prCreatedData.commitCountByMonth,
+    ...reviewedData.monthlyReviewData,
   };
 }
-
-// type AsyncReturnType<T extends (...args: any) => Promise<any>> =
-//     T extends (...args: any) => Promise<infer R> ? R : any
-// export type UserDataListType = AsyncReturnType<typeof getUserData>;
 
 export async function removeUserDataCache({
   organization,

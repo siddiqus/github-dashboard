@@ -4,7 +4,7 @@ import Loading from "../components/Loading";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
 import { dbStore } from "../services/idb";
-import { getUserData } from "../services/index";
+import { getUserData } from "../services/github/utils";
 import { getJiraIssuesCached } from "../services/jira";
 import { getUsersFromStore } from "../services/utils";
 
@@ -12,7 +12,7 @@ const statusMap = {
   LOADING: "loading",
   NO_DATA: "no-data",
   LOADED: "loaded",
-  ERROR: "error"
+  ERROR: "error",
 };
 
 function Home() {
@@ -49,7 +49,9 @@ function Home() {
         }),
 
         getJiraIssuesCached({
-          userEmails: usernames.map((u) => userList.find(u2 => u2.username === u)?.email),
+          userEmails: usernames.map(
+            (u) => userList.find((u2) => u2.username === u)?.email
+          ),
           startDate,
           endDate,
         })

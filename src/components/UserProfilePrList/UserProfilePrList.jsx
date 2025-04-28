@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Button,
+  Card,
+  Col,
   Dropdown,
   InputGroup,
   Row,
-  Col,
-  Card,
   Table,
 } from "react-bootstrap";
 import DataTable from "react-data-table-component";
-import { getPr, clearPrCache } from "../../services/index";
+import {
+  clearPrCache,
+  getPrApiBody,
+  getPrList,
+} from "../../services/github/utils";
 import {
   daysDifference,
   getMonthsStringFromIssueList,
@@ -119,21 +123,6 @@ function PrList({ prList }) {
   ) : (
     <>N/A</>
   );
-}
-
-function getPrApiBody(prList) {
-  const data = prList.map((p) => {
-    const url = p.html_url;
-    const [_, ownerRepoPullNumber] = url.split("github.com/");
-    const [owner, repo] = ownerRepoPullNumber.split("/");
-    return {
-      pullNumber: p.number,
-      owner,
-      repo,
-    };
-  });
-
-  return data;
 }
 
 const LOADING_STATUS = {
@@ -304,7 +293,7 @@ function UserProfilePrList({ userData }) {
       setLoadingStatus(LOADING_STATUS.loading);
       const prList = getPrApiBody(userData.prList);
       prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      const userPrs = await getPr(prList);
+      const userPrs = await getPrList(prList);
       setPrList(userPrs);
       setLoadingStatus(LOADING_STATUS.loaded);
     } catch (error) {
