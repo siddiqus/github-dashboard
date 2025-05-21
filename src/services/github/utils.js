@@ -404,6 +404,20 @@ export async function clearPrCache(prList) {
   }
 }
 
+function getOldPrs(prList, daysThreshold = 5) {
+  const now = new Date();
+  return prList.filter((pr) => {
+    if (!pr.closed_at) {
+      // only check open PRs
+      const created = new Date(pr.created_at);
+      const diffTime = Math.abs(now - created);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > daysThreshold;
+    }
+    return false;
+  });
+}
+
 export async function getUserData({
   author,
   startDate,
@@ -427,12 +441,14 @@ export async function getUserData({
 
   const userList = await getUsersFromStore();
   const user = userList.find((u) => u.username === author);
+  const oldPrs = getOldPrs(prCreatedData.prList);
 
   return {
     name: user ? user.name : author,
     username: author,
     avatarUrl: prCreatedData.avatarUrl,
     prList: prCreatedData.prList,
+    oldPrs,
     ...prCreatedData.monthlyPrStats,
     ...prCreatedData.commitCountByMonth,
     ...reviewedData.monthlyReviewData,

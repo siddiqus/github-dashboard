@@ -7,6 +7,7 @@ import { dbStore } from "../services/idb";
 import { getUserData } from "../services/github/utils";
 import { getJiraIssuesCached } from "../services/jira";
 import { getUsersFromStore } from "../services/utils";
+import OldPrList from "../components/OldPrList";
 
 const statusMap = {
   LOADING: "loading",
@@ -100,14 +101,21 @@ function Home() {
         <></>
       )}
 
+      <br />
       {isLoaded ? (
-        <HomeUserTable
-          userDataList={userDataList}
-          jiraData={jiraData}
-        ></HomeUserTable>
+        <>
+          <h4>Member Data</h4>
+          <HomeUserTable
+            userDataList={userDataList}
+            jiraData={jiraData}
+          ></HomeUserTable>
+        </>
       ) : (
         <></>
       )}
+      <br />
+
+      {isLoaded && <OldPrList userDataList={userDataList} />}
       <br />
     </>
   );

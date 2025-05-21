@@ -23,7 +23,9 @@ function JiraList({ jiraData }) {
         <>
           <a
             target="_blank"
-            href={`${import.meta.env.VITE_APP_JIRA_URL}/browse/${row.issueKey}`.replaceAll(/\/\//g, '/')}
+            href={`${import.meta.env.VITE_APP_JIRA_URL}/browse/${
+              row.issueKey
+            }`.replaceAll(/\/\//g, "/")}
           >
             {row.issueKey}
           </a>
@@ -157,9 +159,6 @@ function JiraStats({ monthlyStats }) {
 }
 
 function UserProfileJiraList({ jiraData }) {
-  if (!jiraData || !jiraData.length) {
-    return null;
-  }
   const [listFilter, setListFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [filteredList, setFilteredList] = useState(jiraData);
@@ -300,6 +299,10 @@ function UserProfileJiraList({ jiraData }) {
         </InputGroup>
       );
     }, [jiraData, listFilter, statusFilter]);
+  }
+
+  if (!jiraData || !jiraData.length) {
+    return null;
   }
 
   return (
