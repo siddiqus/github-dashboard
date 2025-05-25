@@ -18,7 +18,11 @@ export default function OldPrList({ userDataList }) {
       name: "PR Title",
       selector: (row) => (
         <div style={{ whiteSpace: "pre-wrap" }}>
-          <a href={row.url} target="_blank" rel="noopener noreferrer">
+          <a
+            href={row.url.replace("//api.", "//www.").replace("/repos", "")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {row.title}
           </a>
         </div>
