@@ -36,6 +36,16 @@ function PrList({ prList }) {
       name: "Title",
       selector: (row) => (
         <>
+          {row.draft ? (
+            <span
+              style={{
+                marginRight: "3px",
+                background: "lightgray",
+              }}
+            >{`[Draft]`}</span>
+          ) : (
+            ""
+          )}
           {row.title}{" "}
           <a href={row.html_url} target="_blank">
             (#{row.number})

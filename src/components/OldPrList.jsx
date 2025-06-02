@@ -3,7 +3,7 @@ import DataTable from "react-data-table-component";
 export default function OldPrList({ userDataList }) {
   const getRepoFromUrl = (url) => {
     const match = url.match(/repos\/[^/]+\/([^/]+)/);
-    return match ? match[1] : '';
+    return match ? match[1] : "";
   };
 
   const columns = [
@@ -29,6 +29,16 @@ export default function OldPrList({ userDataList }) {
       name: "PR Title / Link",
       selector: (row) => (
         <div style={{ whiteSpace: "pre-wrap" }}>
+          {row.draft ? (
+            <span
+              style={{
+                marginRight: "3px",
+                background: "lightgray",
+              }}
+            >{`[Draft]`}</span>
+          ) : (
+            ""
+          )}
           <a
             href={row.url.replace("//api.", "//www.").replace("/repos", "")}
             target="_blank"
@@ -67,6 +77,7 @@ export default function OldPrList({ userDataList }) {
       daysElapsed: Math.floor(
         (new Date() - new Date(pr.created_at)) / (1000 * 60 * 60 * 24)
       ),
+      draft: pr.draft,
     }))
   );
 
