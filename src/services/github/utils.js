@@ -352,6 +352,7 @@ export async function getUserPrReviewStats({
 
   return {
     monthlyReviewData,
+    reviewedPrList: reviewedData,
   };
 }
 
@@ -452,6 +453,7 @@ export async function getUserData({
     ...prCreatedData.monthlyPrStats,
     ...prCreatedData.commitCountByMonth,
     ...reviewedData.monthlyReviewData,
+    reviewedPrList: reviewedData.reviewedPrList,
   };
 }
 

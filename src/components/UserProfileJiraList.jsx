@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Col,
@@ -111,6 +111,8 @@ function JiraList({ jiraData }) {
               <Modal.Title>{selectedIssue?.issueKey}</Modal.Title>
             </Modal.Header>
             <Modal.Body style={{ whiteSpace: "pre-line" }}>
+              {selectedIssue?.summary}
+              <br />
               {selectedIssue?.description}
             </Modal.Body>
           </Modal>
@@ -161,7 +163,11 @@ function JiraStats({ monthlyStats }) {
 function UserProfileJiraList({ jiraData }) {
   const [listFilter, setListFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [filteredList, setFilteredList] = useState(jiraData);
+  const [filteredList, setFilteredList] = useState([]);
+
+  useEffect(() => {
+    setFilteredList(jiraData);
+  }, [jiraData]);
 
   const monthlyStats = useMemo(() => {
     // Group issues by month
