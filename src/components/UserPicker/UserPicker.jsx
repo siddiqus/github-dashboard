@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Col, Dropdown, Form, Row } from "react-bootstrap";
 import ReactDatePicker from "react-datepicker";
-import { formatDate, getTeamsFromStore, getUsersFromStore } from "../../services/utils";
+import {
+  formatDate,
+  getTeamsFromStore,
+  getUsersFromStore,
+} from "../../services/utils";
 import { resetUserDataCache } from "../../services/github/utils";
 import { dbStore } from "../../services/idb";
 
@@ -43,20 +47,24 @@ function TeamModeSelectionDropdown({ chooseUsers }) {
           setSelected("Choose manually");
           chooseUsers([]);
         } else {
-          const users = teams.find(t => t.id.toString() === e).users;
-          chooseUsers(users.map(u => u.username));
+          const users = teams.find((t) => t.id.toString() === e).users;
+          chooseUsers(users.map((u) => u.username));
           setSelected(e);
         }
       }}
     >
-      <Dropdown.Toggle>{teams.find(t => t.id.toString() === selected)?.name || "Select team"} </Dropdown.Toggle>
+      <Dropdown.Toggle>
+        {teams.find((t) => t.id.toString() === selected)?.name || "Select team"}{" "}
+      </Dropdown.Toggle>
 
       <Dropdown.Menu>
-        {teams.sort((a, b) => a.name.localeCompare(b.name)).map((team, index) => (
-          <Dropdown.Item eventKey={team.id} key={index}>
-            {team.name}
-          </Dropdown.Item>
-        ))}
+        {teams
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((team, index) => (
+            <Dropdown.Item eventKey={team.id} key={index}>
+              {team.name}
+            </Dropdown.Item>
+          ))}
         <Dropdown.Item eventKey={"manual"}>Choose manually</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
@@ -66,7 +74,6 @@ function TeamModeSelectionDropdown({ chooseUsers }) {
 function UserPicker({ onSubmit, onReset }) {
   const [usernames, setUsernames] = useState([]);
   const [userList, setUserList] = useState([]);
-  const [teams, setTeams] = useState([]);
 
   useEffect(() => {
     if (!usernames.length) {
@@ -75,10 +82,6 @@ function UserPicker({ onSubmit, onReset }) {
 
     getUsersFromStore().then((users) => {
       setUserList(users);
-    });
-
-    getTeamsFromStore().then((teams) => {
-      setTeams(teams);
     });
   }, []);
 
