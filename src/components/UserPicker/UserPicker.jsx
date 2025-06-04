@@ -18,11 +18,17 @@ function getDefaultDates() {
   const defaultEndDate = endDateFromStorage
     ? new Date(endDateFromStorage)
     : new Date();
+  // Set to last day of month
+  defaultEndDate.setDate(1);
+  defaultEndDate.setMonth(defaultEndDate.getMonth() + 1);
+  defaultEndDate.setDate(0);
 
   const sixMonthsInMs = 6 * 30 * 24 * 60 * 60 * 1000;
   const defaultStartDate = startDateFromStorage
     ? new Date(startDateFromStorage)
-    : new Date(defaultEndDate.getTime() - sixMonthsInMs).setDate(1);
+    : new Date(defaultEndDate.getTime() - sixMonthsInMs);
+  // Set to first day of month
+  defaultStartDate.setDate(1);
 
   return {
     defaultStartDate: new Date(defaultStartDate),
@@ -137,8 +143,12 @@ function UserPicker({ onSubmit, onReset }) {
       setErrorMessage("StartDate, End Date and Usernames required");
       return;
     }
-    const startDateFormatted = formatDate(startDate);
-    const endDateFormatted = formatDate(endDate);
+
+    const startDateWithFirstDay = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const endDateWithLastDay = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
+    
+    const startDateFormatted = formatDate(startDateWithFirstDay);
+    const endDateFormatted = formatDate(endDateWithLastDay);
 
     setIsLoading(true);
     await onSubmit({
@@ -251,8 +261,9 @@ function UserPicker({ onSubmit, onReset }) {
                 setStartDate(date);
                 localStorage.setItem("opti-gh-startDate", date.toISOString());
               }}
-              dateFormat="dd MMMM yyyy"
-              placeholderText="Start Date"
+              dateFormat="MMMM yyyy"
+              showMonthYearPicker
+              placeholderText="Start Month"
               disabled={isLoading}
             />
           </div>
@@ -264,8 +275,9 @@ function UserPicker({ onSubmit, onReset }) {
                 setEndDate(date);
                 localStorage.setItem("opti-gh-endDate", date.toISOString());
               }}
-              dateFormat="dd MMMM yyyy"
-              placeholderText="End Date"
+              dateFormat="MMMM yyyy"
+              showMonthYearPicker
+              placeholderText="End Month"
               disabled={isLoading}
             />
           </div>
