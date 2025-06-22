@@ -19,7 +19,15 @@ export function HomeUserTable({ userDataList }) {
     },
     {
       name: "Username",
-      selector: (row) => row.username,
+      selector: (row) => (
+        <a
+          href={"https://github.com/" + row.username}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {row.username}
+        </a>
+      ),
     },
     {
       name: "Total PRs in period",
