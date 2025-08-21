@@ -20,7 +20,7 @@ function getQueryQValueForIssuesSearch({
   if (mode === "author") {
     str = `${str} author:${author}`;
   } else if (mode === "reviewer") {
-    str = `${str} reviewed-by:${author}`;
+    str = `${str} reviewed-by:${author} -author:${author}`;
   }
 
   return str;
