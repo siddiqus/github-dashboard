@@ -84,7 +84,7 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
 }
 
 function getUserNameFromEmail(email: string, userList: any[]): string | null {
-  const user = userList.find((u) => u.email === email);
+  const user = userList.find((u) => u.email.toLowerCase() === email.toLowerCase());
   return user ? user.username : null;
 }
 

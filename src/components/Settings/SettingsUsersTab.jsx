@@ -167,7 +167,7 @@ function SettingsUsersTab() {
                 try {
                     const uploadedUsers = JSON.parse(e.target.result);
                     const updatedUsers = [...users, ...uploadedUsers].filter((user, index, self) =>
-                        index === self.findIndex((u) => u.email === user.email)
+                        index === self.findIndex((u) => u.email.toLowerCase() === user.email.toLowerCase())
                     ).map((u, index) => {
                         const id = `${Date.now()}_${index}`;
                         return {

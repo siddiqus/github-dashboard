@@ -20,7 +20,10 @@ interface JiraIssueSearchProps {
 async function searchJiraIssues(
   searchProps: JiraIssueSearchProps
 ): Promise<any> {
-  const userEmails = searchProps.userEmails.map((e) => `"${e}"`).join(",");
+  const userEmails = searchProps.userEmails
+    .map((e) => `"${e}"`)
+    .join(",")
+    .toLowerCase();
 
   const jql = `assignee in (${userEmails}) AND createdDate >= "${searchProps.startDate}" AND createdDate <= "${searchProps.endDate}"`;
 

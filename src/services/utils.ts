@@ -95,13 +95,13 @@ export async function addUserToStore(user) {
 
 export async function deleteUserFromStore(email: string) {
   const users = await getUsersFromStore();
-  const updatedUsers = users.filter(user => user.email !== email);
+  const updatedUsers = users.filter(user => user.email.toLowerCase() !== email.toLowerCase());
   await dbStore.setData('gh-stats-user-list', JSON.stringify(updatedUsers));
 }
 
 export async function updateUserInStore(user) {
   const users = await getUsersFromStore();
-  const userIndex = users.findIndex(u => u.email === user.email);
+  const userIndex = users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase());
   users[userIndex] = user
   await dbStore.setData('gh-stats-user-list', JSON.stringify(users));
 }

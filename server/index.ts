@@ -15,7 +15,7 @@ app.use((req, res, next) => {
     JSON.stringify({
       time: new Date().toISOString(),
       path: req.url,
-      // body: req.body,
+      body: req.body,
       // query: req.query,
     })
   );
