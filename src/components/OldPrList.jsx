@@ -83,7 +83,7 @@ export default function OldPrList({ userDataList }) {
 
   return (
     <div>
-      <h4>Old Pull Requests</h4>
+      <h5>Old Pull Requests</h5>
       <DataTable
         columns={columns}
         data={data}

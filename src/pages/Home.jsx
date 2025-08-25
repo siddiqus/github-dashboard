@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { HomeUserTable } from "../components/HomeUserTable/HomeUserTable";
 import Loading from "../components/Loading";
+import OldPrList from "../components/OldPrList";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserPicker from "../components/UserPicker/UserPicker";
-import { dbStore } from "../services/idb";
 import { getUserData } from "../services/github/utils";
+import { dbStore } from "../services/idb";
 import { getJiraIssuesCached } from "../services/jira";
 import { getUsersFromStore } from "../services/utils";
-import OldPrList from "../components/OldPrList";
+import { Card } from "react-bootstrap";
 
 const statusMap = {
   LOADING: "loading",
@@ -34,6 +35,10 @@ function Home() {
 
       const userList = await getUsersFromStore();
 
+      const userEmails = usernames.map(
+        (u) => userList.find((u2) => u2.username === u)?.email
+      );
+
       await Promise.all([
         Promise.all(
           usernames.map((u) =>
@@ -50,9 +55,7 @@ function Home() {
         }),
 
         getJiraIssuesCached({
-          userEmails: usernames.map(
-            (u) => userList.find((u2) => u2.username === u)?.email
-          ),
+          userEmails,
           startDate,
           endDate,
         })
@@ -83,39 +86,37 @@ function Home() {
     setDataStatus(statusMap.NO_DATA);
   }
 
-  return (
+  const HomeElements = () => (
     <>
-      <UserPicker onSubmit={onSubmit} onReset={onReset} />
-      <hr />
+      <Card className="p-3 mt-3 shadow-sm">
+        <h5>Member Data</h5>
+        <HomeUserTable userDataList={userDataList} jiraData={jiraData} />
+      </Card>
 
-      {isLoading ? <Loading></Loading> : <></>}
-      {isError ? <h4 style={{ color: "red" }}> {errorMessage}</h4> : <></>}
+      <Card className="p-3 mt-3 shadow-sm">
+        <OldPrList userDataList={userDataList} />
+      </Card>
 
-      {isLoaded ? (
+      <Card className="p-3 mt-3 shadow-sm">
+        <h5>Member Stats</h5>
         <UserPrChart
           userDataList={userDataList}
           jiraData={jiraData}
           jiraIsLoading={jiraIsLoading}
         ></UserPrChart>
-      ) : (
-        <></>
-      )}
+      </Card>
+    </>
+  );
 
-      <br />
-      {isLoaded ? (
-        <>
-          <h4>Member Data</h4>
-          <HomeUserTable
-            userDataList={userDataList}
-            jiraData={jiraData}
-          ></HomeUserTable>
-        </>
-      ) : (
-        <></>
-      )}
-      <br />
+  return (
+    <>
+      <UserPicker onSubmit={onSubmit} onReset={onReset} />
+      <hr className="m-0" />
 
-      {isLoaded && <OldPrList userDataList={userDataList} />}
+      {isLoading ? <Loading></Loading> : <></>}
+      {isError ? <h4 style={{ color: "red" }}> {errorMessage}</h4> : <></>}
+
+      {isLoaded && <HomeElements />}
       <br />
     </>
   );

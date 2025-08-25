@@ -144,9 +144,17 @@ function UserPicker({ onSubmit, onReset }) {
       return;
     }
 
-    const startDateWithFirstDay = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-    const endDateWithLastDay = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
-    
+    const startDateWithFirstDay = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      1
+    );
+    const endDateWithLastDay = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth() + 1,
+      0
+    );
+
     const startDateFormatted = formatDate(startDateWithFirstDay);
     const endDateFormatted = formatDate(endDateWithLastDay);
 
