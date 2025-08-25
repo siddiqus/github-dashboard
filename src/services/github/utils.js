@@ -4,6 +4,7 @@ import { getAllCommits, getAllIssues, getPrData } from "./github-api.service";
 import { dbStore } from "../idb";
 import { getFromCache, getUsersFromStore } from "../utils";
 import { resetJiraCache } from "../jira";
+import { resetBonuslyCache } from "../bonusly";
 
 function sortMonthsAscending(monthsArray) {
   return monthsArray.sort((a, b) => {
@@ -373,6 +374,12 @@ export async function resetUserDataCache(
     });
 
     await resetJiraCache({
+      startDate,
+      endDate,
+      userEmails: [userList.find((u) => u.username === author).email],
+    });
+
+    await resetBonuslyCache({
       startDate,
       endDate,
       userEmails: [userList.find((u) => u.username === author).email],

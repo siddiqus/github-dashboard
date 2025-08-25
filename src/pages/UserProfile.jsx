@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
-import { Tab, Table, Tabs } from "react-bootstrap";
+import { Card, Tab, Table, Tabs } from "react-bootstrap";
 import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserProfileJiraList from "../components/UserProfileJiraList";
 import UserProfilePrList from "../components/UserProfilePrList/UserProfilePrList";
 import { dbStore } from "../services/idb";
-import { getMonthsStringFromIssueList } from "../services/utils";
+import {
+  getMonthsStringFromIssueList,
+  getUsersFromStore,
+} from "../services/utils";
+import { getBonuslyDataCached } from "../services/bonusly";
 
 function UserProfile() {
   const { username } = useParams();
 
   const [userData, setUserData] = useState(null);
   const [jiraData, setJiraData] = useState(null);
+  const [bonuslyData, setBonuslyData] = useState([]);
 
   useEffect(() => {
     async function setDefaults() {
@@ -30,7 +35,24 @@ function UserProfile() {
       setUserData(userData);
     }
 
+    async function getBonuslyData() {
+      const startDateFromStorage = localStorage.getItem("opti-gh-startDate");
+      const endDateFromStorage = localStorage.getItem("opti-gh-endDate");
+
+      const userList = await getUsersFromStore();
+
+      const userEmail = userList.find((u2) => u2.username === username)?.email;
+
+      const bonuslyDataMap = await getBonuslyDataCached(
+        [userEmail],
+        startDateFromStorage,
+        endDateFromStorage
+      );
+      const bonuslyData = bonuslyDataMap[userEmail?.toLowerCase()] || [];
+      setBonuslyData(bonuslyData);
+    }
     setDefaults();
+    getBonuslyData();
   }, []);
 
   const localStorageStartDate = localStorage.getItem("opti-gh-startDate");
@@ -55,9 +77,7 @@ function UserProfile() {
           <tr>
             <th></th>
             {months.map((month, index) => (
-              <th key={index} index={`month-${index}`}>
-                {month}
-              </th>
+              <th key={`month-${index}`}>{month}</th>
             ))}
           </tr>
         </thead>
@@ -121,6 +141,49 @@ function UserProfile() {
     );
   }
 
+  const Bonusly = () => {
+    if (!bonuslyData || !bonuslyData.length) {
+      return null;
+    }
+
+    const bonuslyCards = bonuslyData.map((bonusly, index) => (
+      <Card className="p-3 mt-3" key={index}>
+        <div className="d-flex">
+          <div className="me-3">
+            <img
+              src={bonusly.giver.profile_pic_url}
+              alt={bonusly.giver.full_name}
+              className="rounded-circle"
+              style={{ width: "50px", height: "50px", objectFit: "cover" }}
+            />
+          </div>
+          <div className="flex-grow-1">
+            <div className="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <div className="fw-bold">{bonusly.giver.full_name}</div>
+                <div className="text-muted small">{bonusly.giver.email}</div>
+              </div>
+              <div className="text-muted small">
+                {new Date(bonusly.created_at).toDateString()}
+              </div>
+            </div>
+            <div
+              dangerouslySetInnerHTML={{ __html: bonusly.reason_html }}
+            ></div>
+          </div>
+        </div>
+      </Card>
+    ));
+
+    const totalPoints = bonuslyData.reduce((sum, b) => sum + b.amount, 0);
+    return (
+      <>
+        <h5>Total Bonusly Points in time period: {totalPoints}</h5>
+        {bonuslyCards}
+      </>
+    );
+  };
+
   return (
     <>
       <div
@@ -153,8 +216,8 @@ function UserProfile() {
           <UserPrChart
             jiraData={jiraData}
             userDataList={userData ? [userData] : []}
-          ></UserPrChart>
-          <PrStats />
+          />
+          {/* <PrStats /> */}
         </Tab>
         <Tab eventKey="prList" title="PR List">
           {!userData || !userData.prList || !userData.prList.length ? (
@@ -177,6 +240,10 @@ function UserProfile() {
         </Tab>
         <Tab eventKey="jiraList" title="JIRA Tickets">
           <UserProfileJiraList jiraData={jiraData || []} />
+        </Tab>
+
+        <Tab eventKey="bonusly" title="Bonusly">
+          <Bonusly />
         </Tab>
       </Tabs>
       <br />
