@@ -11,7 +11,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-color: #e2e1e0;
+  background-color: #f8f9fa;
 }
 
 .react-datepicker-wrapper input {
@@ -28,4 +28,12 @@ p,
 div,
 span {
   font-size: 14px;
+}
+
+.navbar {
+  background-color: white !important;
+}
+
+body {
+  background-color: #f8f9fa;
 }

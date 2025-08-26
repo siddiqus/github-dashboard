@@ -637,16 +637,14 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   return (
     <div>
       <Row>
-        <Col lg={4}>
+        <Col lg={6}>
           {prClosedChart}
           {jiraIssuesChart}
+          {githubAdditionsChart}
         </Col>
-        <Col lg={4}>
+        <Col lg={6}>
           {prReviewedChart}
           {commitStatsChart}
-        </Col>
-        <Col lg={4}>
-          {githubAdditionsChart}
           {cycleTimeChart}
         </Col>
       </Row>
