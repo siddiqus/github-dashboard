@@ -227,7 +227,7 @@ function UserPicker({ onSubmit, onReset }) {
             onKeyDownCapture={handleUserPicketInputChange}
             type="text"
             className="tags-input"
-            placeholder="Search by name"
+            placeholder="Type in Github usernames"
             disabled={isLoading}
             onBlur={setNewValueInUsernamesInputList}
             list="userSuggestions"

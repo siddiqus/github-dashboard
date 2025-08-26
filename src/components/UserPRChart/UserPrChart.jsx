@@ -12,7 +12,8 @@ import {
   Tooltip,
 } from "chart.js";
 import _ from "lodash";
-import { Card, Col, Row } from "react-bootstrap";
+import React, { useState, cloneElement } from "react";
+import { Card, Col, Modal, Row } from "react-bootstrap";
 import { Line, Radar } from "react-chartjs-2";
 import {
   daysDifference,
@@ -483,6 +484,39 @@ function getGithubAddDeleteChartOptions(months, userDataList) {
   return { addData, deleteData };
 }
 
+// Reusable expandable chart card
+function ExpandableChartCard({
+  title,
+  children,
+  style,
+  collapsedHeight = 200,
+  modalBodyHeight = "70vh",
+}) {
+  const [open, setOpen] = useState(false);
+  const child = React.Children.only(children);
+  const collapsedChild = cloneElement(child, { height: collapsedHeight });
+  const expandedChild = cloneElement(child, { height: undefined });
+  return (
+    <>
+      <Card
+        style={{ ...style, cursor: "pointer" }}
+        onClick={() => setOpen(true)}
+        title="Click to enlarge"
+      >
+        {collapsedChild}
+      </Card>
+      <Modal show={open} onHide={() => setOpen(false)} size="xl" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ height: modalBodyHeight }}>
+          {expandedChild}
+        </Modal.Body>
+      </Modal>
+    </>
+  );
+}
+
 function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const months = Array.from(
     new Set(
@@ -503,13 +537,12 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList,
   });
   const prClosedChart = (
-    <Card style={chartStyle}>
+    <ExpandableChartCard title="PRs Closed" style={chartStyle}>
       <Line
-        height={"200px"}
         options={prClosedChartOptions.chartOptions}
         data={prClosedChartOptions.data}
       />
-    </Card>
+    </ExpandableChartCard>
   );
 
   const prReviewChartOptions = getPrReviewChartOptions({
@@ -517,26 +550,24 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList,
   });
   const prReviewedChart = (
-    <Card style={chartStyle}>
+    <ExpandableChartCard title="PRs Reviewed" style={chartStyle}>
       <Line
-        height={"200px"}
         options={prReviewChartOptions.chartOptions}
         data={prReviewChartOptions.data}
       />
-    </Card>
+    </ExpandableChartCard>
   );
 
   const prCycleTimeChartOptions = getPrCycleTimeChartOptions({
     userDataList,
   });
   const cycleTimeChart = (
-    <Card style={chartStyle}>
+    <ExpandableChartCard title="PR Cycle Time (days)" style={chartStyle}>
       <Line
-        height={"200px"}
         options={prCycleTimeChartOptions.chartOptions}
         data={prCycleTimeChartOptions.data}
       />
-    </Card>
+    </ExpandableChartCard>
   );
 
   const jiraChartData = getJiraMonthWiseIssueDataByUsername(
@@ -547,51 +578,47 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     months,
     chartData: padMonthDataForJira(months, jiraChartData) || [],
   });
-  const jiraIssuesChart = (
-    <Card style={chartStyle}>
-      {jiraIsLoading ? (
-        "JIRA Data Loading..."
-      ) : (
-        <Line
-          height={"200px"}
-          options={jiraClosedTicketOptions.chartOptions}
-          data={jiraClosedTicketOptions.data}
-        />
-      )}
-    </Card>
+  const jiraIssuesChart = jiraIsLoading ? (
+    <Card style={chartStyle}>JIRA Data Loading...</Card>
+  ) : (
+    <ExpandableChartCard title="JIRA Issues Closed" style={chartStyle}>
+      <Line
+        options={jiraClosedTicketOptions.chartOptions}
+        data={jiraClosedTicketOptions.data}
+      />
+    </ExpandableChartCard>
   );
 
   const prCreatedDistributionChartOptions =
     getPrCreatedDistributionChartData(userDataList);
   const prCreatedDistributionChart = (
-    <Card style={chartStyle}>
+    <ExpandableChartCard title="PRs Created Distribution" style={chartStyle}>
       <Radar
         options={prCreatedDistributionChartOptions.chartOptions}
         data={prCreatedDistributionChartOptions.data}
       />
-    </Card>
+    </ExpandableChartCard>
   );
 
   const prReviewDistributionChartOptions =
     getPrReviewedDistributionChartData(userDataList);
   const prReviewedDistributionChart = (
-    <Card style={chartStyle}>
+    <ExpandableChartCard title="PRs Reviewed Distribution" style={chartStyle}>
       <Radar
         options={prReviewDistributionChartOptions.chartOptions}
         data={prReviewDistributionChartOptions.data}
       />
-    </Card>
+    </ExpandableChartCard>
   );
 
   const commitStatsChartOptions = getCommitStatsOptions(months, userDataList);
   const commitStatsChart = (
-    <Card style={chartStyle}>
+    <ExpandableChartCard title="Github Commits" style={chartStyle}>
       <Line
-        height={"200px"}
         options={commitStatsChartOptions.chartOptions}
         data={commitStatsChartOptions.data}
       />
-    </Card>
+    </ExpandableChartCard>
   );
 
   const githubAddDeleteChartOptions = getGithubAddDeleteChartOptions(
@@ -599,23 +626,13 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList
   );
   const githubAdditionsChart = (
-    <Card style={chartStyle}>
+    <ExpandableChartCard title="Github Additions" style={chartStyle}>
       <Line
-        height={"200px"}
         options={githubAddDeleteChartOptions.addData.chartOptions}
         data={githubAddDeleteChartOptions.addData.data}
       />
-    </Card>
+    </ExpandableChartCard>
   );
-  // const githubDeletionsChart = (
-  //   <Card style={chartStyle}>
-  //     <Line
-  //       height={"200px"}
-  //       options={githubAddDeleteChartOptions.deleteData.chartOptions}
-  //       data={githubAddDeleteChartOptions.deleteData.data}
-  //     />
-  //   </Card>
-  // );
 
   return (
     <div>
@@ -630,7 +647,6 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
         </Col>
         <Col lg={4}>
           {githubAdditionsChart}
-          {/* {githubDeletionsChart} */}
           {cycleTimeChart}
         </Col>
       </Row>
