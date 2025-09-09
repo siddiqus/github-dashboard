@@ -11,25 +11,20 @@ function sortMonthsAscending(monthsArray) {
     const [aYear, aMonth] = a.month.split("-");
     const [bYear, bMonth] = b.month.split("-");
 
-    // Compare years
     if (aYear !== bYear) {
       return parseInt(aYear) - parseInt(bYear);
     }
 
-    // If years are the same, compare months
     return parseInt(aMonth) - parseInt(bMonth);
   });
 }
 
 function daysDifference(dateFrom, dateTo) {
-  // Convert dates to milliseconds
   const date1_ms = new Date(dateFrom).getTime();
   const date2_ms = new Date(dateTo).getTime();
 
-  // Calculate the difference in milliseconds
   const difference_ms = Math.abs(date2_ms - date1_ms);
 
-  // Convert the difference from milliseconds to days
   const difference_days = Math.ceil(difference_ms / (1000 * 60 * 60 * 24));
 
   return difference_days;
@@ -44,28 +39,6 @@ function getAveragePrCycleTime(issues) {
 
   return Math.floor(sum / closed.length);
 }
-
-// type CommitData = {
-//   commit: {
-//     author: {
-//       date: string;
-//       name: string;
-//       email: string;
-//     };
-//     message: string;
-//     comment_count: number;
-//   };
-//   author: {
-//     login: string;
-//   };
-//   committer: {
-//     login: string;
-//   };
-//   repository: {
-//     name: string;
-//     full_name: string;
-//   };
-// };
 
 function getMonthlyCommitStats(commitData) {
   const commitsByMonth = _.groupBy(commitData, (commit) => {
@@ -104,6 +77,11 @@ function getMonthlyPrStats(prCreatedData, userPrs) {
   });
 
   const totalPrCounts = prCreatedData.length;
+
+  const totalAdditions = userPrs.reduce(
+    (sum, pr) => sum + (pr.additions || 0),
+    0
+  );
 
   const prAdditionsDeletionsByMonth = {};
   const prCountsPerRepoPerMonth = {};
@@ -161,6 +139,10 @@ function getMonthlyPrStats(prCreatedData, userPrs) {
     totalPrCounts / Object.keys(issuesByMonth).length
   );
 
+  const averageAdditionsPerMonth = Math.round(
+    totalAdditions / Object.keys(issuesByMonth).length
+  );
+
   return {
     statList,
     averagePrCountPerMonth,
@@ -169,6 +151,7 @@ function getMonthlyPrStats(prCreatedData, userPrs) {
     allRepos,
     averagePrCycleTimePerMonth,
     prAdditionsDeletionsByMonth,
+    averageAdditionsPerMonth,
   };
 }
 

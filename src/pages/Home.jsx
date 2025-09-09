@@ -88,17 +88,18 @@ function Home() {
 
   const HomeElements = () => (
     <>
-      <Card className="p-3 mt-3 shadow-sm">
+      <Card className="p-3 mt-4 pt-4 shadow-sm">
         <h5>Member Data</h5>
         <HomeUserTable userDataList={userDataList} jiraData={jiraData} />
       </Card>
 
-      <Card className="p-3 mt-3 shadow-sm">
+      <Card className="p-3 mt-4 pt-4 shadow-sm">
         <OldPrList userDataList={userDataList} />
       </Card>
 
-      <Card className="p-3 mt-3 shadow-sm">
+      <Card className="p-3 mt-4 pt-4 shadow-sm">
         <h5>Member Stats</h5>
+        <br/>
         <UserPrChart
           userDataList={userDataList}
           jiraData={jiraData}

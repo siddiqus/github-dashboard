@@ -30,17 +30,22 @@ export function HomeUserTable({ userDataList }) {
       ),
     },
     {
-      name: "Total PRs in period",
+      name: "Total PRs",
       selector: (row) => row.totalPrCounts,
       sortable: true,
     },
     {
-      name: "Average PR / month",
+      name: "Avg Adds/month",
+      selector: (row) => row.averageAdditionsPerMonth,
+      sortable: true,
+    },
+    {
+      name: "Avg PR/month",
       selector: (row) => row.averagePrCountPerMonth,
       sortable: true,
     },
     {
-      name: "Average PR Cycle (days)",
+      name: "Avg PR Cycle (days)",
       selector: (row) => {
         const prList = row.prList;
         let average = row.prList.reduce((sum, pr) => {
@@ -62,10 +67,11 @@ export function HomeUserTable({ userDataList }) {
       name: "",
       selector: (row) => (
         <Button
+          variant="outline-primary"
           className="btn btn-light"
           onClick={() => goToUser(row.username)}
         >
-          Go to profile
+          Profile
         </Button>
       ),
     },
