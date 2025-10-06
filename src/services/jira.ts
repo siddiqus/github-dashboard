@@ -28,18 +28,6 @@ type JiraChartData = {
   }[];
 };
 
-interface IssueSearchResponse {
-  issueType: string;
-  issueKey: string;
-  summary: string;
-  description: string;
-  status: string;
-  createdAt: string;
-  resolvedAt: string;
-  userEmail: string;
-  storyPoints?: number;
-}
-
 const backendBaseUrl = import.meta.env.VITE_APP_BACKEND_URL as string;
 const backendPort = import.meta.env.VITE_APP_BACKEND_PORT;
 const jiraUrl = `${backendBaseUrl.replace(/\/+$/, "")}:${backendPort}`;
@@ -51,29 +39,14 @@ const jiraAxiosClient = axios.create({
   },
 });
 
-function transformIssueData(issue: any): IssueSearchResponse {
-  return {
-    issueType: issue.fields.issuetype.name,
-    issueKey: issue.key,
-    description: issue.fields.description || "",
-    status: issue.fields.status.name,
-    createdAt: issue.fields.created, // Assuming 'created' field exists and is in the correct format
-    resolvedAt: issue.fields.resolutiondate || issue.fields.created || "", // Use an empty string if resolutiondate is null
-    userEmail: issue.fields.assignee?.emailAddress || "Unassigned", //Handle unassigned issues
-    storyPoints: issue.fields.customfield_12919, // Assuming this field holds story points
-    summary: issue.fields.summary,
-  };
-}
-
 export async function searchJiraIssues(opts: JiraIssueSearchParams) {
   const response = await jiraAxiosClient.post(`/issue-search`, opts);
 
   const userList = await getUsersFromStore();
   const issues: JiraIssue[] = response.data.issues.map((issue) => {
-    const transformedIssue = transformIssueData(issue);
-    const username = getUserNameFromEmail(transformedIssue.userEmail, userList);
+    const username = getUserNameFromEmail(issue.userEmail, userList);
     return {
-      ...transformedIssue,
+      ...issue,
       username,
     };
   });
@@ -84,7 +57,9 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
 }
 
 function getUserNameFromEmail(email: string, userList: any[]): string | null {
-  const user = userList.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  const user = userList.find(
+    (u) => u.email.toLowerCase() === email.toLowerCase()
+  );
   return user ? user.username : null;
 }
 

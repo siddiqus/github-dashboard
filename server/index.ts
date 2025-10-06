@@ -4,7 +4,7 @@ dotenv.config();
 import cors from "cors";
 import express from "express";
 import { getBonusesByUserEmail } from "./bonusly";
-import { fetchAllJiraIssues } from "./jira/jira-rest";
+import { searchJiraIssues } from "./jira-cloud";
 
 const app: any = express();
 
@@ -35,7 +35,7 @@ app.post("/jira/issue-search", async (req, res) => {
   }
 
   try {
-    const issues = await fetchAllJiraIssues({
+    const issues = await searchJiraIssues({
       userEmails,
       startDate,
       endDate,
