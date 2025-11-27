@@ -54,7 +54,7 @@ export async function getAllIssues({
       order: "asc",
     });
 
-    await delay(2000);
+    await delay(1000);
 
     totalCount = res.data.total_count;
 

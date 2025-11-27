@@ -490,7 +490,7 @@ function ExpandableChartCard({
   children,
   style,
   collapsedHeight = 200,
-  modalBodyHeight = "70vh",
+  modalBodyHeight = "80vh",
 }) {
   const [open, setOpen] = useState(false);
   const child = React.Children.only(children);
@@ -498,11 +498,18 @@ function ExpandableChartCard({
   const expandedChild = cloneElement(child, { height: undefined });
   return (
     <>
-      <Card
-        style={{ ...style, cursor: "pointer" }}
-        onClick={() => setOpen(true)}
-        title="Click to enlarge"
-      >
+      <Card style={{ ...style, alignContent: "center", textAlign: "center" }}>
+        <div
+          style={{
+            cursor: "pointer",
+            position: "absolute",
+            right: "12px",
+          }}
+          onClick={() => setOpen(true)}
+          title="Click to enlarge"
+        >
+          ⛶
+        </div>
         {collapsedChild}
       </Card>
       <Modal show={open} onHide={() => setOpen(false)} size="xl" centered>
