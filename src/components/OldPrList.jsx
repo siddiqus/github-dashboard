@@ -1,11 +1,6 @@
 import DataTable from "react-data-table-component";
 
-export default function OldPrList({ userDataList }) {
-  const getRepoFromUrl = (url) => {
-    const match = url.match(/repos\/[^/]+\/([^/]+)/);
-    return match ? match[1] : "";
-  };
-
+export default function OldPrList({ data }) {
   const columns = [
     {
       name: "Name",
@@ -65,21 +60,6 @@ export default function OldPrList({ userDataList }) {
       grow: 1,
     },
   ];
-
-  const data = userDataList.flatMap((userData) =>
-    userData.oldPrs.map((pr) => ({
-      name: userData.name,
-      username: userData.username,
-      repo: getRepoFromUrl(pr.url),
-      title: pr.title,
-      url: pr.url,
-      created_at: pr.created_at,
-      daysElapsed: Math.floor(
-        (new Date() - new Date(pr.created_at)) / (1000 * 60 * 60 * 24)
-      ),
-      draft: pr.draft,
-    }))
-  );
 
   return (
     <div>

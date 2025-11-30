@@ -86,6 +86,26 @@ function Home() {
     setDataStatus(statusMap.NO_DATA);
   }
 
+  const getRepoFromUrl = (url) => {
+    const match = url.match(/repos\/[^/]+\/([^/]+)/);
+    return match ? match[1] : "";
+  };
+
+  const oldPrData = userDataList.flatMap((userData) =>
+    userData.oldPrs.map((pr) => ({
+      name: userData.name,
+      username: userData.username,
+      repo: getRepoFromUrl(pr.url),
+      title: pr.title,
+      url: pr.url,
+      created_at: pr.created_at,
+      daysElapsed: Math.floor(
+        (new Date() - new Date(pr.created_at)) / (1000 * 60 * 60 * 24)
+      ),
+      draft: pr.draft,
+    }))
+  );
+
   const HomeElements = () => (
     <>
       <Card className="p-3 mt-4 pt-4 shadow-sm">
@@ -93,13 +113,17 @@ function Home() {
         <HomeUserTable userDataList={userDataList} jiraData={jiraData} />
       </Card>
 
-      <Card className="p-3 mt-4 pt-4 shadow-sm">
-        <OldPrList userDataList={userDataList} />
-      </Card>
+      {oldPrData.length > 0 ? (
+        <Card className="p-3 mt-4 pt-4 shadow-sm">
+          <OldPrList data={oldPrData} />
+        </Card>
+      ) : (
+        <></>
+      )}
 
       <Card className="p-3 mt-4 pt-4 shadow-sm">
         <h5>Member Stats</h5>
-        <br/>
+        <br />
         <UserPrChart
           userDataList={userDataList}
           jiraData={jiraData}
