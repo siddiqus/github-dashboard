@@ -35,17 +35,22 @@ export function HomeUserTable({ userDataList }) {
       sortable: true,
     },
     {
-      name: "Avg Adds/month",
+      name: "Avg Adds/m",
       selector: (row) => row.averageAdditionsPerMonth,
       sortable: true,
     },
     {
-      name: "Avg PR/month",
+      name: "Avg PR/m",
       selector: (row) => row.averagePrCountPerMonth,
       sortable: true,
     },
     {
-      name: "Avg PR Cycle (days)",
+      name: "Avg Adds/PR",
+      selector: (row) => row.averageAddsPerPr,
+      sortable: true,
+    },
+    {
+      name: "Avg PR Cycle",
       selector: (row) => {
         const prList = row.prList;
         let average = row.prList.reduce((sum, pr) => {
@@ -59,7 +64,7 @@ export function HomeUserTable({ userDataList }) {
           return sum + differenceInHours / 24;
         }, 0);
         average = average / prList.filter((pr) => !!pr.closed_at).length;
-        return +average.toFixed(2);
+        return `${+average.toFixed(2)} days`;
       },
       sortable: true,
     },

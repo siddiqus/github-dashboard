@@ -83,6 +83,10 @@ function getMonthlyPrStats(prCreatedData, userPrs) {
     0
   );
 
+  const averageAddsPerPr = Math.round(
+    totalPrCounts > 0 ? totalAdditions / totalPrCounts : 0
+  );
+
   const prAdditionsDeletionsByMonth = {};
   const prCountsPerRepoPerMonth = {};
 
@@ -152,6 +156,7 @@ function getMonthlyPrStats(prCreatedData, userPrs) {
     averagePrCycleTimePerMonth,
     prAdditionsDeletionsByMonth,
     averageAdditionsPerMonth,
+    averageAddsPerPr,
   };
 }
 
@@ -306,7 +311,10 @@ export async function getUserPrCreatedStats({
   const prList = getPrApiBody(prCreatedData);
   prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   const userPrs = await getPrList(prList);
-  const monthlyPrStats = getMonthlyPrStats(prCreatedData, userPrs);
+  const { averageAddsPerPr, ...monthlyPrStats } = getMonthlyPrStats(
+    prCreatedData,
+    userPrs
+  );
 
   return {
     avatarUrl,
@@ -315,6 +323,7 @@ export async function getUserPrCreatedStats({
     commitData,
     commitCountByMonth,
     userPrs,
+    averageAddsPerPr,
   };
 }
 
@@ -444,6 +453,7 @@ export async function getUserData({
     ...prCreatedData.commitCountByMonth,
     ...reviewedData.monthlyReviewData,
     reviewedPrList: reviewedData.reviewedPrList,
+    averageAddsPerPr: prCreatedData.averageAddsPerPr,
   };
 }
 
