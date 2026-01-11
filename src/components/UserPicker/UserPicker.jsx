@@ -136,6 +136,10 @@ function UserPicker({ onSubmit, onReset }) {
     setUsernames([]);
   }
 
+  function getEndDateWithLastDay(endDate) {
+    return new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
+  }
+
   async function handleSubmit() {
     setErrorMessage("");
 
@@ -149,12 +153,7 @@ function UserPicker({ onSubmit, onReset }) {
       startDate.getMonth(),
       1
     );
-    const endDateWithLastDay = new Date(
-      endDate.getFullYear(),
-      endDate.getMonth() + 1,
-      0
-    );
-
+    const endDateWithLastDay = getEndDateWithLastDay(endDate);
     const startDateFormatted = formatDate(startDateWithFirstDay);
     const endDateFormatted = formatDate(endDateWithLastDay);
 
@@ -281,7 +280,11 @@ function UserPicker({ onSubmit, onReset }) {
               selected={endDate}
               onChange={(date) => {
                 setEndDate(date);
-                localStorage.setItem("opti-gh-endDate", date.toISOString());
+
+                localStorage.setItem(
+                  "opti-gh-endDate",
+                  getEndDateWithLastDay(date).toISOString()
+                );
               }}
               dateFormat="MMMM yyyy"
               showMonthYearPicker

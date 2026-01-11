@@ -3,32 +3,33 @@ import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
 
 export function HomeUserTable({ userDataList }) {
-  if (!userDataList || !userDataList.every((e) => !!e.prList.length)) {
-    return null;
-  }
   const navigate = useNavigate();
 
   function goToUser(username) {
     navigate(`/users/${username}`);
   }
 
+  if (!userDataList || !userDataList.every((e) => !!e.prList.length)) {
+    return null;
+  }
+
   const tableColumns = [
     {
       name: "Name",
-      selector: (row) => row.name,
-    },
-    {
-      name: "Username",
       selector: (row) => (
-        <a
-          href={"https://github.com/" + row.username}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {row.username}
-        </a>
+        <span>
+          {row.name}{' '}
+          (<a
+            href={"https://github.com/" + row.username}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {row.username}
+          </a>)
+        </span>
       ),
     },
+
     {
       name: "Total PRs",
       selector: (row) => row.totalPrCounts,

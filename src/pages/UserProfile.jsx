@@ -43,6 +43,7 @@ function UserProfile() {
 
       const userEmail = userList.find((u2) => u2.username === username)?.email;
 
+      console.log('fetching bonusly data')
       const bonuslyDataMap = await getBonuslyDataCached(
         [userEmail],
         startDateFromStorage,

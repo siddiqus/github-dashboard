@@ -77,11 +77,10 @@ export async function getBonuslyDataCached(
   );
 
   const resultMap: { [email: string]: BonuslyData[] } = {};
-  results.forEach((data) => {
-    const email = data[0]?.email;
-    if (email) {
-      resultMap[email.toLowerCase()] = data;
-    }
+
+  emails.forEach((email, index) => {
+    const data = results[index];
+    resultMap[email.toLowerCase()] = data;
   });
 
   return resultMap;
