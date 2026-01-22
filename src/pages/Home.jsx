@@ -8,7 +8,7 @@ import { getUserData } from "../services/github/utils";
 import { dbStore } from "../services/idb";
 import { getJiraIssuesCached } from "../services/jira";
 import { getUsersFromStore } from "../services/utils";
-import { Card } from "react-bootstrap";
+import { Card, Button } from "react-bootstrap";
 
 const statusMap = {
   LOADING: "loading",
@@ -91,6 +91,19 @@ function Home() {
     return match ? match[1] : "";
   };
 
+  const downloadUserData = () => {
+    const dataStr = JSON.stringify(userDataList, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `github-user-data-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const oldPrData = userDataList.flatMap((userData) =>
     userData.oldPrs.map((pr) => ({
       name: userData.name,
@@ -109,7 +122,16 @@ function Home() {
   const HomeElements = () => (
     <>
       <Card className="p-3 mt-4 pt-4 shadow-sm">
-        <h5>Member Data</h5>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h5 className="mb-0">Member Data</h5>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={downloadUserData}
+          >
+            Download JSON
+          </Button>
+        </div>
         <HomeUserTable userDataList={userDataList} jiraData={jiraData} />
       </Card>
 
