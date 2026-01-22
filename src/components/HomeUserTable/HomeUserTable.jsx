@@ -18,37 +18,42 @@ export function HomeUserTable({ userDataList }) {
       name: "Name",
       selector: (row) => (
         <span>
-          {row.name}{' '}
-          (<a
+          {row.name} (
+          <a
             href={"https://github.com/" + row.username}
             target="_blank"
             rel="noopener noreferrer"
           >
             {row.username}
-          </a>)
+          </a>
+          )
         </span>
       ),
-    },
-
-    {
-      name: "Total PRs",
-      selector: (row) => row.totalPrCounts,
-      sortable: true,
+      width: "300px",
     },
     {
       name: "Avg Adds/m",
       selector: (row) => row.averageAdditionsPerMonth,
       sortable: true,
-    },
-    {
-      name: "Avg PR/m",
-      selector: (row) => row.averagePrCountPerMonth,
-      sortable: true,
+      width: '130px'
     },
     {
       name: "Avg Adds/PR",
       selector: (row) => row.averageAddsPerPr,
       sortable: true,
+      width: '140px'
+    },
+    {
+      name: "Avg PR/m",
+      selector: (row) => row.averagePrCountPerMonth,
+      sortable: true,
+      width: '120px'
+    },
+    {
+      name: "Avg Rev/m",
+      selector: (row) => row.averageReviewsPerMonth,
+      sortable: true,
+      width: '120px'
     },
     {
       name: "Avg PR Cycle",
@@ -67,6 +72,17 @@ export function HomeUserTable({ userDataList }) {
         average = average / prList.filter((pr) => !!pr.closed_at).length;
         return `${+average.toFixed(2)} days`;
       },
+      sortable: true,
+      width: '140px'
+    },
+    {
+      name: "# PRs",
+      selector: (row) => row.totalPrCounts,
+      sortable: true,
+    },
+    {
+      name: "# Revs",
+      selector: (row) => row.totalReviewsInPeriod,
       sortable: true,
     },
     {

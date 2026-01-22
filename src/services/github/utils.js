@@ -343,9 +343,16 @@ export async function getUserPrReviewStats({
 
   const monthlyReviewData = getMonthlyReviewStats(reviewedData);
 
+  const totalReviewsInPeriod = reviewedData.length;
+  const months = Object.keys(monthlyReviewData.reviewCountsPerMonth).length;
+  const averageReviewsPerMonth =
+    months > 0 ? Math.round(totalReviewsInPeriod / months) : 0;
+
+  monthlyReviewData.averageReviewsPerMonth = averageReviewsPerMonth;
   return {
     monthlyReviewData,
     reviewedPrList: reviewedData,
+    totalReviewsInPeriod,
   };
 }
 
@@ -454,6 +461,7 @@ export async function getUserData({
     ...reviewedData.monthlyReviewData,
     reviewedPrList: reviewedData.reviewedPrList,
     averageAddsPerPr: prCreatedData.averageAddsPerPr,
+    totalReviewsInPeriod: reviewedData.totalReviewsInPeriod,
   };
 }
 
