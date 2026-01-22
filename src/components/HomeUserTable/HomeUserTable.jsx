@@ -9,6 +9,53 @@ export function HomeUserTable({ userDataList }) {
     navigate(`/users/${username}`);
   }
 
+  function copyAsTSV() {
+    if (!userDataList || userDataList.length === 0) return;
+
+    // Create TSV header
+    const headers = [
+      "Name",
+      "Username",
+      "Avg Adds/m",
+      "Avg Adds/PR",
+      "Avg PR/m",
+      "Avg Rev/m",
+      "Avg PR Cycle",
+      "# PRs",
+      "# Revs",
+    ];
+    const tsvHeader = headers.join("\t");
+
+    // Create TSV rows
+    const tsvRows = userDataList.map((row) => {
+      return [
+        row.name,
+        row.username,
+        row.averageAdditionsPerMonth,
+        row.averageAddsPerPr,
+        row.averagePrCountPerMonth,
+        row.averageReviewsPerMonth,
+        `${(+row.averagePrCycleInDays).toFixed(2)} days`,
+        row.totalPrCounts,
+        row.totalReviewsInPeriod,
+      ].join("\t");
+    });
+
+    // Combine header and rows
+    const tsvContent = [tsvHeader, ...tsvRows].join("\n");
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(tsvContent).then(
+      () => {
+        alert("Table data copied as TSV!");
+      },
+      (err) => {
+        console.error("Failed to copy TSV: ", err);
+        alert("Failed to copy to clipboard");
+      }
+    );
+  }
+
   if (!userDataList || !userDataList.every((e) => !!e.prList.length)) {
     return null;
   }
@@ -35,45 +82,33 @@ export function HomeUserTable({ userDataList }) {
       name: "Avg Adds/m",
       selector: (row) => row.averageAdditionsPerMonth,
       sortable: true,
-      width: '130px'
+      width: "130px",
     },
     {
       name: "Avg Adds/PR",
       selector: (row) => row.averageAddsPerPr,
       sortable: true,
-      width: '140px'
+      width: "140px",
     },
     {
       name: "Avg PR/m",
       selector: (row) => row.averagePrCountPerMonth,
       sortable: true,
-      width: '120px'
+      width: "120px",
     },
     {
       name: "Avg Rev/m",
       selector: (row) => row.averageReviewsPerMonth,
       sortable: true,
-      width: '120px'
+      width: "120px",
     },
     {
       name: "Avg PR Cycle",
       selector: (row) => {
-        const prList = row.prList;
-        let average = row.prList.reduce((sum, pr) => {
-          if (!pr.closed_at) {
-            return sum;
-          }
-
-          const differenceInMs =
-            new Date(pr.closed_at).getTime() - new Date(pr.created_at);
-          const differenceInHours = differenceInMs / (1000 * 60 * 60);
-          return sum + differenceInHours / 24;
-        }, 0);
-        average = average / prList.filter((pr) => !!pr.closed_at).length;
-        return `${+average.toFixed(2)} days`;
+        return `${(+row.averagePrCycleInDays).toFixed(2)} days`;
       },
       sortable: true,
-      width: '140px'
+      width: "140px",
     },
     {
       name: "# PRs",
@@ -100,6 +135,13 @@ export function HomeUserTable({ userDataList }) {
   ];
 
   return (
-    <DataTable highlightOnHover data={userDataList} columns={tableColumns} />
+    <div>
+      <div style={{ marginBottom: "10px", textAlign: "right" }}>
+        <Button variant="outline-secondary" onClick={copyAsTSV}>
+          Copy as TSV
+        </Button>
+      </div>
+      <DataTable highlightOnHover data={userDataList} columns={tableColumns} />
+    </div>
   );
 }

@@ -309,12 +309,22 @@ export async function getUserPrCreatedStats({
   const commitCountByMonth = getMonthlyCommitStats(commitData);
 
   const prList = getPrApiBody(prCreatedData);
-  prList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   const userPrs = await getPrList(prList);
+  userPrs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   const { averageAddsPerPr, ...monthlyPrStats } = getMonthlyPrStats(
     prCreatedData,
     userPrs
   );
+
+  const prsClosed = userPrs.filter((pr) => !!pr.closed_at);
+  const totalDaysPrOpen = prsClosed.reduce((sum, pr) => {
+    const differenceInMs =
+      new Date(pr.closed_at).getTime() - new Date(pr.created_at);
+    const differenceInHours = differenceInMs / (1000 * 60 * 60);
+    return sum + differenceInHours / 24;
+  }, 0);
+  const averagePrCycleInDays =
+    prsClosed.length > 0 ? totalDaysPrOpen / prsClosed.length : 0;
 
   return {
     avatarUrl,
@@ -324,6 +334,7 @@ export async function getUserPrCreatedStats({
     commitCountByMonth,
     userPrs,
     averageAddsPerPr,
+    averagePrCycleInDays,
   };
 }
 
@@ -462,6 +473,7 @@ export async function getUserData({
     reviewedPrList: reviewedData.reviewedPrList,
     averageAddsPerPr: prCreatedData.averageAddsPerPr,
     totalReviewsInPeriod: reviewedData.totalReviewsInPeriod,
+    averagePrCycleInDays: prCreatedData.averagePrCycleInDays,
   };
 }
 
