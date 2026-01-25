@@ -104,6 +104,53 @@ function Home() {
     URL.revokeObjectURL(url);
   };
 
+  const copyAsTSV = () => {
+    if (!userDataList || userDataList.length === 0) return;
+
+    // Create TSV header
+    const headers = [
+      "Name",
+      "Username",
+      "Avg Adds/m",
+      "Avg Adds/PR",
+      "Avg PR/m",
+      "Avg Rev/m",
+      "Avg PR Cycle",
+      "# PRs",
+      "# Revs",
+    ];
+    const tsvHeader = headers.join("\t");
+
+    // Create TSV rows
+    const tsvRows = userDataList.map((row) => {
+      return [
+        row.name,
+        row.username,
+        row.averageAdditionsPerMonth,
+        row.averageAddsPerPr,
+        row.averagePrCountPerMonth,
+        row.averageReviewsPerMonth,
+        `${(+row.averagePrCycleInDays).toFixed(2)} days`,
+        row.totalPrCounts,
+        row.totalReviewsInPeriod,
+      ].join("\t");
+    });
+
+    // Combine header and rows
+    const tsvContent = [tsvHeader, ...tsvRows].join("\n");
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(tsvContent).then(
+      () => {
+        alert("Table data copied as TSV!");
+      },
+      (err) => {
+        console.error("Failed to copy TSV: ", err);
+        alert("Failed to copy to clipboard");
+      }
+    );
+  };
+
   const oldPrData = userDataList.flatMap((userData) =>
     userData.oldPrs.map((pr) => ({
       name: userData.name,
@@ -124,13 +171,14 @@ function Home() {
       <Card className="p-3 mt-4 pt-4 shadow-sm">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="mb-0">Member Data</h5>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={downloadUserData}
-          >
-            Download JSON
-          </Button>
+          <div className="d-flex gap-2">
+            <Button variant="outline-secondary" size="sm" onClick={copyAsTSV}>
+              Copy as TSV
+            </Button>
+            <Button variant="primary" size="sm" onClick={downloadUserData}>
+              Download JSON
+            </Button>
+          </div>
         </div>
         <HomeUserTable userDataList={userDataList} jiraData={jiraData} />
       </Card>
