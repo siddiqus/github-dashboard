@@ -261,11 +261,13 @@ function getCommitStatsOptions(months, userDataList) {
   const datasets = [];
 
   usernames.forEach((username, index) => {
-    const data = dataPerUser[username];
+    const data = dataPerUser[username] || {};
 
     const dataForUser = [];
     for (const month of months) {
-      const commitCount = data.commitCountsPerMonth[month] || 0;
+      const commitCount = data.commitCountsPerMonth
+        ? data.commitCountsPerMonth[month]
+        : 0;
       dataForUser.push(commitCount);
     }
 

@@ -1,6 +1,20 @@
 import DataTable from "react-data-table-component";
+import { Button } from "react-bootstrap";
 
 export default function OldPrList({ data }) {
+  const copyLinks = () => {
+    if (!data || data.length === 0) return;
+    const links = data
+      .map((row) => row.url.replace("//api.", "//www.").replace("/repos", ""))
+      .join("\n");
+    navigator.clipboard.writeText(links).then(
+      () => alert("PR links copied to clipboard!"),
+      (err) => {
+        console.error("Failed to copy links: ", err);
+        alert("Failed to copy to clipboard");
+      }
+    );
+  };
   const columns = [
     {
       name: "Name",
@@ -63,7 +77,12 @@ export default function OldPrList({ data }) {
 
   return (
     <div>
-      <h5>Old Pull Requests</h5>
+      <div className="d-flex justify-content-between align-items-center">
+        <h5 className="mb-0">Old Pull Requests</h5>
+        <Button variant="outline-secondary" size="sm" onClick={copyLinks}>
+          Copy Links
+        </Button>
+      </div>
       <DataTable
         columns={columns}
         data={data}
