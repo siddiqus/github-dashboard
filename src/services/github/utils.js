@@ -1,5 +1,10 @@
 import _ from "lodash";
-import { getAllCommits, getAllIssues, getPrData } from "./github-api.service";
+import {
+  getAllCommentedIssues,
+  getAllCommits,
+  getAllIssues,
+  getPrData,
+} from "./github-api.service";
 
 import { dbStore } from "../idb";
 import { getFromCache, getUsersFromStore } from "../utils";
@@ -228,6 +233,31 @@ async function getAllIssuesCached({
   });
 }
 
+async function getAllCommentedIssuesCached({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
+  return getFromCache({
+    getCacheKey: () =>
+      getDataCacheKey({
+        organization,
+        author,
+        startDate,
+        endDate,
+        mode: "commenter",
+      }),
+    fn: () =>
+      getAllCommentedIssues({
+        organization,
+        author,
+        startDate,
+        endDate,
+      }),
+  });
+}
+
 async function getAllCommitsCached({
   organization,
   author,
@@ -442,7 +472,7 @@ export async function getUserData({
   endDate,
   organization = import.meta.env.VITE_APP_GITHUB_ORG,
 }) {
-  const [prCreatedData, reviewedData] = await Promise.all([
+  const [prCreatedData, reviewedData, commentedPrList] = await Promise.all([
     getUserPrCreatedStats({
       organization,
       author,
@@ -450,6 +480,12 @@ export async function getUserData({
       endDate,
     }),
     getUserPrReviewStats({
+      organization,
+      author,
+      startDate,
+      endDate,
+    }),
+    getAllCommentedIssuesCached({
       organization,
       author,
       startDate,
@@ -467,6 +503,9 @@ export async function getUserData({
     avatarUrl: prCreatedData.avatarUrl,
     prList: prCreatedData.prList,
     oldPrs,
+    commitData: prCreatedData.commitData,
+    userPrs: prCreatedData.userPrs,
+    commentedPrList,
     ...prCreatedData.monthlyPrStats,
     ...prCreatedData.commitCountByMonth,
     ...reviewedData.monthlyReviewData,
@@ -497,9 +536,17 @@ export async function removeUserDataCache({
     endDate,
     mode: "reviewer",
   });
+  const commenterCachePath = getDataCacheKey({
+    organization,
+    author,
+    startDate,
+    endDate,
+    mode: "commenter",
+  });
 
   await dbStore.unsetData(authorCachePath);
   await dbStore.unsetData(reviewerCachePath);
+  await dbStore.unsetData(commenterCachePath);
 }
 
 export async function removePrCache({ owner, repo, pullNumber }) {

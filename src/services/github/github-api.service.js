@@ -100,6 +100,40 @@ export async function getMemberDetails(org, username) {
     .then((d) => d.data);
 }
 
+export async function getAllCommentedIssues({
+  organization,
+  author,
+  startDate,
+  endDate,
+}) {
+  const results = [];
+
+  let page = 1;
+
+  while (page <= 10) {
+    console.log(`fetching commented PRs page ${page} for ${author}`);
+    const res = await client.request("GET /search/issues", {
+      q: `org:${organization} is:pr commenter:${author} updated:${startDate}..${endDate}`,
+      per_page: 200,
+      page,
+      sort: "updated",
+      order: "asc",
+    });
+
+    await delay(1000);
+
+    if (results.length === res.data.total_count) {
+      break;
+    }
+
+    results.push(...res.data.items);
+
+    page++;
+  }
+
+  return results;
+}
+
 export async function getAllCommits({
   organization,
   author,

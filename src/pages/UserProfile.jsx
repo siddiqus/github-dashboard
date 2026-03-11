@@ -4,6 +4,7 @@ import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
 import UserProfileJiraList from "../components/UserProfileJiraList";
+import UserProfileActivityTimeline from "../components/UserProfileActivityTimeline/UserProfileActivityTimeline";
 import UserProfilePrList from "../components/UserProfilePrList/UserProfilePrList";
 import { dbStore } from "../services/idb";
 import {
@@ -237,6 +238,13 @@ function UserProfile() {
                 prList: userData.reviewedPrList,
               }}
             />
+          )}
+        </Tab>
+        <Tab eventKey="activity" title="GitHub Activity">
+          {!userData ? (
+            "No data available"
+          ) : (
+            <UserProfileActivityTimeline userData={userData} />
           )}
         </Tab>
         <Tab eventKey="jiraList" title="JIRA Tickets">
