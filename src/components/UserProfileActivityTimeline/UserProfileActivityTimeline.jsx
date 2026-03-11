@@ -8,6 +8,27 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const ACTIVITY_TYPES = {
   PR_OPENED: "pr_opened",
@@ -329,6 +350,92 @@ function WeekSection({ week, defaultExpanded }) {
   );
 }
 
+function ActivityChart({ weekGroups }) {
+  const chartData = useMemo(() => {
+    const reversed = [...weekGroups].reverse();
+    return {
+      labels: reversed.map((w) => w.weekLabel),
+      datasets: [
+        {
+          label: "Total",
+          data: reversed.map((w) => w.activities.length),
+          borderColor: "rgb(75, 75, 75)",
+          borderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: "PRs Opened",
+          data: reversed.map((w) => w.counts[ACTIVITY_TYPES.PR_OPENED] || 0),
+          borderColor: "rgb(25, 135, 84)",
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "PRs Merged",
+          data: reversed.map((w) => w.counts[ACTIVITY_TYPES.PR_MERGED] || 0),
+          borderColor: "rgb(13, 202, 240)",
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "Reviews",
+          data: reversed.map((w) => w.counts[ACTIVITY_TYPES.PR_REVIEW] || 0),
+          borderColor: "rgb(13, 110, 253)",
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "Comments",
+          data: reversed.map((w) => w.counts[ACTIVITY_TYPES.PR_COMMENT] || 0),
+          borderColor: "rgb(255, 193, 7)",
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "Commits",
+          data: reversed.map((w) => w.counts[ACTIVITY_TYPES.COMMIT] || 0),
+          borderColor: "rgb(108, 117, 125)",
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+      ],
+    };
+  }, [weekGroups]);
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Weekly Activity",
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: "Activity Count",
+        },
+      },
+      x: {
+        display: false,
+      },
+    },
+  };
+
+  return (
+    <Card className="mb-3">
+      <Card.Body>
+        <Line options={chartOptions} data={chartData} />
+      </Card.Body>
+    </Card>
+  );
+}
+
 // --- Main component ---
 
 function UserProfileActivityTimeline({ userData }) {
@@ -365,7 +472,7 @@ function UserProfileActivityTimeline({ userData }) {
         onFilterChange={setActiveTypeFilters}
       />
       <Row>
-        <Col lg={8}>
+        <Col lg={6}>
           {weekGroups.map((week, index) => (
             <WeekSection
               key={week.weekKey}
@@ -373,6 +480,9 @@ function UserProfileActivityTimeline({ userData }) {
               defaultExpanded={index < 4}
             />
           ))}
+        </Col>
+        <Col lg={6}>
+          <ActivityChart weekGroups={weekGroups} />
         </Col>
       </Row>
     </>

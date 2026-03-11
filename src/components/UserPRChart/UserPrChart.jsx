@@ -392,6 +392,88 @@ const getPrReviewedDistributionChartData = (inputList) => {
   return { chartOptions, data: chartData };
 };
 
+function getGithubActivityChartOptions(userDataList) {
+  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
+  chartOptions.plugins.title.text = "Github Activity";
+
+  const usernames = Array.from(
+    new Set(userDataList.map((u) => u.username))
+  ).sort();
+
+  const dataPerUser = _.keyBy(userDataList, "username");
+
+  const datasets = [];
+
+  usernames.forEach((username, index) => {
+    const data = dataPerUser[username];
+
+    // Collect all activity dates
+    const activities = [];
+    (data.prList || []).forEach((pr) => {
+      activities.push({ date: pr.created_at });
+      if (pr.closed_at) activities.push({ date: pr.closed_at });
+    });
+    (data.reviewedPrList || []).forEach((pr) => {
+      activities.push({ date: pr.created_at });
+    });
+    (data.commentedPrList || []).forEach((pr) => {
+      activities.push({ date: pr.updated_at });
+    });
+    (data.commitData || []).forEach((commit) => {
+      activities.push({ date: commit.commit.author.date });
+    });
+
+    // Group by ISO week
+    const weekMap = {};
+    for (const a of activities) {
+      const d = new Date(a.date);
+      const thursday = new Date(d);
+      thursday.setDate(d.getDate() - ((d.getDay() + 6) % 7) + 3);
+      const year = thursday.getFullYear();
+      const jan1 = new Date(year, 0, 1);
+      const weekNumber = Math.ceil(
+        ((thursday - jan1) / 86400000 + jan1.getDay() + 1) / 7
+      );
+      const weekKey = `${year}-W${String(weekNumber).padStart(2, "0")}`;
+
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      monday.setHours(0, 0, 0, 0);
+
+      if (!weekMap[weekKey]) {
+        weekMap[weekKey] = { weekKey, mondayDate: monday, count: 0 };
+      }
+      weekMap[weekKey].count++;
+    }
+
+    const weeks = Object.values(weekMap).sort(
+      (a, b) => a.mondayDate - b.mondayDate
+    );
+
+    datasets.push({
+      label: data.username,
+      data: weeks.map((w) => w.count),
+      borderColor: colorNames[index] || "red",
+    });
+
+    // Store week labels on first user (they share the same time range)
+    if (index === 0) {
+      chartOptions._weekLabels = weeks.map((w) => w.weekKey);
+    }
+  });
+
+  const labels = chartOptions._weekLabels || [];
+  delete chartOptions._weekLabels;
+
+  // Hide x-axis labels to avoid clutter
+  chartOptions.scales = {
+    y: { beginAtZero: true },
+    x: { display: false },
+  };
+
+  return { chartOptions, data: { labels, datasets } };
+}
+
 function padMonthDataForJira(months, data) {
   if (!data || !data.chartData) {
     return [];
@@ -643,6 +725,25 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     </ExpandableChartCard>
   );
 
+  const githubDeletionsChart = (
+    <ExpandableChartCard title="Github Deletions" style={chartStyle}>
+      <Line
+        options={githubAddDeleteChartOptions.deleteData.chartOptions}
+        data={githubAddDeleteChartOptions.deleteData.data}
+      />
+    </ExpandableChartCard>
+  );
+
+  const githubActivityChartOptions = getGithubActivityChartOptions(userDataList);
+  const githubActivityChart = (
+    <ExpandableChartCard title="Github Activity" style={chartStyle}>
+      <Line
+        options={githubActivityChartOptions.chartOptions}
+        data={githubActivityChartOptions.data}
+      />
+    </ExpandableChartCard>
+  );
+
   return (
     <div>
       <Row>
@@ -650,10 +751,12 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
           {prClosedChart}
           {jiraIssuesChart}
           {githubAdditionsChart}
+          {commitStatsChart}
         </Col>
         <Col lg={6}>
           {prReviewedChart}
-          {commitStatsChart}
+          {githubActivityChart}
+          {githubDeletionsChart}
           {cycleTimeChart}
         </Col>
       </Row>
