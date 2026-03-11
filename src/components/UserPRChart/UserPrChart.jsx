@@ -13,7 +13,14 @@ import {
 } from "chart.js";
 import _ from "lodash";
 import React, { useState, cloneElement } from "react";
-import { Card, Col, Modal, Row } from "react-bootstrap";
+import {
+  Card,
+  Col,
+  Modal,
+  OverlayTrigger,
+  Popover,
+  Row,
+} from "react-bootstrap";
 import { Line, Radar } from "react-chartjs-2";
 import {
   daysDifference,
@@ -571,6 +578,7 @@ function getGithubAddDeleteChartOptions(months, userDataList) {
 // Reusable expandable chart card
 function ExpandableChartCard({
   title,
+  description,
   children,
   style,
   collapsedHeight = 200,
@@ -580,9 +588,37 @@ function ExpandableChartCard({
   const child = React.Children.only(children);
   const collapsedChild = cloneElement(child, { height: collapsedHeight });
   const expandedChild = cloneElement(child, { height: undefined });
+
+  const infoPopover = description ? (
+    <Popover>
+      <Popover.Body style={{ fontSize: "13px" }}>{description}</Popover.Body>
+    </Popover>
+  ) : null;
+
   return (
     <>
       <Card style={{ ...style, alignContent: "center", textAlign: "center" }}>
+        {description && (
+          <OverlayTrigger
+            trigger={["hover", "focus"]}
+            placement="right"
+            overlay={infoPopover}
+          >
+            <div
+              style={{
+                cursor: "help",
+                position: "absolute",
+                left: "12px",
+                top: "8px",
+                zIndex: 1,
+                fontSize: "14px",
+                color: "#6c757d",
+              }}
+            >
+              &#9432;
+            </div>
+          </OverlayTrigger>
+        )}
         <div
           style={{
             cursor: "pointer",
@@ -628,7 +664,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList,
   });
   const prClosedChart = (
-    <ExpandableChartCard title="PRs Closed" style={chartStyle}>
+    <ExpandableChartCard
+      title="PRs Closed"
+      description="Number of pull requests closed or merged per month, grouped by user."
+      style={chartStyle}
+    >
       <Line
         options={prClosedChartOptions.chartOptions}
         data={prClosedChartOptions.data}
@@ -641,7 +681,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList,
   });
   const prReviewedChart = (
-    <ExpandableChartCard title="PRs Reviewed" style={chartStyle}>
+    <ExpandableChartCard
+      title="PRs Reviewed"
+      description="Number of pull requests reviewed per month. Only counts PRs authored by others."
+      style={chartStyle}
+    >
       <Line
         options={prReviewChartOptions.chartOptions}
         data={prReviewChartOptions.data}
@@ -653,7 +697,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList,
   });
   const cycleTimeChart = (
-    <ExpandableChartCard title="PR Cycle Time (days)" style={chartStyle}>
+    <ExpandableChartCard
+      title="PR Cycle Time (days)"
+      description="Average number of days from PR creation to close, plotted per PR creation date. Lower values indicate faster review and merge cycles."
+      style={chartStyle}
+    >
       <Line
         options={prCycleTimeChartOptions.chartOptions}
         data={prCycleTimeChartOptions.data}
@@ -672,7 +720,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const jiraIssuesChart = jiraIsLoading ? (
     <Card style={chartStyle}>JIRA Data Loading...</Card>
   ) : (
-    <ExpandableChartCard title="JIRA Issues Closed" style={chartStyle}>
+    <ExpandableChartCard
+      title="JIRA Issues Closed"
+      description="Number of JIRA issues resolved per month, grouped by user."
+      style={chartStyle}
+    >
       <Line
         options={jiraClosedTicketOptions.chartOptions}
         data={jiraClosedTicketOptions.data}
@@ -683,7 +735,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const prCreatedDistributionChartOptions =
     getPrCreatedDistributionChartData(userDataList);
   const prCreatedDistributionChart = (
-    <ExpandableChartCard title="PRs Created Distribution" style={chartStyle}>
+    <ExpandableChartCard
+      title="PRs Created Distribution"
+      description="Distribution of PRs created across repositories. Shows which repos each user contributes to most."
+      style={chartStyle}
+    >
       <Radar
         options={prCreatedDistributionChartOptions.chartOptions}
         data={prCreatedDistributionChartOptions.data}
@@ -694,7 +750,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   const prReviewDistributionChartOptions =
     getPrReviewedDistributionChartData(userDataList);
   const prReviewedDistributionChart = (
-    <ExpandableChartCard title="PRs Reviewed Distribution" style={chartStyle}>
+    <ExpandableChartCard
+      title="PRs Reviewed Distribution"
+      description="Distribution of PR reviews across repositories. Shows which repos each user reviews most."
+      style={chartStyle}
+    >
       <Radar
         options={prReviewDistributionChartOptions.chartOptions}
         data={prReviewDistributionChartOptions.data}
@@ -704,7 +764,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
 
   const commitStatsChartOptions = getCommitStatsOptions(months, userDataList);
   const commitStatsChart = (
-    <ExpandableChartCard title="Github Commits" style={chartStyle}>
+    <ExpandableChartCard
+      title="Github Commits"
+      description="Total number of commits per month across all repositories in the organization."
+      style={chartStyle}
+    >
       <Line
         options={commitStatsChartOptions.chartOptions}
         data={commitStatsChartOptions.data}
@@ -717,7 +781,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList
   );
   const githubAdditionsChart = (
-    <ExpandableChartCard title="Github Additions" style={chartStyle}>
+    <ExpandableChartCard
+      title="Github Additions"
+      description="Total lines of code added per month across all PRs."
+      style={chartStyle}
+    >
       <Line
         options={githubAddDeleteChartOptions.addData.chartOptions}
         data={githubAddDeleteChartOptions.addData.data}
@@ -726,7 +794,11 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
   );
 
   const githubDeletionsChart = (
-    <ExpandableChartCard title="Github Deletions" style={chartStyle}>
+    <ExpandableChartCard
+      title="Github Deletions"
+      description="Total lines of code deleted per month across all PRs."
+      style={chartStyle}
+    >
       <Line
         options={githubAddDeleteChartOptions.deleteData.chartOptions}
         data={githubAddDeleteChartOptions.deleteData.data}
@@ -734,9 +806,14 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     </ExpandableChartCard>
   );
 
-  const githubActivityChartOptions = getGithubActivityChartOptions(userDataList);
+  const githubActivityChartOptions =
+    getGithubActivityChartOptions(userDataList);
   const githubActivityChart = (
-    <ExpandableChartCard title="Github Activity" style={chartStyle}>
+    <ExpandableChartCard
+      title="Github Activity"
+      description="Total weekly GitHub activity including PRs opened, merged, reviewed, commented on, and commits."
+      style={chartStyle}
+    >
       <Line
         options={githubActivityChartOptions.chartOptions}
         data={githubActivityChartOptions.data}
