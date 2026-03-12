@@ -1,10 +1,30 @@
+import { useMemo, useState } from "react";
 import DataTable from "react-data-table-component";
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 
 export default function OldPrList({ data }) {
+  const [selectedUser, setSelectedUser] = useState("");
+
+  const users = useMemo(() => {
+    const userMap = new Map();
+    (data || []).forEach((row) => {
+      if (!userMap.has(row.username)) {
+        userMap.set(row.username, row.name);
+      }
+    });
+    return Array.from(userMap, ([username, name]) => ({ username, name })).sort(
+      (a, b) => a.name.localeCompare(b.name)
+    );
+  }, [data]);
+
+  const filteredData = useMemo(() => {
+    if (!selectedUser) return data;
+    return (data || []).filter((row) => row.username === selectedUser);
+  }, [data, selectedUser]);
+
   const copyLinks = () => {
-    if (!data || data.length === 0) return;
-    const links = data
+    if (!filteredData || filteredData.length === 0) return;
+    const links = filteredData
       .map((row) => row.url.replace("//api.", "//www.").replace("/repos", ""))
       .join("\n");
     navigator.clipboard.writeText(links).then(
@@ -79,13 +99,28 @@ export default function OldPrList({ data }) {
     <div>
       <div className="d-flex justify-content-between align-items-center">
         <h5 className="mb-0">Old Pull Requests</h5>
-        <Button variant="outline-secondary" size="sm" onClick={copyLinks}>
-          Copy Links
-        </Button>
+        <div className="d-flex gap-2 align-items-center">
+          <Form.Select
+            size="sm"
+            value={selectedUser}
+            onChange={(e) => setSelectedUser(e.target.value)}
+            style={{ width: "200px" }}
+          >
+            <option value="">All Users</option>
+            {users.map((u) => (
+              <option key={u.username} value={u.username}>
+                {u.name}
+              </option>
+            ))}
+          </Form.Select>
+          <Button variant="outline-secondary" size="sm" onClick={copyLinks}>
+            Copy Links
+          </Button>
+        </div>
       </div>
       <DataTable
         columns={columns}
-        data={data}
+        data={filteredData}
         responsive
         striped
         highlightOnHover

@@ -8,7 +8,7 @@ import { getUserData } from "../services/github/utils";
 import { dbStore } from "../services/idb";
 import { getJiraIssuesCached } from "../services/jira";
 import { getUsersFromStore } from "../services/utils";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Tab, Tabs } from "react-bootstrap";
 
 const statusMap = {
   LOADING: "loading",
@@ -167,40 +167,44 @@ function Home() {
   );
 
   const HomeElements = () => (
-    <>
-      <Card className="p-3 mt-4 pt-4 shadow-sm">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="mb-0">Member Data</h5>
-          <div className="d-flex gap-2">
-            <Button variant="outline-secondary" size="sm" onClick={copyAsTSV}>
-              Copy as TSV
-            </Button>
-            <Button variant="primary" size="sm" onClick={downloadUserData}>
-              Download JSON
-            </Button>
+    <Tabs defaultActiveKey="member-data" className="mt-4">
+      <Tab eventKey="member-data" title="Member Data">
+        <Card className="p-3 mt-3 shadow-sm">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="mb-0">Member Data</h5>
+            <div className="d-flex gap-2">
+              <Button variant="outline-secondary" size="sm" onClick={copyAsTSV}>
+                Copy as TSV
+              </Button>
+              <Button variant="primary" size="sm" onClick={downloadUserData}>
+                Download JSON
+              </Button>
+            </div>
           </div>
-        </div>
-        <HomeUserTable userDataList={userDataList} jiraData={jiraData} />
-      </Card>
-
-      {oldPrData.length > 0 ? (
-        <Card className="p-3 mt-4 pt-4 shadow-sm">
-          <OldPrList data={oldPrData} />
+          <HomeUserTable userDataList={userDataList} jiraData={jiraData} />
         </Card>
-      ) : (
-        <></>
-      )}
-
-      <Card className="p-3 mt-4 pt-4 shadow-sm">
-        <h5>Member Stats</h5>
-        <br />
-        <UserPrChart
-          userDataList={userDataList}
-          jiraData={jiraData}
-          jiraIsLoading={jiraIsLoading}
-        ></UserPrChart>
-      </Card>
-    </>
+      </Tab>
+      <Tab eventKey="stats-charts" title="Stats / Charts">
+        <Card className="p-3 mt-3 shadow-sm">
+          <h5>Member Stats</h5>
+          <br />
+          <UserPrChart
+            userDataList={userDataList}
+            jiraData={jiraData}
+            jiraIsLoading={jiraIsLoading}
+          />
+        </Card>
+      </Tab>
+      <Tab eventKey="old-prs" title="Old PRs">
+        <Card className="p-3 mt-3 shadow-sm">
+          {oldPrData.length > 0 ? (
+            <OldPrList data={oldPrData} />
+          ) : (
+            <p className="text-muted mb-0">No old pull requests found.</p>
+          )}
+        </Card>
+      </Tab>
+    </Tabs>
   );
 
   return (
