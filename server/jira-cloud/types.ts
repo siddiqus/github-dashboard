@@ -98,8 +98,32 @@ export interface JiraIssueFields {
   attachment: JiraAttachment[];
 }
 
+export interface JiraChangelogItem {
+  field: string;
+  fieldtype: string;
+  from: string | null;
+  fromString: string | null;
+  to: string | null;
+  toString: string | null;
+}
+
+export interface JiraChangelogHistory {
+  id: string;
+  author: JiraUserRef;
+  created: string;
+  items: JiraChangelogItem[];
+}
+
+export interface JiraChangelog {
+  startAt: number;
+  maxResults: number;
+  total: number;
+  histories: JiraChangelogHistory[];
+}
+
 export interface JiraIssue {
   id: string;
   key: string;
   fields: JiraIssueFields;
+  changelog?: JiraChangelog;
 }

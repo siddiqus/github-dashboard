@@ -87,6 +87,62 @@ export async function resetJiraCache(opts: JiraIssueSearchParams) {
   }
 }
 
+// --- JIRA Activity types and functions ---
+
+export type JiraActivityComment = {
+  id: string;
+  authorEmail: string;
+  body: string;
+  created: string;
+};
+
+export type JiraActivityChangelogItem = {
+  field: string;
+  fromString: string | null;
+  toString: string | null;
+};
+
+export type JiraActivityChangelogHistory = {
+  id: string;
+  authorEmail: string;
+  created: string;
+  items: JiraActivityChangelogItem[];
+};
+
+export type JiraActivityIssue = {
+  issueKey: string;
+  summary: string;
+  issueType: string;
+  project: string;
+  comments: JiraActivityComment[];
+  changelogHistories: JiraActivityChangelogHistory[];
+};
+
+export async function searchJiraActivities(
+  opts: JiraIssueSearchParams
+): Promise<{ issues: JiraActivityIssue[] }> {
+  const response = await jiraAxiosClient.post(`/activity-search`, opts);
+  return { issues: response.data.issues };
+}
+
+export async function getJiraActivitiesCached(
+  opts: JiraIssueSearchParams
+): Promise<JiraActivityIssue[]> {
+  const emails = opts.userEmails;
+
+  const results = await Promise.all(
+    emails.map((email) => {
+      return getFromCache({
+        getCacheKey: () =>
+          `jira-activity-${email}-${opts.startDate}-${opts.endDate}`,
+        fn: () => searchJiraActivities(opts),
+      });
+    })
+  );
+
+  return results.map((r) => r.issues).flat();
+}
+
 export function getJiraMonthWiseIssueDataByUsername(
   usernames: string[],
   jiraData: JiraIssue[]

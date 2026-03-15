@@ -12,6 +12,8 @@ import {
   getUsersFromStore,
 } from "../services/utils";
 import { getBonuslyDataCached } from "../services/bonusly";
+import UserProfileJiraActivityTimeline from "../components/UserProfileJiraActivityTimeline/UserProfileJiraActivityTimeline";
+import { getJiraActivitiesCached } from "../services/jira";
 
 function UserProfile() {
   const { username } = useParams();
@@ -19,6 +21,8 @@ function UserProfile() {
   const [userData, setUserData] = useState(null);
   const [jiraData, setJiraData] = useState(null);
   const [bonuslyData, setBonuslyData] = useState([]);
+  const [jiraActivityData, setJiraActivityData] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
 
   useEffect(() => {
     async function setDefaults() {
@@ -53,8 +57,25 @@ function UserProfile() {
       const bonuslyData = bonuslyDataMap[userEmail?.toLowerCase()] || [];
       setBonuslyData(bonuslyData);
     }
+    async function getJiraActivityData() {
+      const startDateFromStorage = localStorage.getItem("opti-gh-startDate");
+      const endDateFromStorage = localStorage.getItem("opti-gh-endDate");
+      const userList = await getUsersFromStore();
+      const email = userList.find((u) => u.username === username)?.email;
+      if (!email) return;
+      setUserEmail(email);
+
+      const data = await getJiraActivitiesCached({
+        userEmails: [email],
+        startDate: startDateFromStorage,
+        endDate: endDateFromStorage,
+      });
+      setJiraActivityData(data);
+    }
+
     setDefaults();
     getBonuslyData();
+    getJiraActivityData();
   }, []);
 
   const localStorageStartDate = localStorage.getItem("opti-gh-startDate");
@@ -249,6 +270,16 @@ function UserProfile() {
         </Tab>
         <Tab eventKey="jiraList" title="JIRA Tickets">
           <UserProfileJiraList jiraData={jiraData || []} />
+        </Tab>
+        <Tab eventKey="jiraActivity" title="JIRA Activity">
+          {!jiraActivityData ? (
+            "Loading JIRA activity data..."
+          ) : (
+            <UserProfileJiraActivityTimeline
+              jiraActivityData={jiraActivityData}
+              userEmail={userEmail}
+            />
+          )}
         </Tab>
 
         <Tab eventKey="bonusly" title="Bonusly">

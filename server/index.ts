@@ -4,7 +4,10 @@ dotenv.config();
 import cors from "cors";
 import express from "express";
 import { getBonusesByUserEmail } from "./bonusly";
-import { searchJiraIssues } from "./jira-cloud";
+import {
+  searchJiraIssues,
+  searchJiraIssuesWithChangelog,
+} from "./jira-cloud";
 
 const app: any = express();
 
@@ -36,6 +39,33 @@ app.post("/jira/issue-search", async (req, res) => {
 
   try {
     const issues = await searchJiraIssues({
+      userEmails,
+      startDate,
+      endDate,
+    });
+
+    return res.json({ issues });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+app.post("/jira/activity-search", async (req, res) => {
+  const userEmails = req.body.userEmails;
+  const startDate = req.body.startDate;
+  const endDate = req.body.endDate;
+
+  if (!userEmails.length) {
+    return res.status(400).json({
+      message: "emails not provided",
+    });
+  }
+
+  try {
+    const issues = await searchJiraIssuesWithChangelog({
       userEmails,
       startDate,
       endDate,

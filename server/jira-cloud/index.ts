@@ -214,3 +214,112 @@ export async function searchJiraIssues(opts: JiraIssueSearchParams) {
   const mapped = results.map((issue) => transformIssueData(issue));
   return mapped;
 }
+
+interface JiraActivityComment {
+  id: string;
+  authorEmail: string;
+  body: string;
+  created: string;
+}
+
+interface JiraActivityChangelogItem {
+  field: string;
+  fromString: string | null;
+  toString: string | null;
+}
+
+interface JiraActivityChangelogHistory {
+  id: string;
+  authorEmail: string;
+  created: string;
+  items: JiraActivityChangelogItem[];
+}
+
+interface JiraActivitySearchResponse {
+  issueKey: string;
+  summary: string;
+  issueType: string;
+  project: string;
+  comments: JiraActivityComment[];
+  changelogHistories: JiraActivityChangelogHistory[];
+}
+
+function transformIssueActivityData(issue: any): JiraActivitySearchResponse {
+  const comments: JiraActivityComment[] = (
+    issue.fields?.comment?.comments || []
+  ).map((c: any) => ({
+    id: c.id,
+    authorEmail: c.author?.emailAddress || "",
+    body: c.body || "",
+    created: c.created,
+  }));
+
+  const changelogHistories: JiraActivityChangelogHistory[] = (
+    issue.changelog?.histories || []
+  ).map((h: any) => ({
+    id: h.id,
+    authorEmail: h.author?.emailAddress || "",
+    created: h.created,
+    items: (h.items || []).map((item: any) => ({
+      field: item.field,
+      fromString: item.fromString,
+      toString: item.toString,
+    })),
+  }));
+
+  return {
+    issueKey: issue.key,
+    summary: issue.fields?.summary || "",
+    issueType: issue.fields?.issuetype?.name || "",
+    project: issue.fields?.project?.key || "",
+    comments,
+    changelogHistories,
+  };
+}
+
+export async function searchJiraIssuesWithChangelog(
+  opts: JiraIssueSearchParams
+) {
+  const { jqlParam } = buildJql({
+    userEmails: opts.userEmails,
+    startDate: opts.startDate,
+    endDate: opts.endDate,
+  });
+
+  let nextPageToken: string | undefined = undefined;
+
+  const results: any[] = [];
+  const url = `/rest/api/2/search/jql?jql=${jqlParam}`;
+  const params = {
+    maxResults: 1000,
+    fields: "*all",
+    fieldsByKeys: true,
+    expand: "changelog",
+    nextPageToken,
+  };
+  const response: {
+    data: {
+      issues: any[];
+      nextPageToken?: string;
+    };
+  } = await client.get(url, {
+    params,
+  });
+  results.push(...response.data.issues);
+  nextPageToken = response.data.nextPageToken;
+
+  while (nextPageToken) {
+    const resp: {
+      data: {
+        issues: any[];
+        nextPageToken?: string;
+      };
+    } = await client.get(url, {
+      params: { ...params, nextPageToken },
+    });
+    results.push(...resp.data.issues);
+    nextPageToken = resp.data.nextPageToken;
+  }
+
+  return results.map((issue) => transformIssueActivityData(issue));
+}
