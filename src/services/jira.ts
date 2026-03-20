@@ -71,8 +71,13 @@ export async function getJiraIssuesCached(
   const results = await Promise.all(
     emails.map((email) => {
       return getFromCache({
-        getCacheKey: () => `${email}-${opts.startDate}-${opts.endDate}`,
-        fn: () => searchJiraIssues(opts),
+        getCacheKey: () => `jira-issues-${email}-${opts.startDate}-${opts.endDate}`,
+        fn: () =>
+          searchJiraIssues({
+            userEmails: [email],
+            startDate: opts.startDate,
+            endDate: opts.endDate,
+          }),
       });
     })
   );
@@ -82,7 +87,7 @@ export async function getJiraIssuesCached(
 
 export async function resetJiraCache(opts: JiraIssueSearchParams) {
   for (const email of opts.userEmails) {
-    const cacheKey = `${email}-${opts.startDate}-${opts.endDate}`;
+    const cacheKey = `jira-issues-${email}-${opts.startDate}-${opts.endDate}`;
     await dbStore.unsetData(cacheKey);
   }
 }
@@ -147,7 +152,7 @@ export function getJiraMonthWiseIssueDataByUsername(
   usernames: string[],
   jiraData: JiraIssue[]
 ): JiraChartData {
-  const issues = jiraData.filter((issue) => issue.status === "Done");
+  const issues = (jiraData || []).filter((issue) => issue.status === "Done");
 
   const months = Array.from(
     new Set(issues.map((d) => d.resolvedAt!.substring(0, 7)))

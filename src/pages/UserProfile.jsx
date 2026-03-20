@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Tab, Table, Tabs } from "react-bootstrap";
+import { Card, Col, Row, Tab, Table, Tabs } from "react-bootstrap";
 import GitHubCalendar from "react-github-calendar";
 import { useParams } from "react-router-dom";
 import UserPrChart from "../components/UserPRChart/UserPrChart";
@@ -13,7 +13,7 @@ import {
 } from "../services/utils";
 import { getBonuslyDataCached } from "../services/bonusly";
 import UserProfileJiraActivityTimeline from "../components/UserProfileJiraActivityTimeline/UserProfileJiraActivityTimeline";
-import { getJiraActivitiesCached } from "../services/jira";
+import { getJiraActivitiesCached, getJiraIssuesCached } from "../services/jira";
 
 function UserProfile() {
   const { username } = useParams();
@@ -27,17 +27,30 @@ function UserProfile() {
   useEffect(() => {
     async function setDefaults() {
       const userDataList = await dbStore.getData("opti-gh-data");
-      const jiraData = await dbStore.getData("opti-jira-data");
-
-      const userJiraData = (jiraData || []).filter(
-        (j) => j.username === username
-      );
-      setJiraData(userJiraData);
 
       const userData = (userDataList || []).find(
         (u) => u.username === username
       );
       setUserData(userData);
+
+      const startDateFromStorage = localStorage.getItem("opti-gh-startDate");
+      const endDateFromStorage = localStorage.getItem("opti-gh-endDate");
+      const userList = await getUsersFromStore();
+      const email = userList.find((u) => u.username === username)?.email;
+
+      if (email && startDateFromStorage && endDateFromStorage) {
+        const jiraIssues = await getJiraIssuesCached({
+          userEmails: [email],
+          startDate: startDateFromStorage,
+          endDate: endDateFromStorage,
+        });
+        const userJiraData = jiraIssues.filter(
+          (j) => j.username === username
+        );
+        setJiraData(userJiraData);
+      } else {
+        setJiraData([]);
+      }
     }
 
     async function getBonuslyData() {
@@ -227,6 +240,29 @@ function UserProfile() {
             ).toDateString()}`}
         </div>
       </div>
+
+      {userData && (
+        <Row className="mb-3 g-2">
+          {[
+            { label: "Avg Adds/m", value: userData.averageAdditionsPerMonth },
+            { label: "Avg Adds/PR", value: userData.averageAddsPerPr },
+            { label: "Avg PR/m", value: userData.averagePrCountPerMonth },
+            { label: "Avg Rev/m", value: userData.averageReviewsPerMonth },
+            { label: "Avg PR Cycle", value: `${(+userData.averagePrCycleInDays).toFixed(2)} days` },
+            { label: "# PRs", value: userData.totalPrCounts },
+            { label: "# Revs", value: userData.totalReviewsInPeriod },
+          ].map((stat) => (
+            <Col key={stat.label}>
+              <Card className="text-center p-2 shadow-sm h-100">
+                <Card.Body className="p-2">
+                  <div className="text-muted small">{stat.label}</div>
+                  <div className="fw-bold fs-5">{stat.value}</div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
 
       <Tabs
         defaultActiveKey="prStats"

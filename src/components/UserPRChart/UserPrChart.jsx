@@ -481,6 +481,73 @@ function getGithubActivityChartOptions(userDataList) {
   return { chartOptions, data: { labels, datasets } };
 }
 
+function getJiraActivityChartOptions(jiraData, userDataList) {
+  const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
+  chartOptions.plugins.title.text = "JIRA Activity";
+
+  const usernames = Array.from(
+    new Set(userDataList.map((u) => u.username))
+  ).sort();
+
+  const datasets = [];
+
+  usernames.forEach((username, index) => {
+    const userIssues = (jiraData || []).filter((j) => j.username === username);
+
+    const activities = [];
+    userIssues.forEach((issue) => {
+      activities.push({ date: issue.createdAt });
+      if (issue.resolvedAt) activities.push({ date: issue.resolvedAt });
+    });
+
+    const weekMap = {};
+    for (const a of activities) {
+      const d = new Date(a.date);
+      const thursday = new Date(d);
+      thursday.setDate(d.getDate() - ((d.getDay() + 6) % 7) + 3);
+      const year = thursday.getFullYear();
+      const jan1 = new Date(year, 0, 1);
+      const weekNumber = Math.ceil(
+        ((thursday - jan1) / 86400000 + jan1.getDay() + 1) / 7
+      );
+      const weekKey = `${year}-W${String(weekNumber).padStart(2, "0")}`;
+
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      monday.setHours(0, 0, 0, 0);
+
+      if (!weekMap[weekKey]) {
+        weekMap[weekKey] = { weekKey, mondayDate: monday, count: 0 };
+      }
+      weekMap[weekKey].count++;
+    }
+
+    const weeks = Object.values(weekMap).sort(
+      (a, b) => a.mondayDate - b.mondayDate
+    );
+
+    datasets.push({
+      label: username,
+      data: weeks.map((w) => w.count),
+      borderColor: colorNames[index] || "red",
+    });
+
+    if (index === 0) {
+      chartOptions._weekLabels = weeks.map((w) => w.weekKey);
+    }
+  });
+
+  const labels = chartOptions._weekLabels || [];
+  delete chartOptions._weekLabels;
+
+  chartOptions.scales = {
+    y: { beginAtZero: true },
+    x: { display: false },
+  };
+
+  return { chartOptions, data: { labels, datasets } };
+}
+
 function padMonthDataForJira(months, data) {
   if (!data || !data.chartData) {
     return [];
@@ -676,23 +743,6 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     </ExpandableChartCard>
   );
 
-  const prReviewChartOptions = getPrReviewChartOptions({
-    months,
-    userDataList,
-  });
-  const prReviewedChart = (
-    <ExpandableChartCard
-      title="PRs Reviewed"
-      description="Number of pull requests reviewed per month. Only counts PRs authored by others."
-      style={chartStyle}
-    >
-      <Line
-        options={prReviewChartOptions.chartOptions}
-        data={prReviewChartOptions.data}
-      />
-    </ExpandableChartCard>
-  );
-
   const prCycleTimeChartOptions = getPrCycleTimeChartOptions({
     userDataList,
   });
@@ -806,6 +856,25 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     </ExpandableChartCard>
   );
 
+  const jiraActivityChartOptions = getJiraActivityChartOptions(
+    jiraData,
+    userDataList
+  );
+  const jiraActivityChart = jiraIsLoading ? (
+    <Card style={chartStyle}>JIRA Data Loading...</Card>
+  ) : (
+    <ExpandableChartCard
+      title="JIRA Activity"
+      description="Weekly JIRA activity including issue creation and resolution events."
+      style={chartStyle}
+    >
+      <Line
+        options={jiraActivityChartOptions.chartOptions}
+        data={jiraActivityChartOptions.data}
+      />
+    </ExpandableChartCard>
+  );
+
   const githubActivityChartOptions =
     getGithubActivityChartOptions(userDataList);
   const githubActivityChart = (
@@ -825,21 +894,19 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     <div>
       <Row>
         <Col lg={6}>
+          {githubActivityChart}
           {prClosedChart}
           {jiraIssuesChart}
-          {githubAdditionsChart}
-          {commitStatsChart}
+          {cycleTimeChart}
+          {prCreatedDistributionChart}
         </Col>
         <Col lg={6}>
-          {prReviewedChart}
-          {githubActivityChart}
+          {jiraActivityChart}
+          {commitStatsChart}
+          {githubAdditionsChart}
           {githubDeletionsChart}
-          {cycleTimeChart}
+          {prReviewedDistributionChart}
         </Col>
-      </Row>
-      <Row>
-        <Col lg={6}>{prCreatedDistributionChart}</Col>
-        <Col lg={6}>{prReviewedDistributionChart}</Col>
       </Row>
     </div>
   );
