@@ -100,12 +100,28 @@ function UserPicker({ onSubmit, onReset }) {
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  function resolveUsername(input) {
+    const trimmed = input.trim();
+    if (!trimmed) return null;
+    // Try to match by name or email (case-insensitive), resolve to username
+    const match = userList.find(
+      (u) =>
+        u.username.toLowerCase() === trimmed.toLowerCase() ||
+        u.name?.toLowerCase() === trimmed.toLowerCase() ||
+        u.email?.toLowerCase() === trimmed.toLowerCase()
+    );
+    return match ? match.username : trimmed;
+  }
+
   function setNewValueInUsernamesInputList(e) {
     const value = e.target.value;
 
     if (!value.trim()) return;
 
-    const newNames = value.split(",").map((v) => v.trim());
+    const newNames = value
+      .split(",")
+      .map((v) => resolveUsername(v))
+      .filter(Boolean);
 
     const names = Array.from(new Set([...usernames, ...newNames]));
     dbStore.setData("opti-gh-userlist", names);
@@ -212,21 +228,25 @@ function UserPicker({ onSubmit, onReset }) {
           chooseUsers={(users) => setUsernamesAndCache(users)}
         />
         <div className="tags-input-container">
-          {usernames.map((tag, index) => (
-            <div className="tag-item" key={index}>
-              <span className="text">{tag}</span>
-              <span className="close" onClick={() => removeTag(index)}>
-                &times;
-              </span>
-            </div>
-          ))}
+          {usernames.map((tag, index) => {
+            const user = userList.find((u) => u.username === tag);
+            const displayName = user?.name || tag;
+            return (
+              <div className="tag-item" key={index}>
+                <span className="text">{displayName}</span>
+                <span className="close" onClick={() => removeTag(index)}>
+                  &times;
+                </span>
+              </div>
+            );
+          })}
 
           <input
             onKeyDown={handleKeyDown}
             onKeyDownCapture={handleUserPicketInputChange}
             type="text"
             className="tags-input"
-            placeholder="Type in Github usernames"
+            placeholder="Search by name, username, or email"
             disabled={isLoading}
             onBlur={setNewValueInUsernamesInputList}
             list="userSuggestions"
@@ -236,9 +256,9 @@ function UserPicker({ onSubmit, onReset }) {
             {userList.map((user, index) => {
               return (
                 <option
-                  value={user.username}
+                  value={user.name || user.username}
                   key={index}
-                >{`${user.name} (${user.username})`}</option>
+                >{`${user.name} (${user.username}) ${user.email || ""}`}</option>
               );
             })}
           </datalist>

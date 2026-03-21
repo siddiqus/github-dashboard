@@ -25,7 +25,7 @@ function JiraList({ jiraData }) {
             target="_blank"
             href={`${import.meta.env.VITE_APP_JIRA_URL}/browse/${
               row.issueKey
-            }`.replaceAll(/\/\//g, "/")}
+            }`.replaceAll(/\/\//g, "/")} rel="noreferrer"
           >
             {row.issueKey}
           </a>

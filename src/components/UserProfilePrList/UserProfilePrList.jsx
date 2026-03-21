@@ -47,7 +47,7 @@ function PrList({ prList }) {
             ""
           )}
           {row.title}{" "}
-          <a href={row.html_url} target="_blank">
+          <a href={row.html_url} target="_blank" rel="noreferrer">
             (#{row.number})
           </a>
         </>

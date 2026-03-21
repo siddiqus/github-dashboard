@@ -135,3 +135,16 @@ export async function deleteTeamFromStore(teamId: string) {
   const updatedTeams = teams.filter(team => team.id !== teamId);
   await dbStore.setData('gh-stats-teams-list', JSON.stringify(updatedTeams));
 }
+
+/**
+ * Formats a full name into "FirstName LastInitial" format.
+ * e.g. "Kamrul Hasan" -> "Kamrul H", "Kamrul Tushar" -> "Kamrul T"
+ * If the name is a single word, returns it as-is.
+ * Falls back to the provided fallback (e.g. username) if name is empty.
+ */
+export function formatDisplayName(name: string, fallback?: string): string {
+  if (!name || !name.trim()) return fallback || '';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1][0]}`;
+}

@@ -24,6 +24,7 @@ import {
 import { Line, Radar } from "react-chartjs-2";
 import {
   daysDifference,
+  formatDisplayName,
   getMonthsStringFromIssueList,
 } from "../../services/utils";
 import { getJiraMonthWiseIssueDataByUsername } from "../../services/jira";
@@ -135,7 +136,7 @@ function getPrCycleTimeChartOptions({ userDataList }) {
         new Date(pr.created_at).toISOString().substring(0, 10)
       );
       return {
-        label: userData.username,
+        label: formatDisplayName(userData.name, userData.username),
         borderColor: colorNames[index] || "red",
         data: dates.map((d) => {
           const prsForDate = prPerDay[d] || [];
@@ -177,7 +178,7 @@ function getPrReviewChartOptions({ months, userDataList }) {
       const userData = dataPerUser[username];
       const reviewsPerMonth = Object.values(userData.reviewCountsPerMonth);
       return {
-        label: userData.username,
+        label: formatDisplayName(userData.name, userData.username),
         data: reviewsPerMonth,
         borderColor: colorNames[index] || "red",
       };
@@ -217,7 +218,7 @@ function getPrClosedChartData({ months, userDataList }) {
       }
 
       return {
-        label: userData.username,
+        label: formatDisplayName(userData.name, userData.username),
         data: statList,
         borderColor: colorNames[index] || "red",
       };
@@ -230,7 +231,7 @@ function getPrClosedChartData({ months, userDataList }) {
   return { chartOptions, data };
 }
 
-function getJiraClosedTicketData({ months, chartData }) {
+function getJiraClosedTicketData({ months, chartData, nameMap }) {
   const chartOptions = JSON.parse(JSON.stringify(baseChartOptions));
   chartOptions.plugins.title.text = "JIRA Issues Closed";
 
@@ -245,7 +246,7 @@ function getJiraClosedTicketData({ months, chartData }) {
     datasets: usernames.map((username, index) => {
       const data = dataPerUser[username];
       return {
-        label: data.username,
+        label: formatDisplayName(nameMap[username], username),
         data: data.monthDataList,
         borderColor: colorNames[index] || "red",
       };
@@ -279,7 +280,7 @@ function getCommitStatsOptions(months, userDataList) {
     }
 
     datasets.push({
-      label: data.username,
+      label: formatDisplayName(data.name, data.username),
       data: dataForUser,
       borderColor: colorNames[index] || "red",
     });
@@ -334,7 +335,7 @@ const getPrCreatedDistributionChartData = (inputList) => {
 
     // Prepare the chart data structure
     const data = {
-      label: input.username,
+      label: formatDisplayName(input.name, input.username),
       data: allRepos.map((repo) => totalCounts[repo] || 0), // Total counts for each repo
       borderColor: colorNames[index],
       borderWidth: 2,
@@ -387,7 +388,7 @@ const getPrReviewedDistributionChartData = (inputList) => {
 
     // Prepare the chart data structure
     const data = {
-      label: input.username,
+      label: formatDisplayName(input.name, input.username),
       data: allRepos.map((repo) => totalCounts[repo] || 0), // Total counts for each repo
       borderColor: colorNames[index],
       borderWidth: 2,
@@ -458,7 +459,7 @@ function getGithubActivityChartOptions(userDataList) {
     );
 
     datasets.push({
-      label: data.username,
+      label: formatDisplayName(data.name, data.username),
       data: weeks.map((w) => w.count),
       borderColor: colorNames[index] || "red",
     });
@@ -490,6 +491,8 @@ function getJiraActivityChartOptions(jiraData, userDataList) {
   ).sort();
 
   const datasets = [];
+
+  const dataPerUser = _.keyBy(userDataList, "username");
 
   usernames.forEach((username, index) => {
     const userIssues = (jiraData || []).filter((j) => j.username === username);
@@ -526,8 +529,9 @@ function getJiraActivityChartOptions(jiraData, userDataList) {
       (a, b) => a.mondayDate - b.mondayDate
     );
 
+    const userData = dataPerUser[username];
     datasets.push({
-      label: username,
+      label: formatDisplayName(userData?.name, username),
       data: weeks.map((w) => w.count),
       borderColor: colorNames[index] || "red",
     });
@@ -595,12 +599,12 @@ function getGithubAddDeleteChartOptions(months, userDataList) {
     }
 
     addDataSets.push({
-      label: data.username,
+      label: formatDisplayName(data.name, data.username),
       data: addDataForUser,
       borderColor: colorNames[index] || "red",
     });
     deleteDataSets.push({
-      label: data.username,
+      label: formatDisplayName(data.name, data.username),
       data: deleteDataForUser,
       borderColor: colorNames[index] || "red",
     });
@@ -763,9 +767,13 @@ function UserPrChart({ userDataList, jiraData, jiraIsLoading }) {
     userDataList.map((u) => u.username),
     jiraData
   );
+  const nameMap = Object.fromEntries(
+    userDataList.map((u) => [u.username, u.name])
+  );
   const jiraClosedTicketOptions = getJiraClosedTicketData({
     months,
     chartData: padMonthDataForJira(months, jiraChartData) || [],
+    nameMap,
   });
   const jiraIssuesChart = jiraIsLoading ? (
     <Card style={chartStyle}>JIRA Data Loading...</Card>
