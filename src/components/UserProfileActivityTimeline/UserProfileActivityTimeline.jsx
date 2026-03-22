@@ -58,6 +58,7 @@ const ACTIVITY_TYPE_CONFIG = {
     label: "PR Comment",
     icon: "💬",
     badgeColor: "warning",
+    badgeClass: "badge-outline-orange",
   },
   [ACTIVITY_TYPES.COMMIT]: {
     label: "Commit",
@@ -225,13 +226,18 @@ function ActivitySummaryBar({ activities }) {
       <Card.Body className="d-flex gap-3 flex-wrap align-items-center">
         {Object.entries(ACTIVITY_TYPE_CONFIG).map(([type, config]) => (
           <div key={type} className="d-flex align-items-center gap-1">
-            <Badge bg={config.badgeColor}>
-              {config.icon} {config.label}
+            <Badge
+              bg=""
+              className={`border border-${config.badgeColor} text-${config.badgeColor} ${config.badgeClass || ""}`}
+            >
+              {config.label}
             </Badge>
             <span className="fw-bold">{counts[type] || 0}</span>
           </div>
         ))}
-        <div className="ms-auto fw-bold">Total: {activities.length}</div>
+        <div className="ms-auto text-muted">
+          Total: <span className="fw-bold">{activities.length}</span>
+        </div>
       </Card.Body>
     </Card>
   );
@@ -250,9 +256,9 @@ function ActivityFilterBar({ activeTypeFilters, onFilterChange }) {
 
   return (
     <div className="d-flex justify-content-between align-items-center mb-3">
-      <div style={{ fontWeight: "600" }}>
-        Showing {activeTypeFilters.size} of{" "}
-        {Object.keys(ACTIVITY_TYPE_CONFIG).length} activity types
+      <div style={{ padding: "15px", fontWeight: "600" }}>
+        Items: {activeTypeFilters.size} of{" "}
+        {Object.keys(ACTIVITY_TYPE_CONFIG).length} types
       </div>
       <InputGroup style={{ width: "auto" }}>
         <Dropdown autoClose="outside">
@@ -266,7 +272,7 @@ function ActivityFilterBar({ activeTypeFilters, onFilterChange }) {
                 onClick={() => toggleFilter(type)}
                 active={activeTypeFilters.has(type)}
               >
-                {config.icon} {config.label}
+                {config.label}
               </Dropdown.Item>
             ))}
           </Dropdown.Menu>
@@ -281,12 +287,16 @@ function ActivityRow({ activity }) {
 
   return (
     <tr>
-      <td style={{ width: "130px", verticalAlign: "middle" }}>
-        <Badge bg={config.badgeColor} style={{ fontSize: "11px" }}>
-          {config.icon} {config.label}
+      <td style={{ width: "120px", verticalAlign: "middle" }}>
+        <Badge
+          bg=""
+          className={`border border-${config.badgeColor} text-${config.badgeColor} ${config.badgeClass || ""}`}
+          style={{ fontSize: "11px" }}
+        >
+          {config.label}
         </Badge>
       </td>
-      <td style={{ width: "90px", verticalAlign: "middle" }}>
+      <td style={{ width: "90px", verticalAlign: "middle" }} className="text-muted">
         {new Date(activity.date).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
@@ -316,21 +326,37 @@ function WeekSection({ week, defaultExpanded }) {
     <Card className="mb-2">
       <Card.Header
         onClick={() => setExpanded(!expanded)}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: "pointer", backgroundColor: "white" }}
         className="d-flex justify-content-between align-items-center"
       >
-        <span className="fw-bold">{week.weekLabel}</span>
-        <div className="d-flex gap-2">
+        <span style={{ fontWeight: "500" }}>{week.weekLabel}</span>
+        <div className="d-flex gap-2 align-items-center">
           {Object.entries(ACTIVITY_TYPE_CONFIG).map(([type, config]) => {
             const count = week.counts[type] || 0;
             if (count === 0) return null;
             return (
-              <Badge key={type} bg={config.badgeColor} pill>
-                {config.icon} {count}
+              <Badge
+                key={type}
+                bg=""
+                className={`border border-${config.badgeColor} text-${config.badgeColor} ${config.badgeClass || ""}`}
+                style={{
+                  fontSize: "11px",
+                  fontWeight: "normal",
+                }}
+              >
+                {config.label}: {count}
               </Badge>
             );
           })}
-          <Badge bg="dark" pill>
+          <Badge
+            bg=""
+            className="border fw-bold"
+            style={{
+              fontSize: "11px",
+              borderColor: "#adb5bd",
+              color: "#495057",
+            }}
+          >
             {week.activities.length}
           </Badge>
         </div>

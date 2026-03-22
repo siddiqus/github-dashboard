@@ -44,9 +44,7 @@ function UserProfile() {
           startDate: startDateFromStorage,
           endDate: endDateFromStorage,
         });
-        const userJiraData = jiraIssues.filter(
-          (j) => j.username === username
-        );
+        const userJiraData = jiraIssues.filter((j) => j.username === username);
         setJiraData(userJiraData);
       } else {
         setJiraData([]);
@@ -61,7 +59,7 @@ function UserProfile() {
 
       const userEmail = userList.find((u2) => u2.username === username)?.email;
 
-      console.log('fetching bonusly data')
+      console.log("fetching bonusly data");
       const bonuslyDataMap = await getBonuslyDataCached(
         [userEmail],
         startDateFromStorage,
@@ -102,78 +100,30 @@ function UserProfile() {
     if (!userData) {
       return null;
     }
-
-    const allRepos = userData.allRepos.sort(); // default asc
-
-    const months = getMonthsStringFromIssueList(userData.prList);
-
     return (
-      <Table bordered hover>
-        <thead>
-          <tr>
-            <th></th>
-            {months.map((month, index) => (
-              <th key={`month-${index}`}>{month}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>PR Reviews</td>
-            {Object.keys(userData.reviewCountsPerMonth).map((month, index) => {
-              return (
-                <td key={index}>{userData.reviewCountsPerMonth[month]}</td>
-              );
-            })}
-          </tr>
-
-          <tr>
-            <td>Avg. PR Cycle Time (days)</td>
-            {Object.keys(userData.averagePrCycleTimePerMonth).map(
-              (month, index) => {
-                return (
-                  <td key={index}>
-                    {userData.averagePrCycleTimePerMonth[month]}
-                  </td>
-                );
-              }
-            )}
-          </tr>
-          <tr>
-            <td>Total PR Count ({userData.totalPrCounts})</td>
-            {months.map((month, index) => {
-              const monthData = userData.statList.find(
-                (s) => s.month === month
-              );
-
-              return <td key={index}>{monthData?.prCount || 0}</td>;
-            })}
-          </tr>
-
-          {allRepos.map((repo, index) => {
-            const countForRepo = Object.keys(
-              userData.prCountsPerRepoPerMonth
-            ).reduce((sum, month) => {
-              const counts = userData.prCountsPerRepoPerMonth[month][repo] || 0;
-              return sum + counts;
-            }, 0);
-            return (
-              <tr key={index}>
-                <td>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{repo} (
-                  {countForRepo})
-                </td>
-                {months.map((month, index) => {
-                  const countPerRepo = userData.prCountsPerRepoPerMonth[month]
-                    ? userData.prCountsPerRepoPerMonth[month][repo] || 0
-                    : 0;
-                  return <td key={index}>{countPerRepo}</td>;
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+      <Row className="mb-3 g-2">
+        {[
+          { label: "Avg Adds/m", value: userData.averageAdditionsPerMonth },
+          { label: "Avg Adds/PR", value: userData.averageAddsPerPr },
+          { label: "Avg PR/m", value: userData.averagePrCountPerMonth },
+          { label: "Avg Rev/m", value: userData.averageReviewsPerMonth },
+          {
+            label: "Avg PR Cycle",
+            value: `${(+userData.averagePrCycleInDays).toFixed(2)} days`,
+          },
+          { label: "# PRs", value: userData.totalPrCounts },
+          { label: "# Revs", value: userData.totalReviewsInPeriod },
+        ].map((stat) => (
+          <Col key={stat.label}>
+            <Card className="text-center p-2 shadow-sm h-100">
+              <Card.Body className="p-2">
+                <div className="text-muted small">{stat.label}</div>
+                <div className="fw-bold fs-5">{stat.value}</div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
     );
   }
 
@@ -241,28 +191,7 @@ function UserProfile() {
         </div>
       </div>
 
-      {userData && (
-        <Row className="mb-3 g-2">
-          {[
-            { label: "Avg Adds/m", value: userData.averageAdditionsPerMonth },
-            { label: "Avg Adds/PR", value: userData.averageAddsPerPr },
-            { label: "Avg PR/m", value: userData.averagePrCountPerMonth },
-            { label: "Avg Rev/m", value: userData.averageReviewsPerMonth },
-            { label: "Avg PR Cycle", value: `${(+userData.averagePrCycleInDays).toFixed(2)} days` },
-            { label: "# PRs", value: userData.totalPrCounts },
-            { label: "# Revs", value: userData.totalReviewsInPeriod },
-          ].map((stat) => (
-            <Col key={stat.label}>
-              <Card className="text-center p-2 shadow-sm h-100">
-                <Card.Body className="p-2">
-                  <div className="text-muted small">{stat.label}</div>
-                  <div className="fw-bold fs-5">{stat.value}</div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
+      <PrStats />
 
       <Tabs
         defaultActiveKey="prStats"
@@ -276,7 +205,6 @@ function UserProfile() {
             jiraData={jiraData}
             userDataList={userData ? [userData] : []}
           />
-          {/* <PrStats /> */}
         </Tab>
         <Tab eventKey="prList" title="PR List">
           {!userData || !userData.prList || !userData.prList.length ? (
