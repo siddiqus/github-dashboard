@@ -114,6 +114,11 @@ const colorNames = [
   "deepskyblue",
 ];
 
+function formatWeekLabel(monday, sunday) {
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${monday.getFullYear()} ${months[monday.getMonth()]} ${monday.getDate()} - ${months[sunday.getMonth()]} ${sunday.getDate()}`;
+}
+
 function getPrCycleTimeChartOptions({ userDataList }) {
   const dates = userDataList
     .map((u) => u.prList.map((p) => new Date(p.created_at)))
@@ -449,7 +454,9 @@ function getGithubActivityChartOptions(userDataList) {
       monday.setHours(0, 0, 0, 0);
 
       if (!weekMap[weekKey]) {
-        weekMap[weekKey] = { weekKey, mondayDate: monday, count: 0 };
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        weekMap[weekKey] = { weekKey, mondayDate: monday, sundayDate: sunday, count: 0 };
       }
       weekMap[weekKey].count++;
     }
@@ -466,7 +473,7 @@ function getGithubActivityChartOptions(userDataList) {
 
     // Store week labels on first user (they share the same time range)
     if (index === 0) {
-      chartOptions._weekLabels = weeks.map((w) => w.weekKey);
+      chartOptions._weekLabels = weeks.map((w) => formatWeekLabel(w.mondayDate, w.sundayDate));
     }
   });
 
@@ -520,7 +527,9 @@ function getJiraActivityChartOptions(jiraData, userDataList) {
       monday.setHours(0, 0, 0, 0);
 
       if (!weekMap[weekKey]) {
-        weekMap[weekKey] = { weekKey, mondayDate: monday, count: 0 };
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        weekMap[weekKey] = { weekKey, mondayDate: monday, sundayDate: sunday, count: 0 };
       }
       weekMap[weekKey].count++;
     }
@@ -537,7 +546,7 @@ function getJiraActivityChartOptions(jiraData, userDataList) {
     });
 
     if (index === 0) {
-      chartOptions._weekLabels = weeks.map((w) => w.weekKey);
+      chartOptions._weekLabels = weeks.map((w) => formatWeekLabel(w.mondayDate, w.sundayDate));
     }
   });
 

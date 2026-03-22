@@ -175,7 +175,7 @@ function getISOWeekData(dateString) {
     weekKey,
     mondayDate: monday,
     sundayDate: sunday,
-    weekLabel: `${formatShortDate(monday)} - ${formatShortDate(sunday)}`,
+    weekLabel: `${monday.getFullYear()} ${formatShortDate(monday)} - ${formatShortDate(sunday)}`,
   };
 }
 
